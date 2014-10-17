@@ -92,6 +92,7 @@ public final class FooBuilder {
 TODO
 ----
 
-* Recursive builders, like protobuf.
+* Null-checking, opt-outable using @Nullable 
 * JSON support. E.g. emitting Jackson @JsonProperty annotations, etc.
-* Tests
+* Recursive builders, like protobuf.
+* More tests
