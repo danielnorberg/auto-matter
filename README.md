@@ -7,56 +7,62 @@ interfaces. Inspired by [auto-value](https://github.com/google/auto/tree/master/
 Usage
 -----
 
-### In `Foo.java`
+### In `Example.java`
 
 ```java
-package foo;
+package io.norberg.automatter.example;
 
 import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
-public interface Foo {
+public interface Example {
   String foo();
   int bar();
 }
 ```
 
-### Using the generated builder
+### Using the generated builder and class
 
 ```java
-Foo foo = new FooBuilder()
-    .foo("foo")
+Example example = new ExampleBuilder()
     .bar(17)
+    .foo("hello world")
     .build();
+
+System.out.println(example);
 ```
 
-### Generated `FooBuilder.java`
+### Generated `ExampleBuilder.java`
 
 ```java
-package foo;
+package io.norberg.automatter.example;
 
+import java.util.Arrays;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.AutoMatterProcessor")
-public final class FooBuilder {
+public final class ExampleBuilder {
+
   private String foo;
   private int bar;
 
-  public FooBuilder foo(String foo) {
+  public ExampleBuilder foo(String foo) {
     this.foo = foo;
     return this;
   }
 
-  public FooBuilder bar(int bar) {
+  public ExampleBuilder bar(int bar) {
     this.bar = bar;
     return this;
   }
 
-  public Foo build() {
+  public Example build() {
     return new Value(foo, bar);
   }
 
-  private static final class Value implements Foo {
+  private static final class Value
+      implements Example {
+
     private final String foo;
     private final int bar;
 
@@ -73,6 +79,44 @@ public final class FooBuilder {
     @Override
     public int bar() {
       return bar;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      final Value value = (Value) o;
+
+      if (foo != null ? !foo.equals(value.foo) : value.foo != null) {
+        return false;
+      }
+      if (bar != value.bar) {
+        return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = 0;
+      long temp;
+      result = 31 * result + (foo != null ? foo.hashCode() : 0);
+      result = 31 * result + bar;
+      return result;
+    }
+
+    @Override
+    public String toString() {
+      return "Example{" + 
+          "foo=" + foo +
+          ", bar=" + bar +
+          '}';
     }
   }
 }
