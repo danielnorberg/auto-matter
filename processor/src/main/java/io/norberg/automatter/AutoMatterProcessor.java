@@ -84,6 +84,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitPackage(packageName);
     writer.emitImports("javax.annotation.Generated");
 
+    writer.emitEmptyLine();
     writer.emitAnnotation(
         Generated.class,
         ImmutableMap.of("value", "\"" + AutoMatterProcessor.class.getName() + "\""));
@@ -106,6 +107,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitFields(final JavaWriter writer, final List<ExecutableElement> fields)
       throws IOException {
+    writer.emitEmptyLine();
     for (ExecutableElement field : fields) {
       writer.emitField(fieldType(field), fieldName(field), EnumSet.of(PRIVATE));
     }
@@ -114,6 +116,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitValue(final Name targetName, final JavaWriter writer,
                          final List<ExecutableElement> fields)
       throws IOException {
+    writer.emitEmptyLine();
     writer.beginType("Value", "class", EnumSet.of(PRIVATE, STATIC, FINAL),
                      null, targetName.toString());
     emitValueFields(writer, fields);
@@ -124,6 +127,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitValueConstructor(final JavaWriter writer, final List<ExecutableElement> fields)
       throws IOException {
+    writer.emitEmptyLine();
     final List<String> parameters = Lists.newArrayList();
     for (ExecutableElement field : fields) {
       parameters.add(fieldType(field));
@@ -138,6 +142,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitValueFields(final JavaWriter writer, final List<ExecutableElement> fields)
       throws IOException {
+    writer.emitEmptyLine();
     for (ExecutableElement field : fields) {
       writer.emitField(fieldType(field), fieldName(field), EnumSet.of(PRIVATE, FINAL));
     }
@@ -152,6 +157,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
+    writer.emitEmptyLine();
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
@@ -160,6 +166,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitBuild(final Name targetName, final JavaWriter writer,
                          final List<ExecutableElement> fields) throws IOException {
+    writer.emitEmptyLine();
     writer.beginMethod(targetName.toString(), "build", EnumSet.of(PUBLIC));
     final List<String> parameters = Lists.newArrayList();
     for (Element field : fields) {
@@ -179,6 +186,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitSetter(final JavaWriter writer, final String builderName,
                           final ExecutableElement field)
       throws IOException {
+    writer.emitEmptyLine();
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
                        fieldType(field), fieldName(field));
     writer.emitStatement("this.%1$s = %1$s", fieldName(field));
