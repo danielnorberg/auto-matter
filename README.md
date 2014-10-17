@@ -12,7 +12,7 @@ Usage
 ```java
 package foo;
 
-import io.norberg.autobuilder.AutoMatter;
+import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
 public interface Foo {
@@ -37,7 +37,7 @@ package foo;
 
 import javax.annotation.Generated;
 
-@Generated("io.norberg.autobuilder.AutoMatterProcessor")
+@Generated("io.norberg.automatter.AutoMatterProcessor")
 public final class FooBuilder {
   private String foo;
   private int bar;

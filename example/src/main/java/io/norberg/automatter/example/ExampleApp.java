@@ -1,4 +1,4 @@
-package io.norberg.autobuilder.example;
+package io.norberg.automatter.example;
 
 public class ExampleApp {
 

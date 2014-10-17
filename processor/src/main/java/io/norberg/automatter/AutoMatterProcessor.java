@@ -1,4 +1,4 @@
-package io.norberg.autobuilder;
+package io.norberg.automatter;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;

@@ -1,4 +1,4 @@
-package io.norberg.autobuilder;
+package io.norberg.automatter;
 
 import com.google.testing.compile.JavaFileObjects;
 

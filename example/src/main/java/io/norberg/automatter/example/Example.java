@@ -1,9 +1,9 @@
-package foo;
+package io.norberg.automatter.example;
 
 import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
-public interface Foo {
+public interface Example {
   String foo();
   int bar();
 }

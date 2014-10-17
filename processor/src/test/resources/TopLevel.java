@@ -1,4 +1,4 @@
-import io.norberg.autobuilder.AutoMatter;
+import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
 public interface TopLevel {

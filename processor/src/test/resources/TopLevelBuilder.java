@@ -1,6 +1,6 @@
 import javax.annotation.Generated;
 
-@Generated("io.norberg.autobuilder.AutoMatterProcessor")
+@Generated("io.norberg.automatter.AutoMatterProcessor")
 public final class TopLevelBuilder {
 
   public TopLevel build() {

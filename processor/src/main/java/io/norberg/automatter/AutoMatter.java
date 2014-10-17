@@ -1,4 +1,4 @@
-package io.norberg.autobuilder;
+package io.norberg.automatter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
