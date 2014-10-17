@@ -43,7 +43,8 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @SupportedSourceVersion(RELEASE_6)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
-  public static final String JAVA_LANG = "java.lang.";
+  private static final String JAVA_LANG = "java.lang.";
+
   private Filer filer;
   private Elements elements;
 
