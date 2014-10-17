@@ -1,4 +1,4 @@
-package test;
+package foo;
 
 import javax.annotation.Generated;
 
