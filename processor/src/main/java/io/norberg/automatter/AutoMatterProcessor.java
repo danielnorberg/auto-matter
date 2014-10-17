@@ -25,6 +25,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
@@ -122,6 +123,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitValueFields(writer, fields);
     emitValueConstructor(writer, fields);
     emitValueGetters(writer, fields);
+    emitValueHashCode(writer, fields);
     writer.endType();
   }
 
@@ -161,6 +163,52 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
+    writer.endMethod();
+  }
+
+  private void emitValueHashCode(final JavaWriter writer, final List<ExecutableElement> fields)
+      throws IOException {
+    writer.emitEmptyLine();
+    writer.emitAnnotation(Override.class);
+    writer.beginMethod("int", "hashCode", EnumSet.of(PUBLIC));
+    writer.emitStatement("int result = 0");
+    writer.emitStatement("long temp");
+    for (ExecutableElement field : fields) {
+      final String name = field.getSimpleName().toString();
+      final TypeMirror type = field.getReturnType();
+      switch (type.getKind()) {
+        case LONG:
+          writer.emitStatement("result = 31 * result + (int) (%1$s ^ (%1$s >>> 32))", name);
+          break;
+        case INT:
+          writer.emitStatement("result = 31 * result + %s", name);
+          break;
+        case BOOLEAN:
+        case BYTE:
+        case SHORT:
+        case CHAR:
+          writer.emitStatement("result = 31 * result + (int) %s", name);
+          break;
+        case FLOAT:
+          writer.emitStatement("result = 31 * result + " +
+                               "(%1$s != +0.0f ? Float.floatToIntBits(%1$s) : 0)", name);
+          break;
+        case DOUBLE:
+          writer.emitStatement("temp = Double.doubleToLongBits(%s)", name);
+          writer.emitStatement("result = 31 * result + (int) (%1$s ^ (%1$s >>> 32))", name);
+          break;
+        case ARRAY:
+          writer.emitStatement("result = 31 * result + " +
+                               "(%1$s != null ? Arrays.hashCode(%1$s) : 0)", name);
+          break;
+        case DECLARED:
+          writer.emitStatement("result = 31 * result + (%1$s != null ? %1$s.hashCode() : 0)", name);
+          break;
+        default:
+          throw new IllegalArgumentException("Unsupported type: " + type);
+      }
+    }
+    writer.emitStatement("return result");
     writer.endMethod();
   }
 

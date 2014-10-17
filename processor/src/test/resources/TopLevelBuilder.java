@@ -11,5 +11,12 @@ public final class TopLevelBuilder {
 
     private Value() {
     }
+
+    @Override
+    public int hashCode() {
+      int result = 0;
+      long temp;
+      return result;
+    }
   }
 }

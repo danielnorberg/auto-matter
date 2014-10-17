@@ -39,5 +39,14 @@ public final class FooBuilder {
     public int bar() {
       return bar;
     }
+
+    @Override
+    public int hashCode() {
+      int result = 0;
+      long temp;
+      result = 31 * result + (foo != null ? foo.hashCode() : 0);
+      result = 31 * result + bar;
+      return result;
+    }
   }
 }
