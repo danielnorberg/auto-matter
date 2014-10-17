@@ -35,6 +35,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
@@ -127,6 +128,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitValueGetters(writer, fields);
     emitValueEquals(writer, fields);
     emitValueHashCode(writer, fields);
+    emitValueToString(writer, fields, targetName);
     writer.endType();
   }
 
@@ -270,6 +272,35 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
     writer.emitStatement("return result");
     writer.endMethod();
+  }
+
+  private void emitValueToString(final JavaWriter writer, final List<ExecutableElement> fields,
+                                 final Name targetName)
+      throws IOException {
+    writer.emitEmptyLine();
+    writer.emitAnnotation(Override.class);
+    writer.beginMethod("String", "toString", EnumSet.of(PUBLIC));
+    emitToStringStatement(writer, fields, targetName);
+    writer.endMethod();
+  }
+
+  private void emitToStringStatement(final JavaWriter writer, final List<ExecutableElement> fields,
+                                     final Name targetName) throws IOException {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("return \"").append(targetName).append("{\" + \n");
+    boolean first = true;
+    for (ExecutableElement field : fields) {
+      final String comma = first ? "" : ", ";
+      final String name = fieldName(field);
+      if (field.getReturnType().getKind() == ARRAY) {
+        builder.append(format("\"%1$s%2$s=\" + Arrays.toString(%2$s) +\n", comma, name));
+      } else {
+        builder.append(format("\"%1$s%2$s=\" + %2$s +\n", comma, name));
+      }
+      first = false;
+    }
+    builder.append("'}'");
+    writer.emitStatement(builder.toString());
   }
 
   private void emitBuild(final Name targetName, final JavaWriter writer,

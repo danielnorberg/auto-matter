@@ -8,7 +8,6 @@ public class ExampleApp {
         .foo("hello world")
         .build();
 
-    System.out.println("foo: " + example.bar());
-    System.out.println("bar: " + example.foo());
+    System.out.println(example);
   }
 }

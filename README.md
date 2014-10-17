@@ -92,7 +92,6 @@ public final class FooBuilder {
 TODO
 ----
 
-* Generate equals, hashCode, toString, etc...
 * Recursive builders, like protobuf.
 * JSON support. E.g. emitting Jackson @JsonProperty annotations, etc.
 * Tests

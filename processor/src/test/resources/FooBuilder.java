@@ -232,5 +232,21 @@ public final class FooBuilder {
       result = 31 * result + (array != null ? Arrays.hashCode(array) : 0);
       return result;
     }
+
+    @Override
+    public String toString() {
+      return "Foo{" +
+             "aBoolean=" + aBoolean +
+             ", aByte=" + aByte +
+             ", aShort=" + aShort +
+             ", aInt=" + aInt +
+             ", aLong=" + aLong +
+             ", aChar=" + aChar +
+             ", aFloat=" + aFloat +
+             ", aDouble=" + aDouble +
+             ", object=" + object +
+             ", array=" + Arrays.toString(array) +
+             '}';
+    }
   }
 }

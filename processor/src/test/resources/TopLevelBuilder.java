@@ -32,5 +32,11 @@ public final class TopLevelBuilder {
       long temp;
       return result;
     }
+
+    @Override
+    public String toString() {
+      return "TopLevel{" +
+             '}';
+    }
   }
 }
