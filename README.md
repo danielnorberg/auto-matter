@@ -21,7 +21,7 @@ public interface Example {
 }
 ```
 
-### Using the generated builder and class
+### In `ExampleApp.java`
 
 ```java
 Example example = new ExampleBuilder()
