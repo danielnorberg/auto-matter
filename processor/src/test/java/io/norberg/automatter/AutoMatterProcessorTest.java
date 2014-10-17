@@ -21,13 +21,13 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(JavaFileObjects.forResource("FooBuilder.java"));
   }
 
-//  @Test
-//  public void testTopLevel() {
-//    final JavaFileObject source = JavaFileObjects.forResource("TopLevel.java");
-//    assert_().about(javaSource())
-//        .that(source)
-//        .processedWith(new AutoMatterProcessor())
-//        .compilesWithoutError()
-//        .and().generatesSources(JavaFileObjects.forResource("TopLevelBuilder.java"));
-//  }
+  @Test
+  public void testTopLevel() {
+    final JavaFileObject source = JavaFileObjects.forResource("TopLevel.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("TopLevelBuilder.java"));
+  }
 }

@@ -1,6 +1,5 @@
-import javax.annotation.Generated;
-
 import java.util.Arrays;
+import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.AutoMatterProcessor")
 public final class TopLevelBuilder {
@@ -9,9 +8,22 @@ public final class TopLevelBuilder {
     return new Value();
   }
 
-  private static final class Value implements TopLevel {
+  private static final class Value
+      implements TopLevel {
 
     private Value() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      return true;
     }
 
     @Override

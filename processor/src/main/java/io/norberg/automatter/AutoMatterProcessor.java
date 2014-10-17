@@ -29,6 +29,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
+import static java.lang.String.format;
 import static javax.lang.model.SourceVersion.RELEASE_6;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -124,6 +125,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitValueFields(writer, fields);
     emitValueConstructor(writer, fields);
     emitValueGetters(writer, fields);
+    emitValueEquals(writer, fields);
     emitValueHashCode(writer, fields);
     writer.endType();
   }
@@ -165,6 +167,61 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
     writer.endMethod();
+  }
+
+  private void emitValueEquals(final JavaWriter writer, final List<ExecutableElement> fields)
+      throws IOException {
+
+    writer.emitEmptyLine();
+    writer.emitAnnotation(Override.class);
+    writer.beginMethod("boolean", "equals", EnumSet.of(PUBLIC), "Object", "o");
+
+    writer.beginControlFlow("if (this == o)");
+    writer.emitStatement("return true");
+    writer.endControlFlow();
+
+    writer.beginControlFlow("if (o == null || getClass() != o.getClass())");
+    writer.emitStatement("return false");
+    writer.endControlFlow();
+
+    if (!fields.isEmpty()) {
+      writer.emitEmptyLine();
+      writer.emitStatement("final Value value = (Value) o");
+      writer.emitEmptyLine();
+      for (ExecutableElement field : fields) {
+        writer.beginControlFlow(fieldNotEqualCondition(field));
+        writer.emitStatement("return false");
+        writer.endControlFlow();
+      }
+    }
+
+    writer.emitEmptyLine();
+    writer.emitStatement("return true");
+    writer.endMethod();
+  }
+
+  private String fieldNotEqualCondition(final ExecutableElement field) {
+    final String name = field.getSimpleName().toString();
+    final TypeMirror type = field.getReturnType();
+    switch (type.getKind()) {
+      case LONG:
+      case INT:
+      case BOOLEAN:
+      case BYTE:
+      case SHORT:
+      case CHAR:
+        return format("if (%1$s != value.%1$s)", name);
+      case FLOAT:
+        return format("if (Float.compare(value.%1$s, %1$s) != 0)", name);
+      case DOUBLE:
+        return format("if (Double.compare(value.%1$s, %1$s) != 0)", name);
+      case ARRAY:
+        return format("if (!Arrays.equals(%1$s, value.%1$s))", name);
+      case DECLARED:
+        return format("if (%1$s != null ? !%1$s.equals(value.%1$s) : value.%1$s != null)", name);
+      default:
+        throw new IllegalArgumentException("Unsupported type: " + type);
+    }
   }
 
   private void emitValueHashCode(final JavaWriter writer, final List<ExecutableElement> fields)

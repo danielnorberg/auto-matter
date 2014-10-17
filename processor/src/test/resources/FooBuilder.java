@@ -82,7 +82,8 @@ public final class FooBuilder {
         array);
   }
 
-  private static final class Value implements Foo {
+  private static final class Value
+      implements Foo {
 
     private final boolean aBoolean;
     private final byte aByte;
@@ -167,6 +168,51 @@ public final class FooBuilder {
     @Override
     public Object[] array() {
       return array;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      final Value value = (Value) o;
+
+      if (aBoolean != value.aBoolean) {
+        return false;
+      }
+      if (aByte != value.aByte) {
+        return false;
+      }
+      if (aShort != value.aShort) {
+        return false;
+      }
+      if (aInt != value.aInt) {
+        return false;
+      }
+      if (aLong != value.aLong) {
+        return false;
+      }
+      if (aChar != value.aChar) {
+        return false;
+      }
+      if (Float.compare(value.aFloat, aFloat) != 0) {
+        return false;
+      }
+      if (Double.compare(value.aDouble, aDouble) != 0) {
+        return false;
+      }
+      if (object != null ? !object.equals(value.object) : value.object != null) {
+        return false;
+      }
+      if (!Arrays.equals(array, value.array)) {
+        return false;
+      }
+
+      return true;
     }
 
     @Override
