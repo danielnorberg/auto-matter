@@ -28,7 +28,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
-import static javax.lang.model.SourceVersion.RELEASE_8;
+import static javax.lang.model.SourceVersion.RELEASE_6;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -40,7 +40,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
  * materializes it, generating a concrete builder and value class.
  */
 @AutoService(Processor.class)
-@SupportedSourceVersion(RELEASE_8)
+@SupportedSourceVersion(RELEASE_6)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
   public static final String JAVA_LANG = "java.lang.";

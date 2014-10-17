@@ -18,17 +18,13 @@ import io.norberg.autobuilder.AutoMatter;
 public interface Foo {
   String foo();
   int bar();
-
-  static FooBuilder builder() {
-    return new FooBuilder();
-  }
 }
 ```
 
 ### Using the generated builder
 
 ```java
-Foo foo = Foo.builder()
+Foo foo = new FooBuilder()
     .foo("foo")
     .bar(17)
     .build();

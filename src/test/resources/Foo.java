@@ -6,8 +6,4 @@ import io.norberg.autobuilder.AutoMatter;
 public interface Foo {
   String foo();
   int bar();
-
-  static FooBuilder builder() {
-    return new FooBuilder();
-  }
 }
