@@ -10,6 +10,21 @@
   <name>Auto Matter</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/danielnorberg/auto-matter.git</connection>
+    <developerConnection>scm:git:git@github.com:danielnorberg/auto-matter.git</developerConnection>
+    <url>https://github.com/danielnorberg/auto-matter</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
