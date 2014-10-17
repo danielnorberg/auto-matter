@@ -83,7 +83,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final JavaWriter writer = new JavaWriter(sourceFile.openWriter());
 
     writer.emitPackage(packageName);
-    writer.emitImports("javax.annotation.Generated");
+    writer.emitImports("java.util.Arrays",
+                       "javax.annotation.Generated");
 
     writer.emitEmptyLine();
     writer.emitAnnotation(
@@ -184,6 +185,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           writer.emitStatement("result = 31 * result + %s", name);
           break;
         case BOOLEAN:
+          writer.emitStatement("result = 31 * result + (%s ? 1 : 0)", name);
+          break;
         case BYTE:
         case SHORT:
         case CHAR:
@@ -195,7 +198,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           break;
         case DOUBLE:
           writer.emitStatement("temp = Double.doubleToLongBits(%s)", name);
-          writer.emitStatement("result = 31 * result + (int) (%1$s ^ (%1$s >>> 32))", name);
+          writer.emitStatement("result = 31 * result + (int) (temp ^ (temp >>> 32))");
           break;
         case ARRAY:
           writer.emitStatement("result = 31 * result + " +

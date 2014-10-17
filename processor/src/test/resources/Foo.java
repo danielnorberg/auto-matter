@@ -4,6 +4,14 @@ import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
 public interface Foo {
-  String foo();
-  int bar();
+  boolean aBoolean();
+  byte aByte();
+  short aShort();
+  int aInt();
+  long aLong();
+  char aChar();
+  float aFloat();
+  double aDouble();
+  Object object();
+  Object[] array();
 }

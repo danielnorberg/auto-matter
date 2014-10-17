@@ -1,5 +1,7 @@
 import javax.annotation.Generated;
 
+import java.util.Arrays;
+
 @Generated("io.norberg.automatter.AutoMatterProcessor")
 public final class TopLevelBuilder {
 
