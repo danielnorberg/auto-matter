@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>auto-matter-example</artifactId>
@@ -15,7 +15,7 @@
     <dependency>
       <groupId>io.norberg</groupId>
       <artifactId>auto-matter</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>

@@ -6,7 +6,7 @@
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <name>Auto Matter</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
 
