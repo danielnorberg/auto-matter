@@ -69,10 +69,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void writeBuilder(final Element element, final RoundEnvironment env) throws IOException {
-    final Name targetName = element.getSimpleName();
+    final String packageName = elements.getPackageOf(element).getQualifiedName().toString();
+    final Name targetSimpleName = element.getSimpleName();
+    final String targetName = fullyQualifedName(packageName, targetSimpleName.toString());
     final String builderName = targetName + "Builder";
     final String simpleBuilderName = simpleName(builderName);
-    final String packageName = elements.getPackageOf(element).getQualifiedName().toString();
 
     final List<ExecutableElement> fields = enumerateFields(element);
 
@@ -89,11 +90,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     emitFields(writer, fields);
     emitSetters(writer, simpleBuilderName, fields);
-    emitBuild(targetName, writer, fields);
-    emitValue(targetName, writer, fields);
+    emitBuild(targetSimpleName, writer, fields);
+    emitValue(targetSimpleName, writer, fields);
 
     writer.endType();
     writer.close();
+  }
+
+  private String fullyQualifedName(final String packageName, final String simpleName) {
+    return packageName.isEmpty()
+           ? simpleName
+           : packageName + "." + simpleName;
   }
 
   private void emitFields(final JavaWriter writer, final List<ExecutableElement> fields)
@@ -122,8 +129,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       parameters.add(fieldName(field));
     }
     writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
-    for (Element field : fields) {
-      writer.emitStatement("this.%1$s = %1$s", field.getSimpleName().toString());
+    for (ExecutableElement field : fields) {
+      writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     }
     writer.endConstructor();
   }
@@ -173,6 +180,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       throws IOException {
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
                        fieldType(field), fieldName(field));
+    writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     writer.emitStatement("return this");
     writer.endMethod();
   }
