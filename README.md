@@ -43,10 +43,12 @@ public final class FooBuilder {
   private int bar;
 
   public FooBuilder foo(String foo) {
+    this.foo = foo;
     return this;
   }
 
   public FooBuilder bar(int bar) {
+    this.bar = bar;
     return this;
   }
 
