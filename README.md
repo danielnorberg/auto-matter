@@ -32,6 +32,17 @@ Example example = new ExampleBuilder()
 System.out.println(example);
 ```
 
+### In `pom.xml`
+
+```xml
+<dependency>
+  <groupId>io.norberg</groupId>
+  <artifactId>auto-matter</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+```
+
 ### Generated `ExampleBuilder.java`
 
 ```java
@@ -120,17 +131,6 @@ public final class ExampleBuilder {
     }
   }
 }
-```
-
-### In `pom.xml`
-
-```xml
-<dependency>
-  <groupId>io.norberg</groupId>
-  <artifactId>auto-matter</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
 ```
 
 TODO
