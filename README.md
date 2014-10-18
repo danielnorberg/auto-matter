@@ -139,6 +139,6 @@ TODO
 ----
 
 * Null-checking, opt-outable using @Nullable 
-* JSON support. E.g. emitting Jackson @JsonProperty annotations, etc.
 * Recursive builders, like protobuf.
 * More tests
+* Support nested interfaces

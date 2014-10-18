@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import javax.tools.JavaFileObject;
 
+import io.norberg.automatter.processor.AutoMatterProcessor;
+
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 
