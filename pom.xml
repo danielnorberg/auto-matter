@@ -7,7 +7,7 @@
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>Auto Matter</name>
+  <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
 
   <parent>
