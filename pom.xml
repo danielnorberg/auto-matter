@@ -46,6 +46,7 @@
     <module>annotation</module>
     <module>processor</module>
     <module>jackson</module>
+    <module>gson</module>
     <module>example</module>
     <module>all</module>
   </modules>
