@@ -38,7 +38,7 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1</version>
   <scope>provided</scope>
 </dependency>
 ```
