@@ -73,7 +73,31 @@ Foobar parsed = mapper.readValue(json, Foobar.class);
 TODO
 ----
 
-* Null-checking, opt-outable using @Nullable 
+* Null-checking, opt-outable using @Nullable
 * Recursive builders, like protobuf.
 * More tests
 * Support nested interfaces
+
+* Collection support. E.g. something like below:
+
+```java
+@AutoMatter
+interface Foobar {
+  List<String> foos();
+  Map<String, String> bars();
+}
+
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .foo("1")
+    .foo("2")
+    .bar("k1", "v2")
+    .bar("k2", "v2")
+    .build();
+
+assert foobar.foos().equals(asList("1", "2"));
+assert foobar.bars().equals(ImmutableMap.of("k1", "v1",
+                                            "k2", "v2"));
+```
