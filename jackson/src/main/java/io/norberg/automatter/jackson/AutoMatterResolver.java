@@ -14,7 +14,8 @@ class AutoMatterResolver extends AbstractTypeResolver {
 
   private static final String VALUE_SUFFIX = "Builder$Value";
 
-  final ConcurrentMap<JavaType, JavaType> types = new ConcurrentHashMap<JavaType, JavaType>();
+  private final ConcurrentMap<JavaType, JavaType> types =
+      new ConcurrentHashMap<JavaType, JavaType>();
 
   @Override
   public JavaType resolveAbstractType(final DeserializationConfig config, final JavaType type) {
@@ -37,8 +38,7 @@ class AutoMatterResolver extends AbstractTypeResolver {
     try {
       cls = Class.forName(valueName);
     } catch (ClassNotFoundException e) {
-      throw new IllegalArgumentException(
-          "no builder found for @AutoMatter annotated class: " + name, e);
+      throw new IllegalArgumentException("No builder found for @AutoMatter type: " + name, e);
     }
     final JavaType materialized = SimpleType.construct(cls);
 
