@@ -16,7 +16,11 @@
       <artifactId>auto-matter</artifactId>
       <version>0.2-SNAPSHOT</version>
       <scope>provided</scope>
-      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.norberg</groupId>
+      <artifactId>auto-matter-jackson</artifactId>
+      <version>0.2-SNAPSHOT</version>
     </dependency>
 
     <!--test deps-->

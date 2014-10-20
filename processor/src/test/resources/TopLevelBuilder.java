@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import javax.annotation.Generated;
 
-@Generated("io.norberg.automatter.AutoMatterProcessor")
+@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
 public final class TopLevelBuilder {
 
   public TopLevel build() {
@@ -11,6 +11,7 @@ public final class TopLevelBuilder {
   private static final class Value
       implements TopLevel {
 
+    @com.fasterxml.jackson.annotation.JsonCreator
     private Value() {
     }
 

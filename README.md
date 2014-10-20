@@ -40,105 +40,40 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
   <scope>provided</scope>
 </dependency>
 ```
 
-### Generated `ExampleBuilder.java`
+### Jackson JSON Support
+
+```xml
+<dependency>
+  <groupId>io.norberg</groupId>
+  <artifactId>auto-matter-jackson</artifactId>
+  <version>0.2</version>
+</dependency>
+```
 
 ```java
-package io.norberg.automatter.example;
+ObjectMapper mapper = new ObjectMapper()
+    .registerModule(new AutoMatterModule());
 
-import java.util.Arrays;
-import javax.annotation.Generated;
+Foobar foobar = new FoobarBuilder()
+    .bar(17)
+    .foo("hello world")
+    .build();
 
-@Generated("io.norberg.automatter.AutoMatterProcessor")
-public final class ExampleBuilder {
+String json = mapper.writeValueAsString(foobar);
 
-  private String foo;
-  private int bar;
-
-  public ExampleBuilder foo(String foo) {
-    this.foo = foo;
-    return this;
-  }
-
-  public ExampleBuilder bar(int bar) {
-    this.bar = bar;
-    return this;
-  }
-
-  public Example build() {
-    return new Value(foo, bar);
-  }
-
-  private static final class Value
-      implements Example {
-
-    private final String foo;
-    private final int bar;
-
-    private Value(String foo, int bar) {
-      this.foo = foo;
-      this.bar = bar;
-    }
-
-    @Override
-    public String foo() {
-      return foo;
-    }
-
-    @Override
-    public int bar() {
-      return bar;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-
-      final Value value = (Value) o;
-
-      if (foo != null ? !foo.equals(value.foo) : value.foo != null) {
-        return false;
-      }
-      if (bar != value.bar) {
-        return false;
-      }
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      int result = 0;
-      long temp;
-      result = 31 * result + (foo != null ? foo.hashCode() : 0);
-      result = 31 * result + bar;
-      return result;
-    }
-
-    @Override
-    public String toString() {
-      return "Example{" + 
-          "foo=" + foo +
-          ", bar=" + bar +
-          '}';
-    }
-  }
-}
+Foobar parsed = mapper.readValue(json, Foobar.class);
 ```
+
 
 TODO
 ----
 
 * Null-checking, opt-outable using @Nullable 
-* JSON support. E.g. emitting Jackson @JsonProperty annotations, etc.
 * Recursive builders, like protobuf.
 * More tests
+* Support nested interfaces

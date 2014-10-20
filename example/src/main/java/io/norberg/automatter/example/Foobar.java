@@ -3,7 +3,7 @@ package io.norberg.automatter.example;
 import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
-public interface Example {
+public interface Foobar {
   String foo();
   int bar();
 }

@@ -1,4 +1,4 @@
-package io.norberg.automatter;
+package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
@@ -6,9 +6,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.squareup.javawriter.JavaWriter;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +31,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
+
+import io.norberg.automatter.AutoMatter;
 
 import static java.lang.String.format;
 import static javax.lang.model.SourceVersion.RELEASE_6;
@@ -86,6 +91,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     writer.emitPackage(packageName);
     writer.emitImports("java.util.Arrays",
+//                       "com.fasterxml.jackson.annotation.JsonCreator",
+//                       "com.fasterxml.jackson.annotation.JsonProperty",
                        "javax.annotation.Generated");
 
     writer.emitEmptyLine();
@@ -137,14 +144,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     final List<String> parameters = Lists.newArrayList();
     for (ExecutableElement field : fields) {
-      parameters.add(fieldType(field));
+      parameters.add("@" + JsonProperty.class.getName() +
+                     "(\"" + fieldName(field) + "\") " + fieldType(field));
       parameters.add(fieldName(field));
     }
+    emitAnnotation(writer, JsonCreator.class);
     writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
     for (ExecutableElement field : fields) {
       writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     }
     writer.endConstructor();
+  }
+
+  private void emitAnnotation(final JavaWriter writer,
+                              final Class<? extends Annotation> annotation) throws IOException {
+    final boolean compressing = writer.isCompressingTypes();
+    writer.setCompressingTypes(false);
+    writer.emitAnnotation(annotation);
+    writer.setCompressingTypes(compressing);
   }
 
   private void emitValueFields(final JavaWriter writer, final List<ExecutableElement> fields)
@@ -165,6 +182,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
     writer.emitEmptyLine();
+    emitAnnotation(writer, JsonProperty.class);
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
