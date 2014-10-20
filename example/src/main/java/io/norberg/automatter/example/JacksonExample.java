@@ -8,24 +8,24 @@ import io.norberg.automatter.jackson.AutoMatterModule;
 
 import static java.lang.System.out;
 
-public class ExampleApp {
-
-  public static final ObjectMapper MAPPER = new ObjectMapper()
-      .registerModule(new AutoMatterModule());
+public class JacksonExample {
 
   public static void main(final String... args) throws IOException {
-    Example example = new ExampleBuilder()
+    // Register the AutoMatterModule to handle deserialization
+    ObjectMapper mapper = new ObjectMapper()
+        .registerModule(new AutoMatterModule());
+
+    Foobar foobar = new FoobarBuilder()
         .bar(17)
         .foo("hello world")
         .build();
 
-    out.println("bar: " + example.bar());
-    out.println("foo: " + example.foo());
-
-    String json = MAPPER.writeValueAsString(example);
+    String json = mapper.writeValueAsString(foobar);
     out.println("json: " + json);
 
-    Example parsed = MAPPER.readValue(json, Example.class);
+    Foobar parsed = mapper.readValue(json, Foobar.class);
     out.println("parsed: " + parsed);
+
+    out.println("equals: " + foobar.equals(parsed));
   }
 }
