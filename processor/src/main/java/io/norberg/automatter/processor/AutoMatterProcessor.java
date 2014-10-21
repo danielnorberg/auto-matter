@@ -307,7 +307,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       case DECLARED:
         return format("if (%1$s != null ? !%1$s.equals(that.%1$s()) : that.%1$s() != null)", name);
       default:
-        throw new IllegalArgumentException("Unsupported type: " + type);
+        throw fail("Unsupported type: " + type, field);
     }
   }
 
@@ -352,7 +352,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           writer.emitStatement("result = 31 * result + (%1$s != null ? %1$s.hashCode() : 0)", name);
           break;
         default:
-          throw new IllegalArgumentException("Unsupported type: " + type);
+          throw fail("Unsupported type: " + type, field);
       }
     }
     writer.emitStatement("return result");
@@ -459,7 +459,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       this.builderSimpleName = simpleName(builderFullName);
 
       if(!element.getKind().isInterface()) {
-        messager.printMessage(ERROR, "@AutoMatter target must be an interface", element);
+        error("@AutoMatter target must be an interface", element);
       }
 
       final ImmutableList.Builder<ExecutableElement> fields = ImmutableList.builder();
@@ -473,8 +473,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           if (executable.getSimpleName().toString().equals("builder")) {
             final String type = executable.getReturnType().toString();
             if (!type.equals(builderSimpleName) && !type.equals(builderFullName)) {
-              throw new IllegalArgumentException(
-                  "builder() return type must be " + builderSimpleName);
+              throw fail("builder() return type must be " + builderSimpleName, element);
             }
             toBuilder = true;
             continue;
@@ -485,5 +484,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       this.fields = fields.build();
       this.toBuilder = toBuilder;
     }
+  }
+
+  private RuntimeException fail(final String msg, final Element element) {
+    error(msg, element);
+    throw new RuntimeException();
+  }
+
+  private void error(final String s, final Element element) {
+    messager.printMessage(ERROR, s, element);
   }
 }
