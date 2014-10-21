@@ -41,7 +41,7 @@ public final class TopLevelBuilder {
       if (this == o) {
         return true;
       }
-      if (o == null || getClass() != o.getClass()) {
+      if (!(o instanceof TopLevel)) {
         return false;
       }
 

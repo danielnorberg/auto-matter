@@ -228,40 +228,40 @@ public final class FooBuilder {
       if (this == o) {
         return true;
       }
-      if (o == null || getClass() != o.getClass()) {
+      if (!(o instanceof Foo)) {
         return false;
       }
 
-      final Value value = (Value) o;
+      final Foo that = (Foo) o;
 
-      if (aBoolean != value.aBoolean) {
+      if (aBoolean != that.aBoolean()) {
         return false;
       }
-      if (aByte != value.aByte) {
+      if (aByte != that.aByte()) {
         return false;
       }
-      if (aShort != value.aShort) {
+      if (aShort != that.aShort()) {
         return false;
       }
-      if (aInt != value.aInt) {
+      if (aInt != that.aInt()) {
         return false;
       }
-      if (aLong != value.aLong) {
+      if (aLong != that.aLong()) {
         return false;
       }
-      if (aChar != value.aChar) {
+      if (aChar != that.aChar()) {
         return false;
       }
-      if (Float.compare(value.aFloat, aFloat) != 0) {
+      if (Float.compare(that.aFloat(), aFloat) != 0) {
         return false;
       }
-      if (Double.compare(value.aDouble, aDouble) != 0) {
+      if (Double.compare(that.aDouble(), aDouble) != 0) {
         return false;
       }
-      if (object != null ? !object.equals(value.object) : value.object != null) {
+      if (object != null ? !object.equals(that.object()) : that.object() != null) {
         return false;
       }
-      if (!Arrays.equals(array, value.array)) {
+      if (!Arrays.equals(array, that.array())) {
         return false;
       }
 

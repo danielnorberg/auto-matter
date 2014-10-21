@@ -185,7 +185,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitValueConstructor(writer, descriptor.fields);
     emitValueGetters(writer, descriptor.fields);
     emitValueToBuilder(writer, descriptor);
-    emitValueEquals(writer, descriptor.fields);
+    emitValueEquals(writer, descriptor);
     emitValueHashCode(writer, descriptor.fields);
     emitValueToString(writer, descriptor.fields, descriptor.targetSimpleName);
     writer.endType();
@@ -253,7 +253,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitValueEquals(final JavaWriter writer, final List<ExecutableElement> fields)
+  private void emitValueEquals(final JavaWriter writer, final Descriptor descriptor)
       throws IOException {
 
     writer.emitEmptyLine();
@@ -264,15 +264,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitStatement("return true");
     writer.endControlFlow();
 
-    writer.beginControlFlow("if (o == null || getClass() != o.getClass())");
+    writer.beginControlFlow("if (!(o instanceof " + descriptor.targetSimpleName + "))");
     writer.emitStatement("return false");
     writer.endControlFlow();
 
-    if (!fields.isEmpty()) {
+    if (!descriptor.fields.isEmpty()) {
       writer.emitEmptyLine();
-      writer.emitStatement("final Value value = (Value) o");
+      writer.emitStatement("final %1$s that = (%1$s) o", descriptor.targetSimpleName);
       writer.emitEmptyLine();
-      for (ExecutableElement field : fields) {
+      for (ExecutableElement field : descriptor.fields) {
         writer.beginControlFlow(fieldNotEqualCondition(field));
         writer.emitStatement("return false");
         writer.endControlFlow();
@@ -294,15 +294,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       case BYTE:
       case SHORT:
       case CHAR:
-        return format("if (%1$s != value.%1$s)", name);
+        return format("if (%1$s != that.%1$s())", name);
       case FLOAT:
-        return format("if (Float.compare(value.%1$s, %1$s) != 0)", name);
+        return format("if (Float.compare(that.%1$s(), %1$s) != 0)", name);
       case DOUBLE:
-        return format("if (Double.compare(value.%1$s, %1$s) != 0)", name);
+        return format("if (Double.compare(that.%1$s(), %1$s) != 0)", name);
       case ARRAY:
-        return format("if (!Arrays.equals(%1$s, value.%1$s))", name);
+        return format("if (!Arrays.equals(%1$s, that.%1$s()))", name);
       case DECLARED:
-        return format("if (%1$s != null ? !%1$s.equals(value.%1$s) : value.%1$s != null)", name);
+        return format("if (%1$s != null ? !%1$s.equals(that.%1$s()) : that.%1$s() != null)", name);
       default:
         throw new IllegalArgumentException("Unsupported type: " + type);
     }
