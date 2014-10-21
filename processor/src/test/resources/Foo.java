@@ -14,4 +14,6 @@ public interface Foo {
   double aDouble();
   Object object();
   Object[] array();
+
+  FooBuilder builder();
 }

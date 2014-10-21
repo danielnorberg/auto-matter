@@ -59,7 +59,7 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
   <scope>provided</scope>
 </dependency>
 ```
@@ -70,7 +70,7 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-jackson</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
 </dependency>
 ```
 
@@ -94,7 +94,7 @@ Foobar parsed = mapper.readValue(json, Foobar.class);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-gson</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
 </dependency>
 ```
 
@@ -111,6 +111,38 @@ Foobar foobar = new FoobarBuilder()
 String json = gson.toJson(foobar);
 
 Foobar parsed = gson.fromJson(json, Foobar.class);
+```
+
+### Copying
+
+A value can be copied into a new builder in two ways.
+
+* Using the `FoobarBuilder.from(Foobar)` method.
+* Adding a `FoobarBuilder builder();` method to the type definition.
+
+```java
+@AutoMatter
+interface Foobar {
+    String foo();
+    int bar();
+
+    // Note: This method is an optional convenience.
+    FoobarBuilder builder();
+}
+
+// ...
+
+Foobar original = ... ;
+
+// Using a static method on the builder
+Foobar copy1 = FoobarBuilder.from(original);
+    .foo("this is a copy")
+    .build();
+
+// Using a FoobarBuilder builder() method optionally defined on the value type
+Foobar copy2 = original.builder();
+    .foo("this is another copy")
+    .build();
 ```
 
 
