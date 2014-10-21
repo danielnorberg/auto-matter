@@ -59,7 +59,7 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
   <scope>provided</scope>
 </dependency>
 ```
@@ -70,7 +70,7 @@ System.out.println(example);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-jackson</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
 </dependency>
 ```
 
@@ -94,7 +94,7 @@ Foobar parsed = mapper.readValue(json, Foobar.class);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-gson</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
 </dependency>
 ```
 
