@@ -14,7 +14,8 @@ public abstract class AutoValueFoobar {
   @JsonProperty public abstract int bar();
 
   @JsonCreator
-  public static AutoValueFoobar create(@JsonProperty("foo") String foo, @JsonProperty("bar") int bar) {
+  public static AutoValueFoobar create(@JsonProperty("foo") String foo,
+                                       @JsonProperty("bar") int bar) {
     return new AutoValue_AutoValueFoobar(foo, bar);
   }
 }

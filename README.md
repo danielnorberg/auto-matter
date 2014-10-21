@@ -150,7 +150,8 @@ public abstract class Foobar {
   @JsonProperty public abstract int bar();
 
   @JsonCreator
-  public static Foobar create(@JsonProperty("foo") String foo, @JsonProperty("bar") int bar) {
+  public static Foobar create(@JsonProperty("foo") String foo, 
+                              @JsonProperty("bar") int bar) {
     return new AutoValue_Foobar(foo, bar);
   }
 }
