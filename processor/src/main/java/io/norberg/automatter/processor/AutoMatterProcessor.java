@@ -316,7 +316,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.emitAnnotation(Override.class);
     writer.beginMethod("int", "hashCode", EnumSet.of(PUBLIC));
-    writer.emitStatement("int result = 0");
+    writer.emitStatement("int result = 1");
     writer.emitStatement("long temp");
     for (ExecutableElement field : fields) {
       final String name = field.getSimpleName().toString();
@@ -329,7 +329,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           writer.emitStatement("result = 31 * result + %s", name);
           break;
         case BOOLEAN:
-          writer.emitStatement("result = 31 * result + (%s ? 1 : 0)", name);
+          writer.emitStatement("result = 31 * result + (%s ? 1231 : 1237)", name);
           break;
         case BYTE:
         case SHORT:

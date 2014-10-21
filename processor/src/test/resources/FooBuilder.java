@@ -270,9 +270,10 @@ public final class FooBuilder {
 
     @Override
     public int hashCode() {
-      int result = 0;
+      int result = 1;
       long temp;
-      result = 31 * result + (aBoolean ? 1 : 0);
+
+      result = 31 * result + (aBoolean ? 1231 : 1237);
       result = 31 * result + (int) aByte;
       result = 31 * result + (int) aShort;
       result = 31 * result + aInt;
