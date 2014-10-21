@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -55,12 +56,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private Filer filer;
   private Elements elements;
+  private Messager messager;
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     filer = processingEnv.getFiler();
     elements = processingEnv.getElementUtils();
+    this.messager = processingEnv.getMessager();
   }
 
   @Override
@@ -454,6 +457,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
       this.builderFullName = targetFullName + "Builder";
       this.builderSimpleName = simpleName(builderFullName);
+
+      if(!element.getKind().isInterface()) {
+        messager.printMessage(ERROR, "@AutoMatter target must be an interface", element);
+      }
 
       final ImmutableList.Builder<ExecutableElement> fields = ImmutableList.builder();
       boolean toBuilder = false;

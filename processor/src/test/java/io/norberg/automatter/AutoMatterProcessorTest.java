@@ -32,4 +32,14 @@ public class AutoMatterProcessorTest {
         .compilesWithoutError()
         .and().generatesSources(JavaFileObjects.forResource("TopLevelBuilder.java"));
   }
+
+  @Test
+  public void verifyClassTargetFails() {
+    final JavaFileObject source = JavaFileObjects.forResource("bad/ClassFoo.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .failsToCompile()
+        .withErrorContaining("@AutoMatter target must be an interface");
+  }
 }
