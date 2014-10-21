@@ -10,6 +10,8 @@ import io.norberg.automatter.processor.AutoMatterProcessor;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static java.util.Arrays.asList;
 
 public class AutoMatterProcessorTest {
 
@@ -41,5 +43,16 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .failsToCompile()
         .withErrorContaining("@AutoMatter target must be an interface");
+  }
+
+  @Test
+  public void testAutoValue() {
+    final JavaFileObject source = JavaFileObjects.forResource("AutoValueFoobar.java");
+    final JavaFileObject value = JavaFileObjects.forResource("AutoValue_AutoValueFoobar.java");
+    assert_().about(javaSources())
+        .that(asList(value, source))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("AutoValueFoobarBuilder.java"));
   }
 }

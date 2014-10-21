@@ -16,14 +16,8 @@ Why
 
 * AutoMatter allows the value type definitions to be as minimal as possible. No need to write your
   own factory methods, use abstract modifiers or add json annotations, etc.
-
-Why Not
--------
-AutoMatter is designed to work well for pure data value type use cases by generating as much as
-possible of the scaffolding needed in a straightforward manner. As such, it might not be flexible
-enough for all use cases. For example, it is not possible to add your own methods to the generated
-builders. For maximum flexibility, although at a higher cost, consider
-[AutoValue](https://github.com/google/auto/tree/master/value).
+  
+* Integrates with AutoValue for maximum flexibility and power.
 
 Usage
 -----
@@ -145,6 +139,34 @@ Foobar copy2 = original.builder();
     .build();
 ```
 
+
+### AutoValue Support
+
+```java
+@AutoValue
+@AutoMatter
+public abstract class Foobar {
+  @JsonProperty public abstract String foo();
+  @JsonProperty public abstract int bar();
+
+  @JsonCreator
+  public static Foobar create(@JsonProperty("foo") String foo, 
+                              @JsonProperty("bar") int bar) {
+    return new AutoValue_Foobar(foo, bar);
+  }
+}
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .bar(17)
+    .foo("hello world")
+    .build();
+
+out.println("bar: " + foobar.bar());
+out.println("foo: " + foobar.foo());
+out.println("foobar: " + foobar);
+```
 
 TODO
 ----
