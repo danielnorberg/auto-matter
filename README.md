@@ -88,6 +88,31 @@ String json = mapper.writeValueAsString(foobar);
 Foobar parsed = mapper.readValue(json, Foobar.class);
 ```
 
+### Gson Support
+
+```xml
+<dependency>
+  <groupId>io.norberg</groupId>
+  <artifactId>auto-matter-gson</artifactId>
+  <version>0.3-SNAPSHOT</version>
+</dependency>
+```
+
+```java
+Gson gson = new GsonBuilder()
+    .registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory())
+    .create();
+
+Foobar foobar = new FoobarBuilder()
+    .bar(17)
+    .foo("hello world")
+    .build();
+
+String json = gson.toJson(foobar);
+
+Foobar parsed = gson.fromJson(json, Foobar.class);
+```
+
 
 TODO
 ----
