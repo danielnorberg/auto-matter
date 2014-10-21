@@ -91,8 +91,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     writer.emitPackage(packageName);
     writer.emitImports("java.util.Arrays",
-//                       "com.fasterxml.jackson.annotation.JsonCreator",
-//                       "com.fasterxml.jackson.annotation.JsonProperty",
                        "javax.annotation.Generated");
 
     writer.emitEmptyLine();
