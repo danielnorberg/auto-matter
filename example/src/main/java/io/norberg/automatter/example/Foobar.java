@@ -6,4 +6,6 @@ import io.norberg.automatter.AutoMatter;
 public interface Foobar {
   String foo();
   int bar();
+
+  FoobarBuilder builder();
 }

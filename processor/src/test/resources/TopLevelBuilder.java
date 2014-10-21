@@ -4,8 +4,25 @@ import javax.annotation.Generated;
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
 public final class TopLevelBuilder {
 
+  public TopLevelBuilder() {
+  }
+
+  private TopLevelBuilder(TopLevel v) {
+  }
+
+  private TopLevelBuilder(TopLevelBuilder v) {
+  }
+
   public TopLevel build() {
     return new Value();
+  }
+
+  public static TopLevelBuilder from(TopLevel v) {
+    return new TopLevelBuilder(v);
+  }
+
+  public static TopLevelBuilder from(TopLevelBuilder v) {
+    return new TopLevelBuilder(v);
   }
 
   private static final class Value
@@ -13,6 +30,10 @@ public final class TopLevelBuilder {
 
     @com.fasterxml.jackson.annotation.JsonCreator
     private Value() {
+    }
+
+    public TopLevelBuilder builder() {
+      return new TopLevelBuilder(this);
     }
 
     @Override

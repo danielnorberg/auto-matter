@@ -18,6 +18,35 @@ public final class FooBuilder {
   private Object object;
   private Object[] array;
 
+  public FooBuilder() {
+  }
+
+  private FooBuilder(Foo v) {
+    this.aBoolean = v.aBoolean();
+    this.aByte = v.aByte();
+    this.aShort = v.aShort();
+    this.aInt = v.aInt();
+    this.aLong = v.aLong();
+    this.aChar = v.aChar();
+    this.aFloat = v.aFloat();
+    this.aDouble = v.aDouble();
+    this.object = v.object();
+    this.array = v.array();
+  }
+
+  private FooBuilder(FooBuilder v) {
+    this.aBoolean = v.aBoolean;
+    this.aByte = v.aByte;
+    this.aShort = v.aShort;
+    this.aInt = v.aInt;
+    this.aLong = v.aLong;
+    this.aChar = v.aChar;
+    this.aFloat = v.aFloat;
+    this.aDouble = v.aDouble;
+    this.object = v.object;
+    this.array = v.array;
+  }
+
   public FooBuilder aBoolean(boolean aBoolean) {
     this.aBoolean = aBoolean;
     return this;
@@ -80,6 +109,14 @@ public final class FooBuilder {
         aDouble,
         object,
         array);
+  }
+
+  public static FooBuilder from(Foo v) {
+    return new FooBuilder(v);
+  }
+
+  public static FooBuilder from(FooBuilder v) {
+    return new FooBuilder(v);
   }
 
   private static final class Value
@@ -179,6 +216,11 @@ public final class FooBuilder {
     @Override
     public Object[] array() {
       return array;
+    }
+
+    @Override
+    public FooBuilder builder() {
+      return new FooBuilder(this);
     }
 
     @Override

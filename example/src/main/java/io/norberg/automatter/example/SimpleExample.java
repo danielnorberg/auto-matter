@@ -15,5 +15,11 @@ public class SimpleExample {
     out.println("bar: " + foobar.bar());
     out.println("foo: " + foobar.foo());
     out.println("foobar: " + foobar);
+
+    Foobar modified = foobar.builder()
+        .bar(18)
+        .build();
+
+    out.println("modified: " + modified);
   }
 }

@@ -2,6 +2,7 @@ package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -26,7 +27,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -69,7 +69,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final Set<? extends Element> elements = env.getElementsAnnotatedWith(AutoMatter.class);
     for (Element element : elements) {
       try {
-        writeBuilder(element, env);
+        writeBuilder(element);
       } catch (IOException e) {
         processingEnv.getMessager().printMessage(ERROR, e.getMessage());
       }
@@ -77,19 +77,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return false;
   }
 
-  private void writeBuilder(final Element element, final RoundEnvironment env) throws IOException {
-    final String packageName = elements.getPackageOf(element).getQualifiedName().toString();
-    final Name targetSimpleName = element.getSimpleName();
-    final String targetName = fullyQualifedName(packageName, targetSimpleName.toString());
-    final String builderName = targetName + "Builder";
-    final String simpleBuilderName = simpleName(builderName);
+  private void writeBuilder(final Element element) throws IOException {
+    final Descriptor d = new Descriptor(element);
 
-    final List<ExecutableElement> fields = enumerateFields(element);
-
-    final JavaFileObject sourceFile = filer.createSourceFile(builderName);
+    final JavaFileObject sourceFile = filer.createSourceFile(d.builderFullName);
     final JavaWriter writer = new JavaWriter(sourceFile.openWriter());
 
-    writer.emitPackage(packageName);
+    writer.emitPackage(d.packageName);
     writer.emitImports("java.util.Arrays",
                        "javax.annotation.Generated");
 
@@ -97,15 +91,74 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitAnnotation(
         Generated.class,
         ImmutableMap.of("value", "\"" + AutoMatterProcessor.class.getName() + "\""));
-    writer.beginType(simpleBuilderName, "class", EnumSet.of(PUBLIC, FINAL));
+    writer.beginType(d.builderSimpleName, "class", EnumSet.of(PUBLIC, FINAL));
 
-    emitFields(writer, fields);
-    emitSetters(writer, simpleBuilderName, fields);
-    emitBuild(targetSimpleName, writer, fields);
-    emitValue(targetSimpleName, writer, fields);
+    emitFields(writer, d);
+    emitConstructors(writer, d);
+    emitSetters(writer, d);
+    emitBuild(writer, d);
+    emitFactoryMethods(writer, d);
+    emitValue(writer, d);
 
     writer.endType();
     writer.close();
+  }
+
+  private void emitConstructors(final JavaWriter writer,
+                                final Descriptor descriptor)
+      throws IOException {
+    emitDefaultConstructor(writer);
+    emitCopyValueConstructor(writer, descriptor);
+    emitCopyBuilderConstructor(writer, descriptor);
+  }
+
+  private void emitFactoryMethods(final JavaWriter writer, final Descriptor d) throws IOException {
+    emitFromValueFactory(writer, d);
+    emitFromBuilderFactory(writer, d);
+  }
+
+  private void emitFromValueFactory(final JavaWriter writer, final Descriptor d)
+      throws IOException {
+    writer.emitEmptyLine();
+    writer.beginMethod(d.builderSimpleName, "from", EnumSet.of(STATIC, PUBLIC),
+                       d.targetSimpleName, "v");
+    writer.emitStatement("return new %s(v)", d.builderSimpleName);
+    writer.endMethod();
+  }
+
+  private void emitFromBuilderFactory(final JavaWriter writer,
+                                      final Descriptor d) throws IOException {
+    writer.emitEmptyLine();
+    writer.beginMethod(d.builderSimpleName, "from", EnumSet.of(STATIC, PUBLIC),
+                       d.builderSimpleName, "v");
+    writer.emitStatement("return new %s(v)", d.builderSimpleName);
+    writer.endMethod();
+  }
+
+  private void emitDefaultConstructor(final JavaWriter writer) throws IOException {
+    writer.emitEmptyLine();
+    writer.beginConstructor(EnumSet.of(PUBLIC));
+    writer.endConstructor();
+  }
+
+  private void emitCopyValueConstructor(final JavaWriter writer,
+                                        final Descriptor descriptor) throws IOException {
+    writer.emitEmptyLine();
+    writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.targetSimpleName, "v");
+    for (ExecutableElement field : descriptor.fields) {
+      writer.emitStatement("this.%1$s = v.%1$s()", fieldName(field));
+    }
+    writer.endConstructor();
+  }
+
+  private void emitCopyBuilderConstructor(final JavaWriter writer,
+                                          final Descriptor descriptor) throws IOException {
+    writer.emitEmptyLine();
+    writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.builderSimpleName, "v");
+    for (ExecutableElement field : descriptor.fields) {
+      writer.emitStatement("this.%1$s = v.%1$s", fieldName(field));
+    }
+    writer.endConstructor();
   }
 
   private String fullyQualifedName(final String packageName, final String simpleName) {
@@ -114,27 +167,40 @@ public final class AutoMatterProcessor extends AbstractProcessor {
            : packageName + "." + simpleName;
   }
 
-  private void emitFields(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException {
+  private void emitFields(final JavaWriter writer, final Descriptor descriptor)
+  throws IOException {
     writer.emitEmptyLine();
-    for (ExecutableElement field : fields) {
+    for (ExecutableElement field : descriptor.fields) {
       writer.emitField(fieldType(field), fieldName(field), EnumSet.of(PRIVATE));
     }
   }
 
-  private void emitValue(final Name targetName, final JavaWriter writer,
-                         final List<ExecutableElement> fields)
-      throws IOException {
+  private void emitValue(final JavaWriter writer,
+                         final Descriptor descriptor)
+  throws IOException {
     writer.emitEmptyLine();
     writer.beginType("Value", "class", EnumSet.of(PRIVATE, STATIC, FINAL),
-                     null, targetName.toString());
-    emitValueFields(writer, fields);
-    emitValueConstructor(writer, fields);
-    emitValueGetters(writer, fields);
-    emitValueEquals(writer, fields);
-    emitValueHashCode(writer, fields);
-    emitValueToString(writer, fields, targetName);
+                     null, descriptor.targetSimpleName);
+    emitValueFields(writer, descriptor.fields);
+    emitValueConstructor(writer, descriptor.fields);
+    emitValueGetters(writer, descriptor.fields);
+    emitValueToBuilder(writer, descriptor);
+    emitValueEquals(writer, descriptor.fields);
+    emitValueHashCode(writer, descriptor.fields);
+    emitValueToString(writer, descriptor.fields, descriptor.targetSimpleName);
     writer.endType();
+  }
+
+  private void emitValueToBuilder(final JavaWriter writer,
+                                  final Descriptor descriptor) throws IOException {
+    writer.emitEmptyLine();
+    // Always emit toBuilder, but only annotate it with @Override if the target asked for it.
+    if (descriptor.toBuilder) {
+      writer.emitAnnotation(Override.class);
+    }
+    writer.beginMethod(descriptor.builderFullName, "builder", EnumSet.of(PUBLIC));
+    writer.emitStatement("return new %s(this)", descriptor.builderSimpleName);
+    writer.endMethod();
   }
 
   private void emitValueConstructor(final JavaWriter writer, final List<ExecutableElement> fields)
@@ -291,8 +357,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void emitValueToString(final JavaWriter writer, final List<ExecutableElement> fields,
-                                 final Name targetName)
-      throws IOException {
+                                 final String targetName)
+  throws IOException {
     writer.emitEmptyLine();
     writer.emitAnnotation(Override.class);
     writer.beginMethod("String", "toString", EnumSet.of(PUBLIC));
@@ -301,7 +367,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void emitToStringStatement(final JavaWriter writer, final List<ExecutableElement> fields,
-                                     final Name targetName) throws IOException {
+                                     final String targetName) throws IOException {
     final StringBuilder builder = new StringBuilder();
     builder.append("return \"").append(targetName).append("{\" + \n");
     boolean first = true;
@@ -319,22 +385,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitStatement(builder.toString());
   }
 
-  private void emitBuild(final Name targetName, final JavaWriter writer,
-                         final List<ExecutableElement> fields) throws IOException {
+  private void emitBuild(final JavaWriter writer,
+                         final Descriptor descriptor) throws IOException {
     writer.emitEmptyLine();
-    writer.beginMethod(targetName.toString(), "build", EnumSet.of(PUBLIC));
+    writer.beginMethod(descriptor.targetSimpleName, "build", EnumSet.of(PUBLIC));
     final List<String> parameters = Lists.newArrayList();
-    for (Element field : fields) {
+    for (ExecutableElement field : descriptor.fields) {
       parameters.add(field.getSimpleName().toString());
     }
     writer.emitStatement("return new Value(%s)", Joiner.on(", ").join(parameters));
     writer.endMethod();
   }
 
-  private void emitSetters(final JavaWriter writer, final String builderName,
-                           final List<ExecutableElement> fields) throws IOException {
-    for (final ExecutableElement field : fields) {
-      emitSetter(writer, builderName, field);
+  private void emitSetters(final JavaWriter writer,
+                           final Descriptor descriptor) throws IOException {
+    for (final ExecutableElement field : descriptor.fields) {
+      emitSetter(writer, descriptor.builderSimpleName, field);
     }
   }
 
@@ -362,20 +428,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private List<ExecutableElement> enumerateFields(final Element element) {
-    final List<ExecutableElement> fields = Lists.newArrayList();
-    for (final Element member : element.getEnclosedElements()) {
-      if (member.getKind().equals(ElementKind.METHOD)) {
-        final ExecutableElement executable = (ExecutableElement) member;
-        if (executable.getModifiers().contains(STATIC)) {
-          continue;
-        }
-        fields.add(executable);
-      }
-    }
-    return fields;
-  }
-
   private static String simpleName(String fullyQualifiedName) {
     int lastDot = fullyQualifiedName.lastIndexOf('.');
     return fullyQualifiedName.substring(lastDot + 1, fullyQualifiedName.length());
@@ -384,5 +436,47 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return ImmutableSet.of(AutoMatter.class.getName());
+  }
+
+  private class Descriptor {
+
+    private final List<ExecutableElement> fields;
+    private final boolean toBuilder;
+    private final String builderFullName;
+    private final String packageName;
+    private final String targetSimpleName;
+    private final String targetFullName;
+    private final String builderSimpleName;
+
+    private Descriptor(final Element element) {
+      this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
+      this.targetSimpleName = element.getSimpleName().toString();
+      this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
+      this.builderFullName = targetFullName + "Builder";
+      this.builderSimpleName = simpleName(builderFullName);
+
+      final ImmutableList.Builder<ExecutableElement> fields = ImmutableList.builder();
+      boolean toBuilder = false;
+      for (final Element member : element.getEnclosedElements()) {
+        if (member.getKind().equals(ElementKind.METHOD)) {
+          final ExecutableElement executable = (ExecutableElement) member;
+          if (executable.getModifiers().contains(STATIC)) {
+            continue;
+          }
+          if (executable.getSimpleName().toString().equals("builder")) {
+            final String type = executable.getReturnType().toString();
+            if (!type.equals(builderSimpleName) && !type.equals(builderFullName)) {
+              throw new IllegalArgumentException(
+                  "builder() return type must be " + builderSimpleName);
+            }
+            toBuilder = true;
+            continue;
+          }
+          fields.add(executable);
+        }
+      }
+      this.fields = fields.build();
+      this.toBuilder = toBuilder;
+    }
   }
 }
