@@ -140,6 +140,33 @@ Foobar copy2 = original.builder();
 ```
 
 
+### AutoValue Support
+
+```java
+@AutoValue
+@AutoMatter
+public abstract class Foobar {
+  @JsonProperty public abstract String foo();
+  @JsonProperty public abstract int bar();
+
+  @JsonCreator
+  static Foobar create(@JsonProperty("foo") String foo, @JsonProperty("bar") int bar) {
+    return new AutoValue_Foobar(foo, bar);
+  }
+}
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .bar(17)
+    .foo("hello world")
+    .build();
+
+out.println("bar: " + foobar.bar());
+out.println("foo: " + foobar.foo());
+out.println("foobar: " + foobar);
+```
+
 TODO
 ----
 
