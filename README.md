@@ -16,14 +16,8 @@ Why
 
 * AutoMatter allows the value type definitions to be as minimal as possible. No need to write your
   own factory methods, use abstract modifiers or add json annotations, etc.
-
-Why Not
--------
-AutoMatter is designed to work well for pure data value type use cases by generating as much as
-possible of the scaffolding needed in a straightforward manner. As such, it might not be flexible
-enough for all use cases. For example, it is not possible to add your own methods to the generated
-builders. For maximum flexibility, although at a higher cost, consider
-[AutoValue](https://github.com/google/auto/tree/master/value).
+  
+* Integrates with AutoValue for maximum flexibility and power.
 
 Usage
 -----

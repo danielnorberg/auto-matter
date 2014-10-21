@@ -1,6 +1,7 @@
 package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +38,7 @@ import io.norberg.automatter.AutoMatter;
 
 import static java.lang.String.format;
 import static javax.lang.model.SourceVersion.RELEASE_6;
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -101,7 +103,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitSetters(writer, d);
     emitBuild(writer, d);
     emitFactoryMethods(writer, d);
-    emitValue(writer, d);
+
+    if (!d.autoValue) {
+      emitValue(writer, d);
+    }
 
     writer.endType();
     writer.close();
@@ -396,7 +401,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : descriptor.fields) {
       parameters.add(field.getSimpleName().toString());
     }
-    writer.emitStatement("return new Value(%s)", Joiner.on(", ").join(parameters));
+    writer.emitStatement("return new %s(%s)", descriptor.constructor,
+                         Joiner.on(", ").join(parameters));
     writer.endMethod();
   }
 
@@ -450,6 +456,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     private final String targetSimpleName;
     private final String targetFullName;
     private final String builderSimpleName;
+    private final boolean autoValue;
+    private final String constructor;
 
     private Descriptor(final Element element) {
       this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
@@ -457,8 +465,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
       this.builderFullName = targetFullName + "Builder";
       this.builderSimpleName = simpleName(builderFullName);
+      this.autoValue = element.getAnnotation(AutoValue.class) != null;
+      this.constructor = autoValue ? "AutoValue_" + targetSimpleName : "Value";
 
-      if(!element.getKind().isInterface()) {
+      if (!element.getKind().isInterface() && !autoValue) {
         error("@AutoMatter target must be an interface", element);
       }
 
@@ -470,15 +480,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           if (executable.getModifiers().contains(STATIC)) {
             continue;
           }
-          if (executable.getSimpleName().toString().equals("builder")) {
-            final String type = executable.getReturnType().toString();
-            if (!type.equals(builderSimpleName) && !type.equals(builderFullName)) {
-              throw fail("builder() return type must be " + builderSimpleName, element);
+          if (autoValue) {
+            if (executable.getModifiers().contains(ABSTRACT)) {
+              fields.add(executable);
             }
-            toBuilder = true;
-            continue;
+          } else {
+            if (executable.getSimpleName().toString().equals("builder")) {
+              final String type = executable.getReturnType().toString();
+              if (!type.equals(builderSimpleName) && !type.equals(builderFullName)) {
+                throw fail("builder() return type must be " + builderSimpleName, element);
+              }
+              toBuilder = true;
+              continue;
+            }
+            if (!executable.getParameters().isEmpty()) {
+              throw new IllegalArgumentException("methods must have no arguments");
+            }
+            fields.add(executable);
           }
-          fields.add(executable);
         }
       }
       this.fields = fields.build();
