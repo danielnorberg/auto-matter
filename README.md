@@ -8,7 +8,7 @@ interfaces. Inspired by [AutoValue](https://github.com/google/auto/tree/master/v
 
 Why
 ---
-* AutoMatter provides implementations of setters, getters, equals, hashCode, toString, etc for you,
+* AutoMatter provides implementations of getters, equals, hashCode, toString, etc for you,
   letting you quickly describe your data and move on to using it without spending time on error
   prone and repetitive scaffolding.
 
