@@ -8,8 +8,8 @@ public class SimpleExample {
 
   public static void main(final String... args) throws IOException {
     Foobar foobar = new FoobarBuilder()
-        .bar(17)
         .foo("hello world")
+        .bar(17)
         .build();
 
     out.println("bar: " + foobar.bar());

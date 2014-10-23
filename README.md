@@ -28,25 +28,27 @@ builders. For maximum flexibility, although at a higher cost, consider
 Usage
 -----
 
-### In `Example.java`
+### In `Foobar.java`
 
 ```java
 @AutoMatter
-public interface Example {
+public interface Foobar {
   String foo();
   int bar();
 }
 ```
 
-### In `ExampleApp.java`
+### In `Application.java`
 
 ```java
-Example example = new ExampleBuilder()
-    .bar(17)
+Foobar foobar = new FoobarBuilder()
     .foo("hello world")
+    .bar(17)
     .build();
 
-System.out.println(example);
+out.println("foo: " + foobar.foo());
+out.println("bar: " + foobar.bar());
+out.println("foobar: " + foobar);
 ```
 
 ### In `pom.xml`
@@ -100,8 +102,8 @@ Gson gson = new GsonBuilder()
     .create();
 
 Foobar foobar = new FoobarBuilder()
-    .bar(17)
     .foo("hello world")
+    .bar(17)
     .build();
 
 String json = gson.toJson(foobar);
