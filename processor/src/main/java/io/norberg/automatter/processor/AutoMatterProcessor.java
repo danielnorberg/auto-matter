@@ -31,7 +31,6 @@ import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
 import io.norberg.automatter.AutoMatter;
-import io.norberg.automatter.AutoMatterField;
 
 import static java.lang.String.format;
 import static javax.lang.model.SourceVersion.RELEASE_6;
@@ -85,7 +84,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final JavaWriter writer = new JavaWriter(sourceFile.openWriter());
 
     writer.emitPackage(d.packageName);
-    writer.emitImports("java.util.Arrays",
+    writer.emitImports("io.norberg.automatter.AutoMatter",
+                       "java.util.Arrays",
                        "javax.annotation.Generated");
 
     writer.emitEmptyLine();
@@ -209,8 +209,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     final List<String> parameters = Lists.newArrayList();
     for (ExecutableElement field : fields) {
-      parameters.add("@" + AutoMatterField.class.getName() +
-                     "(\"" + fieldName(field) + "\") " + fieldType(field));
+      parameters.add("@AutoMatter.Field(\"" + fieldName(field) + "\") " + fieldType(field));
       parameters.add(fieldName(field));
     }
     writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
@@ -238,7 +237,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
     writer.emitEmptyLine();
-    writer.emitAnnotation(AutoMatterField.class);
+    writer.emitAnnotation("AutoMatter.Field");
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));

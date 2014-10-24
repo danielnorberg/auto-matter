@@ -1,3 +1,5 @@
+import io.norberg.automatter.AutoMatter;
+
 import java.util.Arrays;
 
 import javax.annotation.Generated;

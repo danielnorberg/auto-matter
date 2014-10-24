@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotatedParameter;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 
-import io.norberg.automatter.AutoMatterField;
+import io.norberg.automatter.AutoMatter;
 
 class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {
 
   @Override
   public String findImplicitPropertyName(final AnnotatedMember member) {
-    final AutoMatterField field = member.getAnnotation(AutoMatterField.class);
+    final AutoMatter.Field field = member.getAnnotation(AutoMatter.Field.class);
     if (field == null) {
       return null;
     }

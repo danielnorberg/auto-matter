@@ -1,5 +1,7 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
+
 import java.util.Arrays;
 
 import javax.annotation.Generated;
@@ -134,16 +136,16 @@ public final class FooBuilder {
     private final Object[] array;
 
     private Value(
-        @io.norberg.automatter.AutoMatterField("aBoolean") boolean aBoolean,
-        @io.norberg.automatter.AutoMatterField("aByte") byte aByte,
-        @io.norberg.automatter.AutoMatterField("aShort") short aShort,
-        @io.norberg.automatter.AutoMatterField("aInt") int aInt,
-        @io.norberg.automatter.AutoMatterField("aLong") long aLong,
-        @io.norberg.automatter.AutoMatterField("aChar") char aChar,
-        @io.norberg.automatter.AutoMatterField("aFloat") float aFloat,
-        @io.norberg.automatter.AutoMatterField("aDouble") double aDouble,
-        @io.norberg.automatter.AutoMatterField("object") Object object,
-        @io.norberg.automatter.AutoMatterField("array") Object[] array
+        @AutoMatter.Field("aBoolean") boolean aBoolean,
+        @AutoMatter.Field("aByte") byte aByte,
+        @AutoMatter.Field("aShort") short aShort,
+        @AutoMatter.Field("aInt") int aInt,
+        @AutoMatter.Field("aLong") long aLong,
+        @AutoMatter.Field("aChar") char aChar,
+        @AutoMatter.Field("aFloat") float aFloat,
+        @AutoMatter.Field("aDouble") double aDouble,
+        @AutoMatter.Field("object") Object object,
+        @AutoMatter.Field("array") Object[] array
     ) {
       this.aBoolean = aBoolean;
       this.aByte = aByte;
@@ -157,61 +159,61 @@ public final class FooBuilder {
       this.array = array;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public boolean aBoolean() {
       return aBoolean;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public byte aByte() {
       return aByte;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public short aShort() {
       return aShort;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public int aInt() {
       return aInt;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public long aLong() {
       return aLong;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public char aChar() {
       return aChar;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public float aFloat() {
       return aFloat;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public double aDouble() {
       return aDouble;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public Object object() {
       return object;
     }
 
-    @io.norberg.automatter.AutoMatterField
+    @AutoMatter.Field
     @Override
     public Object[] array() {
       return array;
