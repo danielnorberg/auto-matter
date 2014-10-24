@@ -8,5 +8,6 @@ public class AutoMatterModule extends SimpleModule {
   public void setupModule(final SetupContext context) {
     super.setupModule(context);
     context.addAbstractTypeResolver(new AutoMatterResolver());
+    context.appendAnnotationIntrospector(new AutoMatterAnnotationIntrospector());
   }
 }

@@ -1,5 +1,7 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
+
 import java.util.Arrays;
 
 import javax.annotation.Generated;
@@ -133,18 +135,17 @@ public final class FooBuilder {
     private final Object object;
     private final Object[] array;
 
-    @com.fasterxml.jackson.annotation.JsonCreator
     private Value(
-        @com.fasterxml.jackson.annotation.JsonProperty("aBoolean") boolean aBoolean,
-        @com.fasterxml.jackson.annotation.JsonProperty("aByte") byte aByte,
-        @com.fasterxml.jackson.annotation.JsonProperty("aShort") short aShort,
-        @com.fasterxml.jackson.annotation.JsonProperty("aInt") int aInt,
-        @com.fasterxml.jackson.annotation.JsonProperty("aLong") long aLong,
-        @com.fasterxml.jackson.annotation.JsonProperty("aChar") char aChar,
-        @com.fasterxml.jackson.annotation.JsonProperty("aFloat") float aFloat,
-        @com.fasterxml.jackson.annotation.JsonProperty("aDouble") double aDouble,
-        @com.fasterxml.jackson.annotation.JsonProperty("object") Object object,
-        @com.fasterxml.jackson.annotation.JsonProperty("array") Object[] array
+        @AutoMatter.Field("aBoolean") boolean aBoolean,
+        @AutoMatter.Field("aByte") byte aByte,
+        @AutoMatter.Field("aShort") short aShort,
+        @AutoMatter.Field("aInt") int aInt,
+        @AutoMatter.Field("aLong") long aLong,
+        @AutoMatter.Field("aChar") char aChar,
+        @AutoMatter.Field("aFloat") float aFloat,
+        @AutoMatter.Field("aDouble") double aDouble,
+        @AutoMatter.Field("object") Object object,
+        @AutoMatter.Field("array") Object[] array
     ) {
       this.aBoolean = aBoolean;
       this.aByte = aByte;
@@ -158,61 +159,61 @@ public final class FooBuilder {
       this.array = array;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public boolean aBoolean() {
       return aBoolean;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public byte aByte() {
       return aByte;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public short aShort() {
       return aShort;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public int aInt() {
       return aInt;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public long aLong() {
       return aLong;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public char aChar() {
       return aChar;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public float aFloat() {
       return aFloat;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public double aDouble() {
       return aDouble;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public Object object() {
       return object;
     }
 
-    @com.fasterxml.jackson.annotation.JsonProperty
+    @AutoMatter.Field
     @Override
     public Object[] array() {
       return array;
