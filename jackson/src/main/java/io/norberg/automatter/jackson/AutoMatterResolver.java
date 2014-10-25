@@ -19,7 +19,8 @@ class AutoMatterResolver extends AbstractTypeResolver {
 
   @Override
   public JavaType resolveAbstractType(final DeserializationConfig config, final JavaType type) {
-    final AutoMatter annotation = type.getRawClass().getAnnotation(AutoMatter.class);
+    final Class<?> rawClass = type.getRawClass();
+    final AutoMatter annotation = rawClass.getAnnotation(AutoMatter.class);
     if (annotation == null) {
       // This was not an @AutoMatter type.
       return super.resolveAbstractType(config, type);
@@ -32,8 +33,9 @@ class AutoMatterResolver extends AbstractTypeResolver {
     }
 
     // Look up and instantiate the value class
-    final String name = type.getRawClass().getName();
-    final String valueName = name + VALUE_SUFFIX;
+    final String packageName = rawClass.getPackage().getName();
+    final String name = rawClass.getSimpleName();
+    final String valueName = packageName + '.' + name + VALUE_SUFFIX;
     final Class<?> cls;
     try {
       cls = Class.forName(valueName);
