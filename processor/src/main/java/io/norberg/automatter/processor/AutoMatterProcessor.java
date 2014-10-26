@@ -71,13 +71,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       try {
         writeBuilder(element);
       } catch (IOException e) {
-        processingEnv.getMessager().printMessage(ERROR, e.getMessage());
+        messager.printMessage(ERROR, e.getMessage());
+      } catch (AutoMatterProcessorException e) {
+        e.print(messager);
       }
     }
     return false;
   }
 
-  private void writeBuilder(final Element element) throws IOException {
+  private void writeBuilder(final Element element) throws IOException,
+                                                          AutoMatterProcessorException {
     final Descriptor d = new Descriptor(element);
 
     final JavaFileObject sourceFile = filer.createSourceFile(d.builderFullName);
@@ -96,7 +99,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     emitFields(writer, d);
     emitConstructors(writer, d);
-    emitSetters(writer, d);
+    emitAccessors(writer, d);
     emitBuild(writer, d);
     emitFactoryMethods(writer, d);
     emitValue(writer, d);
@@ -178,7 +181,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitValue(final JavaWriter writer,
                          final Descriptor descriptor)
-  throws IOException {
+      throws IOException, AutoMatterProcessorException {
     writer.emitEmptyLine();
     writer.beginType("Value", "class", EnumSet.of(PRIVATE, STATIC, FINAL),
                      null, descriptor.targetSimpleName);
@@ -245,7 +248,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void emitValueEquals(final JavaWriter writer, final Descriptor descriptor)
-      throws IOException {
+      throws IOException, AutoMatterProcessorException {
 
     writer.emitEmptyLine();
     writer.emitAnnotation(Override.class);
@@ -275,7 +278,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private String fieldNotEqualCondition(final ExecutableElement field) {
+  private String fieldNotEqualCondition(final ExecutableElement field)
+      throws AutoMatterProcessorException {
     final String name = field.getSimpleName().toString();
     final TypeMirror type = field.getReturnType();
     switch (type.getKind()) {
@@ -294,13 +298,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return format("if (!Arrays.equals(%1$s, that.%1$s()))", name);
       case DECLARED:
         return format("if (%1$s != null ? !%1$s.equals(that.%1$s()) : that.%1$s() != null)", name);
+      case ERROR:
+        throw fail("Cannot resolve type, might be missing import: " + type, field);
       default:
         throw fail("Unsupported type: " + type, field);
     }
   }
 
   private void emitValueHashCode(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException {
+      throws IOException, AutoMatterProcessorException {
     writer.emitEmptyLine();
     writer.emitAnnotation(Override.class);
     writer.beginMethod("int", "hashCode", EnumSet.of(PUBLIC));
@@ -339,6 +345,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         case DECLARED:
           writer.emitStatement("result = 31 * result + (%1$s != null ? %1$s.hashCode() : 0)", name);
           break;
+        case ERROR:
+          throw fail("Cannot resolve type, might be missing import: " + type, field);
         default:
           throw fail("Unsupported type: " + type, field);
       }
@@ -388,9 +396,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitSetters(final JavaWriter writer,
-                           final Descriptor descriptor) throws IOException {
+  private void emitAccessors(final JavaWriter writer,
+                             final Descriptor descriptor) throws IOException {
     for (final ExecutableElement field : descriptor.fields) {
+      emitGetter(writer, field);
       emitSetter(writer, descriptor.builderSimpleName, field);
     }
   }
@@ -403,6 +412,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        fieldType(field), fieldName(field));
     writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     writer.emitStatement("return this");
+    writer.endMethod();
+  }
+
+  private void emitGetter(final JavaWriter writer,
+                          final ExecutableElement field)
+      throws IOException {
+    writer.emitEmptyLine();
+    writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
+    writer.emitStatement("return %s", fieldName(field));
     writer.endMethod();
   }
 
@@ -439,7 +457,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     private final String targetFullName;
     private final String builderSimpleName;
 
-    private Descriptor(final Element element) {
+    private Descriptor(final Element element) throws AutoMatterProcessorException {
       this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
       this.targetSimpleName = element.getSimpleName().toString();
       this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
@@ -474,9 +492,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private RuntimeException fail(final String msg, final Element element) {
-    error(msg, element);
-    throw new RuntimeException();
+  private AutoMatterProcessorException fail(final String msg, final Element element)
+      throws AutoMatterProcessorException {
+    throw new AutoMatterProcessorException(msg, element);
   }
 
   private void error(final String s, final Element element) {

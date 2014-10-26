@@ -1,9 +1,7 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
-
 import java.util.Arrays;
-
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
@@ -49,9 +47,17 @@ public final class FooBuilder {
     this.array = v.array;
   }
 
+  public boolean aBoolean() {
+    return aBoolean;
+  }
+
   public FooBuilder aBoolean(boolean aBoolean) {
     this.aBoolean = aBoolean;
     return this;
+  }
+
+  public byte aByte() {
+    return aByte;
   }
 
   public FooBuilder aByte(byte aByte) {
@@ -59,9 +65,17 @@ public final class FooBuilder {
     return this;
   }
 
+  public short aShort() {
+    return aShort;
+  }
+
   public FooBuilder aShort(short aShort) {
     this.aShort = aShort;
     return this;
+  }
+
+  public int aInt() {
+    return aInt;
   }
 
   public FooBuilder aInt(int aInt) {
@@ -69,9 +83,17 @@ public final class FooBuilder {
     return this;
   }
 
+  public long aLong() {
+    return aLong;
+  }
+
   public FooBuilder aLong(long aLong) {
     this.aLong = aLong;
     return this;
+  }
+
+  public char aChar() {
+    return aChar;
   }
 
   public FooBuilder aChar(char aChar) {
@@ -79,9 +101,17 @@ public final class FooBuilder {
     return this;
   }
 
+  public float aFloat() {
+    return aFloat;
+  }
+
   public FooBuilder aFloat(float aFloat) {
     this.aFloat = aFloat;
     return this;
+  }
+
+  public double aDouble() {
+    return aDouble;
   }
 
   public FooBuilder aDouble(double aDouble) {
@@ -89,9 +119,17 @@ public final class FooBuilder {
     return this;
   }
 
+  public Object object() {
+    return object;
+  }
+
   public FooBuilder object(Object object) {
     this.object = object;
     return this;
+  }
+
+  public Object[] array() {
+    return array;
   }
 
   public FooBuilder array(Object[] array) {
