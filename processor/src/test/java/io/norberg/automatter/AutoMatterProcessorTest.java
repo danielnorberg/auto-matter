@@ -15,32 +15,32 @@ public class AutoMatterProcessorTest {
 
   @Test
   public void testFoo() {
-    final JavaFileObject source = JavaFileObjects.forResource("Foo.java");
+    final JavaFileObject source = JavaFileObjects.forResource("good/Foo.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("FooBuilder.java"));
+        .and().generatesSources(JavaFileObjects.forResource("expected/FooBuilder.java"));
   }
 
   @Test
   public void testTopLevel() {
-    final JavaFileObject source = JavaFileObjects.forResource("TopLevel.java");
+    final JavaFileObject source = JavaFileObjects.forResource("good/TopLevel.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("TopLevelBuilder.java"));
+        .and().generatesSources(JavaFileObjects.forResource("expected/TopLevelBuilder.java"));
   }
 
   @Test
   public void testNested() {
-    final JavaFileObject source = JavaFileObjects.forResource("Nested.java");
+    final JavaFileObject source = JavaFileObjects.forResource("good/Nested.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("NestedFoobarBuilder.java"));
+        .and().generatesSources(JavaFileObjects.forResource("expected/NestedFoobarBuilder.java"));
   }
 
   @Test
