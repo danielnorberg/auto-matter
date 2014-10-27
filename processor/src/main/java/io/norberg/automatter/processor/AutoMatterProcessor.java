@@ -25,6 +25,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -97,8 +98,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitAnnotation(
         Generated.class,
         ImmutableMap.of("value", "\"" + AutoMatterProcessor.class.getName() + "\""));
-    writer.beginType(d.builderSimpleName, "class", EnumSet.of(PUBLIC, FINAL));
-
+    writer.beginType(d.builderSimpleName, "class", d.isPublic
+                                                   ? EnumSet.of(PUBLIC, FINAL)
+                                                   : EnumSet.of(FINAL));
     emitFields(writer, d);
     emitConstructors(writer, d);
     emitAccessors(writer, d);
@@ -110,10 +112,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.close();
   }
 
+  private EnumSet<Modifier> maybePublic(final boolean isPublic, final Modifier modifier,
+                                        final Modifier... modifiers) {
+    return maybePublic(isPublic, EnumSet.of(modifier, modifiers));
+  }
+
+  private EnumSet<Modifier> maybePublic(final boolean isPublic, final EnumSet<Modifier> modifiers) {
+    if (isPublic) {
+      modifiers.add(PUBLIC);
+    }
+    return modifiers;
+  }
+
   private void emitConstructors(final JavaWriter writer,
                                 final Descriptor descriptor)
       throws IOException {
-    emitDefaultConstructor(writer);
+    emitDefaultConstructor(writer, descriptor);
     emitCopyValueConstructor(writer, descriptor);
     emitCopyBuilderConstructor(writer, descriptor);
   }
@@ -141,7 +155,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitDefaultConstructor(final JavaWriter writer) throws IOException {
+  private void emitDefaultConstructor(final JavaWriter writer,
+                                      final Descriptor descriptor) throws IOException {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PUBLIC));
     writer.endConstructor();
@@ -458,8 +473,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     private final String targetSimpleName;
     private final String targetFullName;
     private final String builderSimpleName;
+    private final boolean isPublic;
 
     private Descriptor(final Element element) throws AutoMatterProcessorException {
+      this.isPublic = element.getModifiers().contains(PUBLIC);
       this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
       this.targetSimpleName = nestedName(element);
       this.targetFullName = fullyQualifedName(packageName, targetSimpleName);

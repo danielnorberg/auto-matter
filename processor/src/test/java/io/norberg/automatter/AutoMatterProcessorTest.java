@@ -44,6 +44,28 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testPackageLocal() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/PackageLocal.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/PackageLocalBuilder.java"));
+  }
+
+  @Test
+  public void testNestedPackageLocal() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/NestedPackageLocal.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/NestedPackageLocalFoobarBuilder.java"));
+  }
+
+  @Test
   public void verifyClassTargetFails() {
     final JavaFileObject source = JavaFileObjects.forResource("bad/ClassFoo.java");
     assert_().about(javaSource())
