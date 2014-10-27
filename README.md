@@ -147,8 +147,6 @@ Foobar copy2 = original.builder();
 TODO
 ----
 
-* Propagate public modifier on target interface to builder. E.g. a package-local interface should
-  generate a package-local builder.
 * Null-checking, opt-outable using @Nullable
 * Recursive builders, like protobuf.
 * More tests
