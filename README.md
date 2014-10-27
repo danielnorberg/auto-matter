@@ -150,7 +150,6 @@ TODO
 * Null-checking, opt-outable using @Nullable
 * Recursive builders, like protobuf.
 * More tests
-* Support nested interfaces
 * Collection support. E.g. something like below:
 
 ```java
