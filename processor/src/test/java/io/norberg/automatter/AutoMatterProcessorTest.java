@@ -62,4 +62,14 @@ public class AutoMatterProcessorTest {
         .failsToCompile()
         .withErrorContaining("Cannot resolve type, might be missing import: Dependency");
   }
+
+  @Test
+  public void verifyBadBuilderReturnTypeFails() {
+    final JavaFileObject source = JavaFileObjects.forResource("bad/BadBuilderReturnType.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .failsToCompile()
+        .withErrorContaining("builder() return type must be BadBuilderReturnTypeBuilder");
+  }
 }
