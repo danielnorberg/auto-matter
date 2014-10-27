@@ -149,7 +149,6 @@ TODO
 
 * Null-checking, opt-outable using @Nullable
 * Recursive builders, like protobuf.
-* More tests
 * Collection support. E.g. something like below:
 
 ```java
