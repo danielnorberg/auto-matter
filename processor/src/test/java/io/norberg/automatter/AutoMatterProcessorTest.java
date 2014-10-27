@@ -52,4 +52,14 @@ public class AutoMatterProcessorTest {
         .failsToCompile()
         .withErrorContaining("@AutoMatter target must be an interface");
   }
+
+  @Test
+  public void verifyMissingImportFails() {
+    final JavaFileObject source = JavaFileObjects.forResource("bad/MissingImport.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .failsToCompile()
+        .withErrorContaining("Cannot resolve type, might be missing import: Dependency");
+  }
 }
