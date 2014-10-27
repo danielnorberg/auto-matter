@@ -34,6 +34,16 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testNested() {
+    final JavaFileObject source = JavaFileObjects.forResource("Nested.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("NestedFoobarBuilder.java"));
+  }
+
+  @Test
   public void verifyClassTargetFails() {
     final JavaFileObject source = JavaFileObjects.forResource("bad/ClassFoo.java");
     assert_().about(javaSource())

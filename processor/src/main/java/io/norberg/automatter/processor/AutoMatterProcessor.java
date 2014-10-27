@@ -33,7 +33,9 @@ import javax.tools.JavaFileObject;
 import io.norberg.automatter.AutoMatter;
 
 import static java.lang.String.format;
+import static java.util.Collections.reverse;
 import static javax.lang.model.SourceVersion.RELEASE_6;
+import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -459,9 +461,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     private Descriptor(final Element element) throws AutoMatterProcessorException {
       this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
-      this.targetSimpleName = element.getSimpleName().toString();
+      this.targetSimpleName = nestedName(element);
       this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
-      this.builderFullName = targetFullName + "Builder";
+      final String targetName = element.getSimpleName().toString();
+      this.builderFullName = fullyQualifedName(packageName, targetName + "Builder");
       this.builderSimpleName = simpleName(builderFullName);
 
       if(!element.getKind().isInterface()) {
@@ -489,6 +492,26 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       }
       this.fields = fields.build();
       this.toBuilder = toBuilder;
+    }
+
+    private String nestedName(final Element element) {
+      final List<Element> classes = enclosingClasses(element);
+      final List<String> names = Lists.newArrayList();
+      for (Element cls : classes) {
+        names.add(cls.getSimpleName().toString());
+      }
+      return Joiner.on('.').join(names);
+    }
+
+    private List<Element> enclosingClasses(final Element element) {
+      final List<Element> classes = Lists.newArrayList();
+      Element e = element;
+      while (e.getKind() != PACKAGE) {
+        classes.add(e);
+        e = e.getEnclosingElement();
+      }
+      reverse(classes);
+      return classes;
     }
   }
 
