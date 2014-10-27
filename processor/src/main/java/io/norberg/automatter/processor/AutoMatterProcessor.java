@@ -21,7 +21,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -35,7 +35,6 @@ import io.norberg.automatter.AutoMatter;
 
 import static java.lang.String.format;
 import static java.util.Collections.reverse;
-import static javax.lang.model.SourceVersion.RELEASE_6;
 import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -49,7 +48,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
  * materializes it, generating a concrete builder and value class.
  */
 @AutoService(Processor.class)
-@SupportedSourceVersion(RELEASE_6)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
   private static final String JAVA_LANG = "java.lang.";
@@ -539,5 +537,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void error(final String s, final Element element) {
     messager.printMessage(ERROR, s, element);
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+    return SourceVersion.latestSupported();
   }
 }
