@@ -20,6 +20,18 @@ public class AutoMatterModuleTest {
       .aCamelCaseField(true)
       .build();
 
+  static final WithInner.Bar BAR = new BarBuilder()
+      .a(17)
+      .b("foobar")
+      .aCamelCaseField(true)
+      .build();
+
+  static final WithInner.PublicBar PUBLIC_BAR = new PublicBarBuilder()
+      .a(17)
+      .b("foobar")
+      .aCamelCaseField(true)
+      .build();
+
   ObjectMapper mapper;
 
   @Before
@@ -33,6 +45,20 @@ public class AutoMatterModuleTest {
     final String json = mapper.writeValueAsString(FOO);
     final Foo parsed = mapper.readValue(json, Foo.class);
     assertThat(parsed, is(FOO));
+  }
+
+  @Test
+  public void testInner() throws IOException {
+    final String json = mapper.writeValueAsString(BAR);
+    final WithInner.Bar parsed = mapper.readValue(json, WithInner.Bar.class);
+    assertThat(parsed, is(BAR));
+  }
+
+  @Test
+  public void testPublicInner() throws IOException {
+    final String json = mapper.writeValueAsString(PUBLIC_BAR);
+    final WithInner.PublicBar parsed = mapper.readValue(json, WithInner.PublicBar.class);
+    assertThat(parsed, is(PUBLIC_BAR));
   }
 
   @Test
