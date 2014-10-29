@@ -11,7 +11,9 @@ import com.squareup.javawriter.JavaWriter;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Generated;
@@ -22,6 +24,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -234,7 +238,23 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : fields) {
       writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     }
+    for (ExecutableElement field : fields) {
+      emitNullCheck(writer, "this", field);
+    }
     writer.endConstructor();
+  }
+
+  private void emitNullCheck(final JavaWriter writer, final String scope, final ExecutableElement field)
+      throws IOException {
+    if (!shouldEnforceNonNull(field)) {
+      return;
+    }
+    final String variable = scope.isEmpty()
+                            ? fieldName(field)
+                            : scope + "." + fieldName(field);
+    writer.beginControlFlow("if (" + variable + " == null)");
+    writer.emitStatement("throw new NullPointerException(\"%s\")", fieldName(field));
+    writer.endControlFlow();
   }
 
   private void emitValueFields(final JavaWriter writer, final List<ExecutableElement> fields)
@@ -255,11 +275,30 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
     writer.emitEmptyLine();
+    emitValueGetterNullableAnnotation(writer, field);
     writer.emitAnnotation("AutoMatter.Field");
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
     writer.endMethod();
+  }
+
+  private void emitValueGetterNullableAnnotation(final JavaWriter writer,
+                                                 final ExecutableElement field) throws IOException {
+    if (isPrimitive(field)) {
+      return;
+    }
+    final AnnotationMirror nullableAnnotation = nullableAnnotation(field);
+    if (nullableAnnotation != null) {
+      final Element annotationElement = nullableAnnotation.getAnnotationType().asElement();
+      final String annotationString = annotationElement.asType().toString();
+      final Map<String, String> values = annotationValues(nullableAnnotation);
+      writer.emitAnnotation(annotationString, values);
+    }
+  }
+
+  private boolean isPrimitive(final ExecutableElement field) {
+    return field.getReturnType().getKind().isPrimitive();
   }
 
   private void emitValueEquals(final JavaWriter writer, final Descriptor descriptor)
@@ -425,9 +464,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
                        fieldType(field), fieldName(field));
+    emitNullCheck(writer, "", field);
     writer.emitStatement("this.%1$s = %1$s", fieldName(field));
     writer.emitStatement("return this");
     writer.endMethod();
+  }
+
+  private void emitNullCheck(final ExecutableElement field) {
+
   }
 
   private void emitGetter(final JavaWriter writer,
@@ -437,6 +481,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.beginMethod(fieldType(field), fieldName(field), EnumSet.of(PUBLIC));
     writer.emitStatement("return %s", fieldName(field));
     writer.endMethod();
+  }
+
+  private Map<String, String> annotationValues(final AnnotationMirror annotation) {
+    final Map<String, String> values = new LinkedHashMap<String, String>();
+    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+        annotation.getElementValues().entrySet()) {
+      final String key = entry.getKey().getSimpleName().toString();
+      final String value = entry.getValue().toString();
+      values.put(key, value);
+    }
+    return values;
   }
 
   private String fieldName(final ExecutableElement field) {
@@ -528,6 +583,23 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       reverse(classes);
       return classes;
     }
+  }
+
+  private boolean shouldEnforceNonNull(final ExecutableElement field) {
+    return !isPrimitive(field) && !isNullableAnnotated(field);
+  }
+
+  private boolean isNullableAnnotated(final ExecutableElement field) {
+    return nullableAnnotation(field) != null;
+  }
+
+  private AnnotationMirror nullableAnnotation(final ExecutableElement field) {
+    for (AnnotationMirror annotation : field.getAnnotationMirrors()) {
+      if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
+        return annotation;
+      }
+    }
+    return null;
   }
 
   private AutoMatterProcessorException fail(final String msg, final Element element)

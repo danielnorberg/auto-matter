@@ -1,5 +1,6 @@
 package io.norberg.automatter;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.JavaFileObjects;
 
 import org.junit.Test;
@@ -10,6 +11,7 @@ import io.norberg.automatter.processor.AutoMatterProcessor;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
+import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
 public class AutoMatterProcessorTest {
 
@@ -94,4 +96,19 @@ public class AutoMatterProcessorTest {
         .failsToCompile()
         .withErrorContaining("builder() return type must be BadBuilderReturnTypeBuilder");
   }
+
+  @Test
+  public void testNullableFields() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/NullableFields.java"),
+            JavaFileObjects.forResource("good/Nullable.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/NullableFieldsBuilder.java"));
+  }
+
+
 }

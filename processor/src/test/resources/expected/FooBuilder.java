@@ -124,6 +124,9 @@ public final class FooBuilder {
   }
 
   public FooBuilder object(Object object) {
+    if (object == null) {
+      throw new NullPointerException("object");
+    }
     this.object = object;
     return this;
   }
@@ -133,6 +136,9 @@ public final class FooBuilder {
   }
 
   public FooBuilder array(Object[] array) {
+    if (array == null) {
+      throw new NullPointerException("array");
+    }
     this.array = array;
     return this;
   }
@@ -195,6 +201,12 @@ public final class FooBuilder {
       this.aDouble = aDouble;
       this.object = object;
       this.array = array;
+      if (this.object == null) {
+        throw new NullPointerException("object");
+      }
+      if (this.array == null) {
+        throw new NullPointerException("array");
+      }
     }
 
     @AutoMatter.Field
