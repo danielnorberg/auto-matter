@@ -12,10 +12,14 @@ Why
   letting you quickly describe your data and move on to using it without spending time on error
   prone and repetitive scaffolding.
 
-* AutoMatter also generates builders for your value types, as opposed to e.g. AutoValue.
+* AutoMatter generates builders for your value types. No need to deal with long and error prone
+  argument lists in factory methods and constructors.
 
 * AutoMatter allows the value type definitions to be as minimal as possible. No need to write your
   own factory methods, use abstract modifiers or add json annotations, etc.
+
+* The value and builder implementations are generated using standard Java annotation processing at
+  build time. Thus all code is visible, navigable and debuggable using standard Java IDE's.
 
 Why Not
 -------
