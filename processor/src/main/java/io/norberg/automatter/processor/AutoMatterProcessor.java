@@ -29,7 +29,6 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -112,18 +111,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     writer.endType();
     writer.close();
-  }
-
-  private EnumSet<Modifier> maybePublic(final boolean isPublic, final Modifier modifier,
-                                        final Modifier... modifiers) {
-    return maybePublic(isPublic, EnumSet.of(modifier, modifiers));
-  }
-
-  private EnumSet<Modifier> maybePublic(final boolean isPublic, final EnumSet<Modifier> modifiers) {
-    if (isPublic) {
-      modifiers.add(PUBLIC);
-    }
-    return modifiers;
   }
 
   private void emitConstructors(final JavaWriter writer,
