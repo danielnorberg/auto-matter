@@ -6,31 +6,6 @@ AutoMatter
 A small library for materializing value classes and builders from value types defined as minimal
 interfaces. Inspired by [AutoValue](https://github.com/google/auto/tree/master/value).
 
-Why
----
-* AutoMatter provides implementations of getters, equals, hashCode, toString, etc for you,
-  letting you quickly describe your data and move on to using it without spending time on error
-  prone and repetitive scaffolding.
-
-* AutoMatter generates builders for your value types. No need to deal with long and error prone
-  argument lists in factory methods and constructors.
-
-* AutoMatter allows the value type definitions to be as minimal as possible. No need to write your
-  own factory methods, use abstract modifiers or add json annotations, etc.
-
-* The value and builder implementations are generated using standard Java annotation processing at
-  build time. Thus all code is visible, navigable and debuggable using standard Java IDE's.
-
-* AutoMatter enforces non-nullity for fields by default, moving those pesky NullPointerExceptions
-  closer to the source. `@Nullable` can be used to opt out of the null checks.
-
-Why Not
--------
-AutoMatter is designed to work well for pure data value type use cases by generating as much as
-possible of the scaffolding needed in a straightforward manner. As such, it might not be flexible
-enough for all use cases. For example, it is not possible to add your own methods to the generated
-builders. For maximum flexibility, although at a higher cost, consider
-[AutoValue](https://github.com/google/auto/tree/master/value).
 
 Usage
 -----
@@ -68,6 +43,38 @@ out.println("foobar: " + foobar);
   <scope>provided</scope>
 </dependency>
 ```
+
+
+Why
+---
+* AutoMatter provides implementations of getters, equals, hashCode, toString, etc for you,
+  letting you quickly describe your data and move on to using it without spending time on error
+  prone and repetitive scaffolding.
+
+* AutoMatter generates builders for your value types. No need to deal with long and error prone
+  argument lists in factory methods and constructors.
+
+* AutoMatter allows the value type definitions to be as minimal as possible. No need to write your
+  own factory methods, use abstract modifiers or add json annotations, etc.
+
+* The value and builder implementations are generated using standard Java annotation processing at
+  build time. Thus all code is visible, navigable and debuggable using standard Java IDE's.
+
+* AutoMatter enforces non-nullity for fields by default, moving those pesky NullPointerExceptions
+  closer to the source. `@Nullable` can be used to opt out of the null checks.
+
+
+Why Not
+-------
+AutoMatter is designed to work well for pure data value type use cases by generating as much as
+possible of the scaffolding needed in a straightforward manner. As such, it might not be flexible
+enough for all use cases. For example, it is not possible to add your own methods to the generated
+builders. For maximum flexibility, although at a higher cost, consider
+[AutoValue](https://github.com/google/auto/tree/master/value).
+
+
+Features
+--------
 
 ### Jackson JSON Support
 
