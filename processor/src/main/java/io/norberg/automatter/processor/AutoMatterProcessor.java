@@ -116,7 +116,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitConstructors(final JavaWriter writer,
                                 final Descriptor descriptor)
       throws IOException {
-    emitDefaultConstructor(writer, descriptor);
+    emitDefaultConstructor(writer);
     emitCopyValueConstructor(writer, descriptor);
     emitCopyBuilderConstructor(writer, descriptor);
   }
@@ -144,8 +144,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitDefaultConstructor(final JavaWriter writer,
-                                      final Descriptor descriptor) throws IOException {
+  private void emitDefaultConstructor(final JavaWriter writer) throws IOException {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PUBLIC));
     writer.endConstructor();
@@ -457,10 +456,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitNullCheck(final ExecutableElement field) {
-
-  }
-
   private void emitGetter(final JavaWriter writer,
                           final ExecutableElement field)
       throws IOException {
@@ -511,7 +506,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     private final String builderFullName;
     private final String packageName;
     private final String targetSimpleName;
-    private final String targetFullName;
     private final String builderSimpleName;
     private final boolean isPublic;
 
@@ -519,7 +513,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       this.isPublic = element.getModifiers().contains(PUBLIC);
       this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
       this.targetSimpleName = nestedName(element);
-      this.targetFullName = fullyQualifedName(packageName, targetSimpleName);
       final String targetName = element.getSimpleName().toString();
       this.builderFullName = fullyQualifedName(packageName, targetName + "Builder");
       this.builderSimpleName = simpleName(builderFullName);
