@@ -21,6 +21,9 @@ Why
 * The value and builder implementations are generated using standard Java annotation processing at
   build time. Thus all code is visible, navigable and debuggable using standard Java IDE's.
 
+* AutoMatter enforces non-nullity for fields by default, moving those pesky NullPointerExceptions
+  closer to the source. `@Nullable` can be used to opt out of the null checks.
+
 Why Not
 -------
 AutoMatter is designed to work well for pure data value type use cases by generating as much as
@@ -147,11 +150,31 @@ Foobar copy2 = original.builder();
     .build();
 ```
 
+### `@Nullable`
+
+AutoMatter will omit null checks for fields annotated with `@Nullable`.
+
+```java
+@AutoMatter
+interface Foobar {
+    @Nullable String foo();
+    int bar();
+}
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .foo(null)
+    .bar(17)
+    .build();
+
+assert foobar.foo() == null;
+```
+
 
 TODO
 ----
 
-* Null-checking, opt-outable using @Nullable
 * Recursive builders, like protobuf.
 * Collection support. E.g. something like below:
 
