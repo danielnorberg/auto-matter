@@ -82,6 +82,11 @@ public class BuilderTest {
   }
 
   @Test
+  public void testCopyBuilderWithDefaults() {
+    FoobarBuilder.from(builder);
+  }
+
+  @Test
   public void testCopyBuilder() {
     builder.foo(17);
     builder.bar("hello");
