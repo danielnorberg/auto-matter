@@ -58,6 +58,17 @@ public final class CollectionFieldsBuilder {
     return strings(Arrays.asList(strings));
   }
 
+  public CollectionFieldsBuilder string(String string) {
+    if (string == null) {
+      throw new NullPointerException("string");
+    }
+    if (strings == null) {
+      strings = new ArrayList<String>();
+    }
+    strings.add(string);
+    return this;
+  }
+
   public List<String> stringList() {
     return stringList;
   }

@@ -10,6 +10,8 @@ import com.google.common.collect.Lists;
 
 import com.squareup.javawriter.JavaWriter;
 
+import org.modeshape.common.text.Inflector;
+
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -60,6 +62,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private Filer filer;
   private Elements elements;
   private Messager messager;
+  public static final Inflector INFLECTOR = new Inflector();
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -274,8 +277,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final String variable = scope.isEmpty()
                             ? fieldName(field)
                             : scope + "." + fieldName(field);
+    final String name = fieldName(field);
+    emitNullCheck(writer, variable, name);
+  }
+
+  private void emitNullCheck(final JavaWriter writer, final String variable, final String name)
+      throws IOException {
     writer.beginControlFlow("if (" + variable + " == null)");
-    emitNPE(writer, fieldName(field));
+    emitNPE(writer, name);
     writer.endControlFlow();
   }
 
@@ -493,10 +502,36 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private void emitListSetters(final JavaWriter writer, final String builderSimpleName,
+  private void emitListSetters(final JavaWriter writer, final String builderName,
                                final ExecutableElement field) throws IOException {
-    emitListIterableSetter(writer, builderSimpleName, field);
-    emitListVarArgSetter(writer, builderSimpleName, field);
+    emitListIterableSetter(writer, builderName, field);
+    emitListVarArgSetter(writer, builderName, field);
+    emitListItemSingleAdder(writer, builderName, field);
+  }
+
+  private void emitListItemSingleAdder(final JavaWriter writer, final String builderName,
+                                       final ExecutableElement field) throws IOException {
+    final String name = fieldName(field);
+    final String singular = singular(name);
+    if (singular == null) {
+      return;
+    }
+    final String type = fieldTypeArgument(writer, field);
+    writer.emitEmptyLine();
+    writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
+                       type, singular);
+    emitNullCheck(writer, singular, singular);
+    writer.beginControlFlow("if (" + name + " == null)");
+    writer.emitStatement(name + " = new ArrayList<" + type + ">()");
+    writer.endControlFlow();
+    writer.emitStatement("%s.add(%s)", fieldName(field), singular);
+    writer.emitStatement("return this", fieldName(field));
+    writer.endMethod();
+  }
+
+  private String singular(final String name) {
+    final String singular = INFLECTOR.singularize(name);
+    return name.equals(singular) ? null : singular;
   }
 
   private void emitListIterableSetter(final JavaWriter writer, final String builderName,

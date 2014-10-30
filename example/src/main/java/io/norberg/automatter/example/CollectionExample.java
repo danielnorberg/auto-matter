@@ -11,19 +11,22 @@ public class CollectionExample {
 
   @AutoMatter
   interface CollectionsFoobar {
-    List<String> foos();
-    List<Integer> bars();
+    List<String> oxen();
+    List<String> cows();
+    List<Integer> foo();
   }
-
 
   public static void main(final String... args) throws IOException {
     CollectionsFoobar foobar = new CollectionsFoobarBuilder()
-        .foos("hello world")
-        .bars(17)
+        .ox("moo!")
+        .ox("mooo!!")
+        .cow("moooo!!!")
+        .foo(17, 18)
         .build();
 
-    out.println("bars: " + foobar.bars());
-    out.println("foos: " + foobar.foos());
+    out.println("oxen: " + foobar.oxen());
+    out.println("cows: " + foobar.cows());
+    out.println("foo: " + foobar.foo());
     out.println("foobar: " + foobar);
   }
 }
