@@ -57,8 +57,6 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @AutoService(Processor.class)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
-  private static final String JAVA_LANG = "java.lang.";
-
   private Filer filer;
   private Elements elements;
   private Messager messager;
@@ -167,11 +165,27 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       throws IOException {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.targetSimpleName, "v");
-    for (ExecutableElement f : descriptor.fields) {
-      writer.emitStatement("%s _%2$s = v.%2$s()", fieldType(writer, f), fieldName(f));
-      writer.emitStatement("this.%s = %s", fieldName(f), constructorFieldCopy(f, "_%s"));
+    for (ExecutableElement field : descriptor.fields) {
+      emitCopyValueConstructorFieldCopy(writer, field);
     }
     writer.endConstructor();
+  }
+
+  private void emitCopyValueConstructorFieldCopy(final JavaWriter writer,
+                                                 final ExecutableElement field) throws IOException {
+    final String name = fieldName(field);
+    final String copy;
+    if (isList(field)) {
+      writer.emitStatement("%1$s _%2$s = v.%2$s()", fieldType(writer, field), name);
+      copy = constructorListCopy("_" + name);
+    } else {
+      copy = "v." + name + "()";
+    }
+    writer.emitStatement("this.%s = %s", name, copy);
+  }
+
+  private String constructorListCopy(final String original) {
+    return format("(%1$s == null) ? null : new ArrayList(%1$s)", original);
   }
 
   private void emitCopyBuilderConstructor(final JavaWriter writer,
@@ -179,19 +193,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.builderSimpleName, "v");
     for (ExecutableElement field : descriptor.fields) {
-      writer.emitStatement("this.%s = %s", fieldName(field), constructorFieldCopy(field, "v.%s"));
+      emitCopyBuilderConstructorFieldCopy(writer, field);
     }
     writer.endConstructor();
   }
 
-  private String constructorFieldCopy(final ExecutableElement field, final String rhs) {
+  private void emitCopyBuilderConstructorFieldCopy(final JavaWriter writer,
+                                                   final ExecutableElement field)
+      throws IOException {
     final String name = fieldName(field);
-    final String original = format(rhs, name);
+    final String copy;
     if (isList(field)) {
-      return format("(%1$s == null) ? null : new ArrayList(%1$s)", original);
+      copy = constructorListCopy("v." + name);
     } else {
-      return original;
+      copy = "v." + name;
     }
+    writer.emitStatement("this.%s = %s", name, copy);
   }
 
   private boolean isList(final ExecutableElement field) {

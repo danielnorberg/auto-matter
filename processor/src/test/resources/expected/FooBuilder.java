@@ -1,7 +1,14 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
@@ -191,6 +198,12 @@ public final class FooBuilder {
         @AutoMatter.Field("object") Object object,
         @AutoMatter.Field("array") Object[] array
     ) {
+      if (object == null) {
+        throw new NullPointerException("object");
+      }
+      if (array == null) {
+        throw new NullPointerException("array");
+      }
       this.aBoolean = aBoolean;
       this.aByte = aByte;
       this.aShort = aShort;
@@ -201,12 +214,6 @@ public final class FooBuilder {
       this.aDouble = aDouble;
       this.object = object;
       this.array = array;
-      if (this.object == null) {
-        throw new NullPointerException("object");
-      }
-      if (this.array == null) {
-        throw new NullPointerException("array");
-      }
     }
 
     @AutoMatter.Field

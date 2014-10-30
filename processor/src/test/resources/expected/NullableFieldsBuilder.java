@@ -1,7 +1,14 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
@@ -98,13 +105,13 @@ public final class NullableFieldsBuilder {
         @AutoMatter.Field("nonNullQuux") String nonNullQuux,
         @AutoMatter.Field("nonNullPrimitive") int nonNullPrimitive
     ) {
+      if (nonNullQuux == null) {
+        throw new NullPointerException("nonNullQuux");
+      }
       this.nullableFoo = nullableFoo;
       this.customNullableBar = customNullableBar;
       this.nonNullQuux = nonNullQuux;
       this.nonNullPrimitive = nonNullPrimitive;
-      if (this.nonNullQuux == null) {
-        throw new NullPointerException("nonNullQuux");
-      }
     }
 
     @javax.annotation.Nullable
