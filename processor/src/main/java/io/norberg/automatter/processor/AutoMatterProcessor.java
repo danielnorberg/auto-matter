@@ -569,14 +569,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Collection optimization
     writer.nextControlFlow("else if (" + name + " instanceof Collection)");
+    writer.emitStatement("Collection<%1$s> collection = (Collection<%1$s>) %2$s", type, name);
+    writer.beginControlFlow("for (" + type + " item : collection)");
+    writer.beginControlFlow("if (item == null)");
+    writer.emitStatement("throw new NullPointerException(\"%s: null item\")", name);
+    writer.endControlFlow();
+    writer.endControlFlow();
     writer.emitStatement("this.%1$s = new ArrayList((Collection<%2$s>) %1$s)", name, type);
 
     // Iterator fallback
     writer.nextControlFlow("else");
     writer.emitStatement("this.%s = new ArrayList()", name);
-    writer.emitStatement("Iterator<%s> it = %s.iterator()", fieldTypeArgument(writer, field), name);
+    writer.emitStatement("Iterator<%s> it = %s.iterator()", type, name);
     writer.beginControlFlow("while (it.hasNext())");
-    writer.emitStatement("this.%s.add(it.next())", name);
+    writer.emitStatement("%s item = it.next()", type);
+    writer.beginControlFlow("if (item == null)");
+    writer.emitStatement("throw new NullPointerException(\"%s: null item\")", name);
+    writer.endControlFlow();
+    writer.emitStatement("this.%s.add(item)", name);
     writer.endControlFlow();
     writer.endControlFlow();
 

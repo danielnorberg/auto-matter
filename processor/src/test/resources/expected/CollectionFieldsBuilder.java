@@ -40,12 +40,22 @@ public final class CollectionFieldsBuilder {
     if (strings == null) {
       throw new NullPointerException("strings");
     } else if (strings instanceof Collection) {
-      this.strings = new ArrayList((Collection<String>) strings);
+      Collection<String> collection = (Collection<String>) strings;
+      for (String item : collection) {
+        if (item == null) {
+          throw new NullPointerException("strings: null item");
+        }
+      }
+      this.strings = new ArrayList(collection);
     } else {
       this.strings = new ArrayList();
       Iterator<String> it = strings.iterator();
       while (it.hasNext()) {
-        this.strings.add(it.next());
+        final String item = it.next();
+        if (item == null) {
+          throw new NullPointerException("strings: null item");
+        }
+        this.strings.add(item);
       }
     }
     return this;
@@ -77,12 +87,22 @@ public final class CollectionFieldsBuilder {
     if (stringList == null) {
       throw new NullPointerException("stringList");
     } else if (stringList instanceof Collection) {
-      this.stringList = new ArrayList((Collection<String>) stringList);
+      final Collection<String> collection = (Collection<String>) strings;
+      for (String item : collection) {
+        if (item == null) {
+          throw new NullPointerException("stringList: null item");
+        }
+      }
+      this.stringList = new ArrayList(collection);
     } else {
       this.stringList = new ArrayList();
       Iterator<String> it = stringList.iterator();
       while (it.hasNext()) {
-        this.stringList.add(it.next());
+        final String items = it.next();
+        if (item == null) {
+          throw new NullPointerException("stringList: null item");
+        }
+        this.stringList.add(items);
       }
     }
     return this;
