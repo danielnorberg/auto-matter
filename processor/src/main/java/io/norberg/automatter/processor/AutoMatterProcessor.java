@@ -578,7 +578,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitMapEntriesSetters(final JavaWriter writer, final String builderName,
                                      final ExecutableElement field) throws IOException {
-    for (int i = 1; i <= 6; i++) {
+    for (int i = 1; i <= 5; i++) {
       emitMapEntriesSetter(writer, builderName, field, i);
     }
   }

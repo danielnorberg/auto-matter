@@ -224,23 +224,6 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder mappedStrings(String k1, String v1,
-                                               String k2, String v2,
-                                               String k3, String v3,
-                                               String k4, String v4,
-                                               String k5, String v5,
-                                               String k6, String v6) {
-    mappedStrings(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
-    if (k6 == null) {
-      throw new NullPointerException("mappedStrings: k6");
-    }
-    if (v6 == null) {
-      throw new NullPointerException("mappedStrings: v6");
-    }
-    mappedStrings.put(k6, v6);
-    return this;
-  }
-
   public CollectionFieldsBuilder mappedString(String key, String value) {
     if (key == null) {
       throw new NullPointerException("mappedString: key");
@@ -345,23 +328,6 @@ public final class CollectionFieldsBuilder {
       throw new NullPointerException("stringMap: v5");
     }
     stringMap.put(k5, v5);
-    return this;
-  }
-
-  public CollectionFieldsBuilder stringMap(String k1, String v1,
-                                               String k2, String v2,
-                                               String k3, String v3,
-                                               String k4, String v4,
-                                               String k5, String v5,
-                                               String k6, String v6) {
-    stringMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
-    if (k6 == null) {
-      throw new NullPointerException("stringMap: k6");
-    }
-    if (v6 == null) {
-      throw new NullPointerException("stringMap: v6");
-    }
-    stringMap.put(k6, v6);
     return this;
   }
 
