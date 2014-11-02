@@ -43,6 +43,9 @@ public final class CollectionFieldsBuilder {
   }
 
   public List<String> strings() {
+    if (strings == null) {
+      strings = new ArrayList<String>();
+    }
     return strings;
   }
 
@@ -90,6 +93,9 @@ public final class CollectionFieldsBuilder {
   }
 
   public List<String> stringList() {
+    if (stringList == null) {
+      stringList = new ArrayList<String>();
+    }
     return stringList;
   }
 
@@ -126,6 +132,9 @@ public final class CollectionFieldsBuilder {
   }
 
   public Map<String,String> mappedStrings() {
+    if (mappedStrings == null) {
+      mappedStrings = new HashMap<String, String>();
+    }
     return mappedStrings;
   }
 
@@ -247,6 +256,9 @@ public final class CollectionFieldsBuilder {
   }
 
   public Map<String,String> stringMap() {
+    if (stringMap == null) {
+      stringMap = new HashMap<String, String>();
+    }
     return stringMap;
   }
 

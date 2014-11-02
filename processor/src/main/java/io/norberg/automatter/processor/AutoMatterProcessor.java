@@ -660,11 +660,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     // Null checks
     emitNullCheck(writer, "key", singular + ": key");
     emitNullCheck(writer, "value", singular + ": value");
-
-    // Lazy map instantiation
-    writer.beginControlFlow("if (" + name + " == null)");
-    writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
-    writer.endControlFlow();
+    emitLazyMapFieldInstantiation(writer, field);
 
     // Put
     writer.emitStatement("%s.put(key, value)", name);
@@ -687,14 +683,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (singular == null) {
       return;
     }
-    final String type = fieldTypeArguments(writer, field);
     writer.emitEmptyLine();
     writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
-                       type, singular);
+                       fieldTypeArguments(writer, field), singular);
     emitNullCheck(writer, singular, singular);
-    writer.beginControlFlow("if (" + name + " == null)");
-    writer.emitStatement(name + " = new ArrayList<" + type + ">()");
-    writer.endControlFlow();
+    emitLazyListFieldInstantiation(writer, field);
     writer.emitStatement("%s.add(%s)", fieldName(field), singular);
     writer.emitStatement("return this", fieldName(field));
     writer.endMethod();
@@ -815,8 +808,47 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       throws IOException {
     writer.emitEmptyLine();
     writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
-    writer.emitStatement("return %s", fieldName(field));
+    if (isList(field)) {
+      emitListGetterBody(writer, field);
+    } else if (isMap(field)) {
+      emitMapGetterBody(writer, field);
+    } else {
+      emitDefaultGetterBody(writer, field);
+    }
     writer.endMethod();
+  }
+
+  private void emitListGetterBody(final JavaWriter writer, final ExecutableElement field)
+      throws IOException {
+    emitLazyListFieldInstantiation(writer, field);
+    writer.emitStatement("return %s", fieldName(field));
+  }
+
+  private void emitLazyListFieldInstantiation(final JavaWriter writer,
+                                              final ExecutableElement field) throws IOException {
+    final String name = fieldName(field);
+    writer.beginControlFlow("if (" + name + " == null)");
+    writer.emitStatement("%s = new ArrayList<%s>()", name, fieldTypeArguments(writer, field));
+    writer.endControlFlow();
+  }
+
+  private void emitMapGetterBody(final JavaWriter writer, final ExecutableElement field)
+      throws IOException {
+    emitLazyMapFieldInstantiation(writer, field);
+    writer.emitStatement("return %s", fieldName(field));
+  }
+
+  private void emitLazyMapFieldInstantiation(final JavaWriter writer,
+                                             final ExecutableElement field) throws IOException {
+    final String name = fieldName(field);
+    writer.beginControlFlow("if (" + name + " == null)");
+    writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
+    writer.endControlFlow();
+  }
+
+  private void emitDefaultGetterBody(final JavaWriter writer, final ExecutableElement field)
+      throws IOException {
+    writer.emitStatement("return %s", fieldName(field));
   }
 
   private String unmodifiableValueField(final ExecutableElement field) {
