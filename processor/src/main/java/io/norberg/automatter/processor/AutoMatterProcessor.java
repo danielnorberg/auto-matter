@@ -556,18 +556,19 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                              final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
+    final String extendedType = fieldTypeArgumentsExtended(writer, field);
 
     writer.emitEmptyLine();
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       fieldType(writer, field), name);
+                       "Map<" + extendedType + ">", name);
 
     // Null checks
     final String entry = variableName("entry", name);
     emitNullCheck(writer, name, name);
-    writer.beginControlFlow("for (Map.Entry<" + type + "> " + entry + " : " + name + ".entrySet())");
+    beginFor(writer, "Map.Entry<" + extendedType + ">", entry, name + ".entrySet()");
     emitNullCheck(writer, entry + ".getKey()", name + ": null key");
     emitNullCheck(writer, entry + ".getValue()", name + ": null value");
-    writer.endControlFlow();
+    endFor(writer);
 
     // Copy
     writer.emitStatement("this.%1$s = new HashMap<%2$s>(%1$s)", name, type);
@@ -703,7 +704,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
-    final String iterableType = "Iterable<" + type + ">";
+    final String extendedType = fieldTypeArgumentsExtended(writer, field);
+    final String iterableType = "Iterable<" + extendedType + ">";
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), iterableType, name);
 
     // Null check
@@ -719,7 +721,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     // Collection optimization
     final String collection = variableName("collection", name);
     writer.nextControlFlow("else if (" + name + " instanceof Collection)");
-    writer.emitStatement("Collection<%1$s> %2$s = (Collection<%1$s>) %3$s", type, collection, name);
+    writer.emitStatement("Collection<%1$s> %2$s = (Collection<%1$s>) %3$s", extendedType, collection, name);
     beginFor(writer, type, item, collection);
     emitNullCheck(writer, item, name + ": null item");
     endFor(writer);
@@ -729,7 +731,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final String iterator = variableName("iterator", name);
     writer.nextControlFlow("else");
     writer.emitStatement("this.%s = new ArrayList<%s>()", name, type);
-    writer.emitStatement("Iterator<%s> %s = %s.iterator()", type, iterator, name);
+    writer.emitStatement("Iterator<%s> %s = %s.iterator()", extendedType, iterator, name);
 
     writer.beginControlFlow("while (" + iterator + ".hasNext())");
     writer.emitStatement("%s %s = %s.next()", type, item, iterator);
@@ -768,6 +770,21 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private String fieldTypeArguments(final JavaWriter writer, final ExecutableElement field) {
     return Joiner.on(",").join(typeArguments(writer, field));
+  }
+
+  private String fieldTypeArgumentsExtended(final JavaWriter writer,
+                                            final ExecutableElement field) {
+    return Joiner.on(",").join(typeArgumentsExtended(writer, field));
+  }
+
+  private List<String> typeArgumentsExtended(final JavaWriter writer,
+                                            final ExecutableElement field) {
+    final List<String> typeArguments = typeArguments(writer, field);
+    final List<String> extended = Lists.newArrayList();
+    for (String type : typeArguments) {
+      extended.add("? extends " + type);
+    }
+    return extended;
   }
 
   private List<String> typeArguments(final JavaWriter writer, final ExecutableElement field) {
