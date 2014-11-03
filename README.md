@@ -78,6 +78,8 @@ Features
 
 ### Jackson JSON Support
 
+*Note: Requires Jackson 2.4.0+*
+
 ```xml
 <dependency>
   <groupId>io.norberg</groupId>
