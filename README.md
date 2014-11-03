@@ -159,7 +159,7 @@ Foobar copy2 = original.builder();
     .build();
 ```
 
-### `@Nullable`
+### @Nullable
 
 AutoMatter will omit null checks for fields annotated with `@Nullable`.
 
