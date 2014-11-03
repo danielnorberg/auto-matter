@@ -180,6 +180,8 @@ Foobar foobar = new FoobarBuilder()
 assert foobar.foo() == null;
 ```
 
+The `@Nullable` annotation can be e.g. `javax.annotation.Nullable` from [jsr305](http://search.maven.org/#search%7Cga%7C1%7Cjsr305). A `@Nullable` annotation from any other package will also work.
+
 
 TODO
 ----
