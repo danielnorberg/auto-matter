@@ -63,6 +63,7 @@ Why
 * AutoMatter enforces non-nullity for fields by default, moving those pesky NullPointerExceptions
   closer to the source. `@Nullable` can be used to opt out of the null checks.
 
+* AutoMatter adds no runtime dependencies.
 
 Why Not
 -------
