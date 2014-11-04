@@ -536,23 +536,25 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
       if (isList(field)) {
-        emitListAdders(writer, descriptor.builderSimpleName, field);
+        emitListMutators(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
-        emitMapSetters(writer, descriptor.builderSimpleName, field);
+        emitMapMutators(writer, descriptor.builderSimpleName, field);
       } else {
         emitRawSetter(writer, descriptor.builderSimpleName, field);
       }
     }
   }
 
-  private void emitMapSetters(final JavaWriter writer, final String builderName,
-                              final ExecutableElement field) throws IOException {
-    emitMapSetter(writer, builderName, field);
-    emitMapEntriesSetters(writer, builderName, field);
-    emitMapEntryPutter(writer, builderName, field);
+  private void emitMapMutators(final JavaWriter writer, final String builderName,
+                               final ExecutableElement field) throws IOException {
+    emitMapPutAll(writer, builderName, field);
+    for (int i = 1; i <= 5; i++) {
+      emitMapEntriesPutAll(writer, builderName, field, i);
+    }
+    emitMapEntryPut(writer, builderName, field);
   }
 
-  private void emitMapSetter(final JavaWriter writer, final String builderName,
+  private void emitMapPutAll(final JavaWriter writer, final String builderName,
                              final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
@@ -580,14 +582,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitMapEntriesSetters(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
-    for (int i = 1; i <= 5; i++) {
-      emitMapEntriesSetter(writer, builderName, field, i);
-    }
-  }
-
-  private void emitMapEntriesSetter(final JavaWriter writer, final String builderName,
+  private void emitMapEntriesPutAll(final JavaWriter writer, final String builderName,
                                     final ExecutableElement field, final int entries)
       throws IOException {
     checkArgument(entries > 0, "entries");
@@ -648,8 +643,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return arguments.get(1);
   }
 
-  private void emitMapEntryPutter(final JavaWriter writer, final String builderName,
-                                  final ExecutableElement field) throws IOException {
+  private void emitMapEntryPut(final JavaWriter writer, final String builderName,
+                               final ExecutableElement field) throws IOException {
 
     final String name = fieldName(field);
     final String singular = singular(name);
@@ -675,18 +670,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListAdders(final JavaWriter writer, final String builderName,
-                              final ExecutableElement field) throws IOException {
-    emitListListAdder(writer, builderName, field);
-    emitListCollectionAdder(writer, builderName, field);
-    emitListIterableAdder(writer, builderName, field);
-    emitListIteratorAdder(writer, builderName, field);
-    emitListVarArgSetter(writer, builderName, field);
-    emitListItemSingleAdder(writer, builderName, field);
+  private void emitListMutators(final JavaWriter writer, final String builderName,
+                                final ExecutableElement field) throws IOException {
+    emitListListAddAll(writer, builderName, field);
+    emitListCollectionAddAll(writer, builderName, field);
+    emitListIterableAddAll(writer, builderName, field);
+    emitListIteratorAddAll(writer, builderName, field);
+    emitListVarArgAddAll(writer, builderName, field);
+    emitListItemAdd(writer, builderName, field);
   }
 
-  private void emitListIteratorAdder(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
+  private void emitListIteratorAddAll(final JavaWriter writer, final String builderName,
+                                      final ExecutableElement field) throws IOException {
     final String type = fieldTypeArguments(writer, field);
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String name = fieldName(field);
@@ -707,8 +702,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListListAdder(final JavaWriter writer, final String builderName,
-                                 final ExecutableElement field) throws IOException {
+  private void emitListListAddAll(final JavaWriter writer, final String builderName,
+                                  final ExecutableElement field) throws IOException {
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String name = fieldName(field);
     writer.emitEmptyLine();
@@ -718,8 +713,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListItemSingleAdder(final JavaWriter writer, final String builderName,
-                                       final ExecutableElement field) throws IOException {
+  private void emitListItemAdd(final JavaWriter writer, final String builderName,
+                               final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String singular = singular(name);
     if (singular == null) {
@@ -742,8 +737,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return name.equals(singular) ? null : singular;
   }
 
-  private void emitListIterableAdder(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
+  private void emitListIterableAddAll(final JavaWriter writer, final String builderName,
+                                      final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String iterableType = "Iterable<" + extendedType + ">";
@@ -771,8 +766,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListCollectionAdder(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
+  private void emitListCollectionAddAll(final JavaWriter writer, final String builderName,
+                                        final ExecutableElement field) throws IOException {
     writer.emitEmptyLine();
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
@@ -866,7 +861,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return arguments;
   }
 
-  private void emitListVarArgSetter(final JavaWriter writer, final String builderName,
+  private void emitListVarArgAddAll(final JavaWriter writer, final String builderName,
                                     final ExecutableElement field) throws IOException {
     final String type = fieldTypeArguments(writer, field);
     final String vararg = type + "...";
