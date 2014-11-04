@@ -8,5 +8,5 @@ import io.norberg.automatter.AutoMatter;
 @AutoMatter
 public interface CollectionFields {
   List<String> strings();
-  Map<String, String> mappedStrings();
+  Map<String, Integer> integers();
 }
