@@ -102,9 +102,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        "java.util.Collection",
                        "java.util.Collections",
                        "java.util.HashMap",
+                       "java.util.HashSet",
                        "java.util.Iterator",
                        "java.util.List",
-                       "java.util.Map");
+                       "java.util.Map",
+                       "java.util.Set");
     writer.emitEmptyLine();
     writer.emitImports("javax.annotation.Generated");
 
@@ -178,9 +180,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                                                  final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String copy;
-    if (isList(field)) {
+    if (isCollection(field)) {
       writer.emitStatement("%1$s _%2$s = v.%2$s()", fieldType(writer, field), name);
-      copy = constructorListCopy("_" + name, fieldTypeArguments(writer, field));
+      copy = constructorCollectionCopy("_" + name, writer, field);
     } else if (isMap(field)) {
       writer.emitStatement("%1$s _%2$s = v.%2$s()", fieldType(writer, field), name);
       copy = constructorMapCopy("_" + name, fieldTypeArguments(writer, field));
@@ -190,8 +192,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitStatement("this.%s = %s", name, copy);
   }
 
-  private String constructorListCopy(final String original, final String typeArguments) {
-    return format("(%1$s == null) ? null : new ArrayList<%2$s>(%1$s)", original, typeArguments);
+  private String constructorCollectionCopy(final String original, final JavaWriter writer,
+                                           final ExecutableElement field) {
+    return format("(%1$s == null) ? null : new %3$s<%2$s>(%1$s)",
+                  original, fieldTypeArguments(writer, field), collection(field));
   }
 
   private String constructorMapCopy(final String original, final String typeArguments) {
@@ -213,8 +217,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       throws IOException {
     final String name = fieldName(field);
     final String copy;
-    if (isList(field)) {
-      copy = constructorListCopy("v." + name, fieldTypeArguments(writer, field));
+    if (isCollection(field)) {
+      copy = constructorCollectionCopy("v." + name, writer, field);
     } else if (isMap(field)) {
       copy = constructorMapCopy("v." + name, fieldTypeArguments(writer, field));
     } else {
@@ -223,10 +227,56 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitStatement("this.%s = %s", name, copy);
   }
 
-  private boolean isList(final ExecutableElement field) {
+  private boolean isCollection(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.List<");
+    return returnType.startsWith("java.util.List<") ||
+           returnType.startsWith("java.util.Set<");
   }
+
+  private String collection(final ExecutableElement field) {
+    final String type = collectionType(field);
+    if (type.equals("List")) {
+      return "ArrayList";
+    } else if (type.equals("Set")) {
+      return "HashSet";
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  private String unmodifiableCollection(final ExecutableElement field) {
+    final String type = collectionType(field);
+    if (type.equals("List")) {
+      return "unmodifiableList";
+    } else if (type.equals("Set")) {
+      return "unmodifiableSet";
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  private String emptyCollection(final ExecutableElement field) {
+    final String type = collectionType(field);
+    if (type.equals("List")) {
+      return "emptyList";
+    } else if (type.equals("Set")) {
+      return "emptySet";
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  private String collectionType(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("java.util.List<")) {
+      return "List";
+    } else if (returnType.startsWith("java.util.Set<")) {
+      return "Set";
+    } else {
+      throw new AssertionError();
+    }
+  }
+
 
   private boolean isMap(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
@@ -294,9 +344,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String valueConstructorFieldCopy(final JavaWriter writer, final ExecutableElement field) {
-    if (isList(field)) {
-      return format("(%1$s != null) ? %1$s : Collections.<%2$s>emptyList()",
-                    fieldName(field), fieldTypeArguments(writer, field));
+    if (isCollection(field)) {
+      return format("(%1$s != null) ? %1$s : Collections.<%2$s>%3$s()",
+                    fieldName(field), fieldTypeArguments(writer, field), emptyCollection(field));
     } else if (isMap(field)) {
       return format("(%1$s != null) ? %1$s : Collections.<%2$s>emptyMap()",
                     fieldName(field), fieldTypeArguments(writer, field));
@@ -490,7 +540,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitToStringStatement(final JavaWriter writer, final List<ExecutableElement> fields,
                                      final String targetName) throws IOException {
     final StringBuilder builder = new StringBuilder();
-    builder.append("return \"").append(targetName).append("{\" + \n");
+    builder.append("return \"").append(targetName).append("{\" +\n");
     boolean first = true;
     for (ExecutableElement field : fields) {
       final String comma = first ? "" : ", ";
@@ -519,9 +569,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String buildFieldCopy(final JavaWriter writer, final ExecutableElement field) {
-    if (isList(field)) {
-      return format("(%1$s != null) ? new ArrayList<%2$s>(%1$s) : Collections.<%2$s>emptyList()",
-                    fieldName(field), fieldTypeArguments(writer, field));
+    if (isCollection(field)) {
+      return format("(%1$s != null) ? new %3$s<%2$s>(%1$s) : Collections.<%2$s>%4$s()",
+                    fieldName(field), fieldTypeArguments(writer, field),
+                    collection(field), emptyCollection(field));
     }
     if (isMap(field)) {
       return format("(%1$s != null) ? new HashMap<%2$s>(%1$s) : Collections.<%2$s>emptyMap()",
@@ -535,7 +586,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                              final Descriptor descriptor) throws IOException {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
-      if (isList(field)) {
+      if (isCollection(field)) {
         emitListMutators(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
         emitMapMutators(writer, descriptor.builderSimpleName, field);
@@ -672,16 +723,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitListMutators(final JavaWriter writer, final String builderName,
                                 final ExecutableElement field) throws IOException {
-    emitListListAddAll(writer, builderName, field);
-    emitListCollectionAddAll(writer, builderName, field);
-    emitListIterableAddAll(writer, builderName, field);
-    emitListIteratorAddAll(writer, builderName, field);
+    emitCollectionAddAll(writer, builderName, field);
+    emitCollectionCollectionAddAll(writer, builderName, field);
+    emitCollectionIterableAddAll(writer, builderName, field);
+    emitCollectionIteratorAddAll(writer, builderName, field);
     emitListVarArgAddAll(writer, builderName, field);
-    emitListItemAdd(writer, builderName, field);
+    emitCollectionItemAdd(writer, builderName, field);
   }
 
-  private void emitListIteratorAddAll(final JavaWriter writer, final String builderName,
-                                      final ExecutableElement field) throws IOException {
+  private void emitCollectionIteratorAddAll(final JavaWriter writer, final String builderName,
+                                            final ExecutableElement field) throws IOException {
     final String type = fieldTypeArguments(writer, field);
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String name = fieldName(field);
@@ -691,7 +742,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        "Iterator<" + extendedType + ">", name);
 
     emitListNullGuard(writer, field);
-    emitLazyListFieldInstantiation(writer, field);
+    emitLazyCollectionFieldInstantiation(writer, field);
     writer.beginControlFlow("while (" + name + ".hasNext())");
     writer.emitStatement("%s %s = %s.next()", type, item, name);
     emitNullCheck(writer, item, name + ": null item");
@@ -702,19 +753,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListListAddAll(final JavaWriter writer, final String builderName,
-                                  final ExecutableElement field) throws IOException {
+  private void emitCollectionAddAll(final JavaWriter writer, final String builderName,
+                                    final ExecutableElement field) throws IOException {
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String name = fieldName(field);
     writer.emitEmptyLine();
+    final String fullType = collectionType(field) + "<" + extendedType + ">";
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       "List<" + extendedType + ">", name);
+                       fullType, name);
     writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
     writer.endMethod();
   }
 
-  private void emitListItemAdd(final JavaWriter writer, final String builderName,
-                               final ExecutableElement field) throws IOException {
+  private void emitCollectionItemAdd(final JavaWriter writer, final String builderName,
+                                     final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String singular = singular(name);
     if (singular == null) {
@@ -725,7 +777,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        fieldTypeArguments(writer, field), singular);
 
     emitNullCheck(writer, singular, singular);
-    emitLazyListFieldInstantiation(writer, field);
+    emitLazyCollectionFieldInstantiation(writer, field);
     writer.emitStatement("%s.add(%s)", fieldName(field), singular);
 
     writer.emitStatement("return this");
@@ -734,11 +786,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private String singular(final String name) {
     final String singular = INFLECTOR.singularize(name);
+    // TODO: verify that the singular is not a reserved keyword
     return name.equals(singular) ? null : singular;
   }
 
-  private void emitListIterableAddAll(final JavaWriter writer, final String builderName,
-                                      final ExecutableElement field) throws IOException {
+  private void emitCollectionIterableAddAll(final JavaWriter writer, final String builderName,
+                                            final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
     final String iterableType = "Iterable<" + extendedType + ">";
@@ -755,7 +808,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endControlFlow();
 
     // Iterator fallback
-    emitLazyListFieldInstantiation(writer, field);
+    emitLazyCollectionFieldInstantiation(writer, field);
 
     beginFor(writer, fieldTypeArguments(writer, field), item, name);
     emitNullCheck(writer, item, name + ": null item");
@@ -766,8 +819,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListCollectionAddAll(final JavaWriter writer, final String builderName,
-                                        final ExecutableElement field) throws IOException {
+  private void emitCollectionCollectionAddAll(final JavaWriter writer, final String builderName,
+                                              final ExecutableElement field) throws IOException {
     writer.emitEmptyLine();
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
@@ -783,7 +836,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     beginFor(writer, type, item, name);
     emitNullCheck(writer, item, name + ": null item");
     endFor(writer);
-    writer.emitStatement("this.%1$s = new ArrayList<%2$s>(%1$s)", name, type);
+    writer.emitStatement("this.%1$s = new %3$s<%2$s>(%1$s)", name, type, collection(field));
 
     writer.nextControlFlow("else");
     beginFor(writer, type, item, name);
@@ -890,8 +943,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       throws IOException {
     writer.emitEmptyLine();
     writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
-    if (isList(field)) {
-      emitListGetterBody(writer, field);
+    if (isCollection(field)) {
+      emitCollectionGetterBody(writer, field);
     } else if (isMap(field)) {
       emitMapGetterBody(writer, field);
     } else {
@@ -900,17 +953,19 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListGetterBody(final JavaWriter writer, final ExecutableElement field)
+  private void emitCollectionGetterBody(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
-    emitLazyListFieldInstantiation(writer, field);
+    emitLazyCollectionFieldInstantiation(writer, field);
     writer.emitStatement("return %s", fieldName(field));
   }
 
-  private void emitLazyListFieldInstantiation(final JavaWriter writer,
-                                              final ExecutableElement field) throws IOException {
+  private void emitLazyCollectionFieldInstantiation(final JavaWriter writer,
+                                                    final ExecutableElement field)
+      throws IOException {
     final String name = fieldName(field);
     writer.beginControlFlow("if (this." + name + " == null)");
-    writer.emitStatement("this.%s = new ArrayList<%s>()", name, fieldTypeArguments(writer, field));
+    writer.emitStatement("this.%s = new %s<%s>()",
+                         name, collection(field), fieldTypeArguments(writer, field));
     writer.endControlFlow();
   }
 
@@ -934,8 +989,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String unmodifiableValueField(final ExecutableElement field) {
-    if (isList(field)) {
-      return format("Collections.unmodifiableList(%s)", fieldName(field));
+    if (isCollection(field)) {
+      return format("Collections.%s(%s)", unmodifiableCollection(field), fieldName(field));
     } else if (isMap(field)) {
       return format("Collections.unmodifiableMap(%s)", fieldName(field));
     } else {
