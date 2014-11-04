@@ -121,4 +121,11 @@ public class AutoMatterProcessorTest {
   }
 
 
+  @Test
+  public void testSingularCollectionFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/SingularCollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError();
+  }
 }
