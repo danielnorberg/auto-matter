@@ -536,7 +536,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
       if (isList(field)) {
-        emitListSetters(writer, descriptor.builderSimpleName, field);
+        emitListAdders(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
         emitMapSetters(writer, descriptor.builderSimpleName, field);
       } else {
@@ -570,8 +570,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitNullCheck(writer, entry + ".getValue()", name + ": null value");
     endFor(writer);
 
-    // Copy
+    writer.beginControlFlow("if (this." + name + " == null)");
     writer.emitStatement("this.%1$s = new HashMap<%2$s>(%1$s)", name, type);
+    writer.nextControlFlow("else");
+    writer.emitStatement("this.%1$s.putAll(%1$s)", name);
+    writer.endControlFlow();
 
     writer.emitStatement("return this");
     writer.endMethod();
@@ -621,7 +624,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Map instantiation
     if (entries == 1) {
+      writer.beginControlFlow("if (" + name + " == null)");
       writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
+      writer.endControlFlow();
     }
 
     // Put
@@ -670,11 +675,47 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListSetters(final JavaWriter writer, final String builderName,
-                               final ExecutableElement field) throws IOException {
-    emitListIterableSetter(writer, builderName, field);
+  private void emitListAdders(final JavaWriter writer, final String builderName,
+                              final ExecutableElement field) throws IOException {
+    emitListListAdder(writer, builderName, field);
+    emitListCollectionAdder(writer, builderName, field);
+    emitListIterableAdder(writer, builderName, field);
+    emitListIteratorAdder(writer, builderName, field);
     emitListVarArgSetter(writer, builderName, field);
     emitListItemSingleAdder(writer, builderName, field);
+  }
+
+  private void emitListIteratorAdder(final JavaWriter writer, final String builderName,
+                                     final ExecutableElement field) throws IOException {
+    final String type = fieldTypeArguments(writer, field);
+    final String extendedType = fieldTypeArgumentsExtended(writer, field);
+    final String name = fieldName(field);
+    final String item = variableName("item", name);
+    writer.emitEmptyLine();
+    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
+                       "Iterator<" + extendedType + ">", name);
+
+    emitListNullGuard(writer, field);
+    emitLazyListFieldInstantiation(writer, field);
+    writer.beginControlFlow("while (" + name + ".hasNext())");
+    writer.emitStatement("%s %s = %s.next()", type, item, name);
+    emitNullCheck(writer, item, name + ": null item");
+    writer.emitStatement("this.%s.add(%s)", name, item);
+    writer.endControlFlow();
+
+    writer.emitStatement("return this");
+    writer.endMethod();
+  }
+
+  private void emitListListAdder(final JavaWriter writer, final String builderName,
+                                 final ExecutableElement field) throws IOException {
+    final String extendedType = fieldTypeArgumentsExtended(writer, field);
+    final String name = fieldName(field);
+    writer.emitEmptyLine();
+    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
+                       "List<" + extendedType + ">", name);
+    writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
+    writer.endMethod();
   }
 
   private void emitListItemSingleAdder(final JavaWriter writer, final String builderName,
@@ -687,10 +728,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
                        fieldTypeArguments(writer, field), singular);
+
     emitNullCheck(writer, singular, singular);
     emitLazyListFieldInstantiation(writer, field);
     writer.emitStatement("%s.add(%s)", fieldName(field), singular);
-    writer.emitStatement("return this", fieldName(field));
+
+    writer.emitStatement("return this");
     writer.endMethod();
   }
 
@@ -699,49 +742,76 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return name.equals(singular) ? null : singular;
   }
 
-  private void emitListIterableSetter(final JavaWriter writer, final String builderName,
-                                      final ExecutableElement field) throws IOException {
+  private void emitListIterableAdder(final JavaWriter writer, final String builderName,
+                                     final ExecutableElement field) throws IOException {
+    final String name = fieldName(field);
+    final String extendedType = fieldTypeArgumentsExtended(writer, field);
+    final String iterableType = "Iterable<" + extendedType + ">";
+    writer.emitEmptyLine();
+    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), iterableType, name);
+
+    emitListNullGuard(writer, field);
+
+    final String item = variableName("item", name);
+
+    // Collection optimization
+    writer.beginControlFlow("if (" + name + " instanceof Collection)");
+    writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
+    writer.endControlFlow();
+
+    // Iterator fallback
+    emitLazyListFieldInstantiation(writer, field);
+
+    beginFor(writer, fieldTypeArguments(writer, field), item, name);
+    emitNullCheck(writer, item, name + ": null item");
+    writer.emitStatement("this.%s.add(%s)", name, item);
+    endFor(writer);
+
+    writer.emitStatement("return this");
+    writer.endMethod();
+  }
+
+  private void emitListCollectionAdder(final JavaWriter writer, final String builderName,
+                                     final ExecutableElement field) throws IOException {
     writer.emitEmptyLine();
     final String name = fieldName(field);
     final String type = fieldTypeArguments(writer, field);
     final String extendedType = fieldTypeArgumentsExtended(writer, field);
-    final String iterableType = "Iterable<" + extendedType + ">";
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), iterableType, name);
+    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
+                       "Collection<" + extendedType + ">", name);
 
-    // Null check
+    emitListNullGuard(writer, field);
+
+    final String item = variableName("item", name);
+
+    writer.beginControlFlow("if (this." + name + " == null)");
+    beginFor(writer, type, item, name);
+    emitNullCheck(writer, item, name + ": null item");
+    endFor(writer);
+    writer.emitStatement("this.%1$s = new ArrayList<%2$s>(%1$s)", name, type);
+
+    writer.nextControlFlow("else");
+    beginFor(writer, type, item, name);
+    emitNullCheck(writer, item, name + ": null item");
+    writer.emitStatement("this.%s.add(%s)", name, item);
+    endFor(writer);
+    writer.endControlFlow();
+
+    writer.emitStatement("return this");
+    writer.endMethod();
+  }
+
+  private void emitListNullGuard(final JavaWriter writer, final ExecutableElement field)
+      throws IOException {
+    final String name = fieldName(field);
     writer.beginControlFlow("if (" + name + " == null)");
     if (shouldEnforceNonNull(field)) {
       emitNPE(writer, name);
     } else {
       writer.emitStatement("this.%s = null", name);
+      writer.emitStatement("return this");
     }
-
-    final String item = variableName("item", name);
-
-    // Collection optimization
-    final String collection = variableName("collection", name);
-    writer.nextControlFlow("else if (" + name + " instanceof Collection)");
-    writer.emitStatement("Collection<%1$s> %2$s = (Collection<%1$s>) %3$s", extendedType, collection, name);
-    beginFor(writer, type, item, collection);
-    emitNullCheck(writer, item, name + ": null item");
-    endFor(writer);
-    writer.emitStatement("this.%1$s = new ArrayList<%2$s>(collection)", name, type);
-
-    // Iterator fallback
-    final String iterator = variableName("iterator", name);
-    writer.nextControlFlow("else");
-    writer.emitStatement("this.%s = new ArrayList<%s>()", name, type);
-    writer.emitStatement("Iterator<%s> %s = %s.iterator()", extendedType, iterator, name);
-
-    writer.beginControlFlow("while (" + iterator + ".hasNext())");
-    writer.emitStatement("%s %s = %s.next()", type, item, iterator);
-    emitNullCheck(writer, item, name + ": null item");
-    writer.emitStatement("this.%s.add(%s)", name, item);
     writer.endControlFlow();
-    writer.endControlFlow();
-
-    writer.emitStatement("return this");
-    writer.endMethod();
   }
 
   private String variableName(final String name, final String... scope) {
@@ -844,8 +914,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitLazyListFieldInstantiation(final JavaWriter writer,
                                               final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
-    writer.beginControlFlow("if (" + name + " == null)");
-    writer.emitStatement("%s = new ArrayList<%s>()", name, fieldTypeArguments(writer, field));
+    writer.beginControlFlow("if (this." + name + " == null)");
+    writer.emitStatement("this.%s = new ArrayList<%s>()", name, fieldTypeArguments(writer, field));
     writer.endControlFlow();
   }
 

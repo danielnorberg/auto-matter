@@ -43,33 +43,70 @@ public final class CollectionFieldsBuilder {
   }
 
   public List<String> strings() {
-    if (strings == null) {
-      strings = new ArrayList<String>();
+    if (this.strings == null) {
+      this.strings = new ArrayList<String>();
     }
     return strings;
   }
 
-  public CollectionFieldsBuilder strings(Iterable<? extends String> strings) {
+  public CollectionFieldsBuilder strings(List<? extends String> strings) {
+    return strings((Collection<? extends String>)strings);
+  }
+
+  public CollectionFieldsBuilder strings(Collection<? extends String> strings) {
     if (strings == null) {
       throw new NullPointerException("strings");
-    } else if (strings instanceof Collection) {
-      Collection<? extends String> collection = (Collection<? extends String>) strings;
-      for (String item : collection) {
+    }
+    if (this.strings == null) {
+      for (String item : strings) {
         if (item == null) {
           throw new NullPointerException("strings: null item");
         }
       }
-      this.strings = new ArrayList<String>(collection);
+      this.strings = new ArrayList<String>(strings);
     } else {
-      this.strings = new ArrayList<String>();
-      Iterator<? extends String> iterator = strings.iterator();
-      while (iterator.hasNext()) {
-        String item = iterator.next();
+      for (String item : strings) {
         if (item == null) {
           throw new NullPointerException("strings: null item");
         }
         this.strings.add(item);
       }
+    }
+    return this;
+  }
+
+  public CollectionFieldsBuilder strings(Iterable<? extends String> strings) {
+    if (strings == null) {
+      throw new NullPointerException("strings");
+    }
+    if (strings instanceof Collection) {
+      return strings((Collection<? extends String>) strings);
+    }
+    if (this.strings == null) {
+      this.strings = new ArrayList<String>();
+    }
+    for (String item : strings) {
+      if (item == null) {
+        throw new NullPointerException("strings: null item");
+      }
+      this.strings.add(item);
+    }
+    return this;
+  }
+
+  public CollectionFieldsBuilder strings(Iterator<? extends String> strings) {
+    if (strings == null) {
+      throw new NullPointerException("strings");
+    }
+    if (this.strings == null) {
+      this.strings = new ArrayList<String>();
+    }
+    while (strings.hasNext()) {
+      String item = strings.next();
+      if (item == null) {
+        throw new NullPointerException("strings: null item");
+      }
+      this.strings.add(item);
     }
     return this;
   }
@@ -85,41 +122,78 @@ public final class CollectionFieldsBuilder {
     if (string == null) {
       throw new NullPointerException("string");
     }
-    if (strings == null) {
-      strings = new ArrayList<String>();
+    if (this.strings == null) {
+      this.strings = new ArrayList<String>();
     }
     strings.add(string);
     return this;
   }
 
   public List<String> stringList() {
-    if (stringList == null) {
-      stringList = new ArrayList<String>();
+    if (this.stringList == null) {
+      this.stringList = new ArrayList<String>();
     }
     return stringList;
   }
 
-  public CollectionFieldsBuilder stringList(Iterable<? extends String> stringList) {
+  public CollectionFieldsBuilder stringList(List<? extends String> stringList) {
+    return stringList((Collection<? extends String>)stringList);
+  }
+
+  public CollectionFieldsBuilder stringList(Collection<? extends String> stringList) {
     if (stringList == null) {
       throw new NullPointerException("stringList");
-    } else if (stringList instanceof Collection) {
-      Collection<? extends String> collection = (Collection<? extends String>) stringList;
-      for (String item : collection) {
+    }
+    if (this.stringList == null) {
+      for (String item : stringList) {
         if (item == null) {
           throw new NullPointerException("stringList: null item");
         }
       }
-      this.stringList = new ArrayList<String>(collection);
+      this.stringList = new ArrayList<String>(stringList);
     } else {
-      this.stringList = new ArrayList<String>();
-      Iterator<? extends String> iterator = stringList.iterator();
-      while (iterator.hasNext()) {
-        String item = iterator.next();
+      for (String item : stringList) {
         if (item == null) {
           throw new NullPointerException("stringList: null item");
         }
         this.stringList.add(item);
       }
+    }
+    return this;
+  }
+
+  public CollectionFieldsBuilder stringList(Iterable<? extends String> stringList) {
+    if (stringList == null) {
+      throw new NullPointerException("stringList");
+    }
+    if (stringList instanceof Collection) {
+      return stringList((Collection<? extends String>) stringList);
+    }
+    if (this.stringList == null) {
+      this.stringList = new ArrayList<String>();
+    }
+    for (String item : stringList) {
+      if (item == null) {
+        throw new NullPointerException("stringList: null item");
+      }
+      this.stringList.add(item);
+    }
+    return this;
+  }
+
+  public CollectionFieldsBuilder stringList(Iterator<? extends String> stringList) {
+    if (stringList == null) {
+      throw new NullPointerException("stringList");
+    }
+    if (this.stringList == null) {
+      this.stringList = new ArrayList<String>();
+    }
+    while (stringList.hasNext()) {
+      String item = stringList.next();
+      if (item == null) {
+        throw new NullPointerException("stringList: null item");
+      }
+      this.stringList.add(item);
     }
     return this;
   }
@@ -150,7 +224,11 @@ public final class CollectionFieldsBuilder {
         throw new NullPointerException("mappedStrings: null value");
       }
     }
-    this.mappedStrings = new HashMap<String,String>(mappedStrings);
+    if (this.mappedStrings == null) {
+      this.mappedStrings = new HashMap<String,String>(mappedStrings);
+    } else {
+      this.mappedStrings.putAll(mappedStrings);
+    }
     return this;
   }
 
@@ -161,7 +239,9 @@ public final class CollectionFieldsBuilder {
     if (v1 == null) {
       throw new NullPointerException("mappedStrings: v1");
     }
-    mappedStrings = new HashMap<String,String>();
+    if (mappedStrings == null) {
+      mappedStrings = new HashMap<String,String>();
+    }
     mappedStrings.put(k1, v1);
     return this;
   }
@@ -257,7 +337,11 @@ public final class CollectionFieldsBuilder {
         throw new NullPointerException("stringMap: null value");
       }
     }
-    this.stringMap = new HashMap<String,String>(stringMap);
+    if (this.stringMap == null) {
+      this.stringMap = new HashMap<String,String>(stringMap);
+    } else {
+      this.stringMap.putAll(stringMap);
+    }
     return this;
   }
 
@@ -268,13 +352,15 @@ public final class CollectionFieldsBuilder {
     if (v1 == null) {
       throw new NullPointerException("stringMap: v1");
     }
-    stringMap = new HashMap<String,String>();
+    if (stringMap == null) {
+      stringMap = new HashMap<String,String>();
+    }
     stringMap.put(k1, v1);
     return this;
   }
 
   public CollectionFieldsBuilder stringMap(String k1, String v1,
-                                               String k2, String v2) {
+                                           String k2, String v2) {
     stringMap(k1, v1);
     if (k2 == null) {
       throw new NullPointerException("stringMap: k2");
@@ -287,8 +373,8 @@ public final class CollectionFieldsBuilder {
   }
 
   public CollectionFieldsBuilder stringMap(String k1, String v1,
-                                               String k2, String v2,
-                                               String k3, String v3) {
+                                           String k2, String v2,
+                                           String k3, String v3) {
     stringMap(k1, v1, k2, v2);
     if (k3 == null) {
       throw new NullPointerException("stringMap: k3");
@@ -301,9 +387,9 @@ public final class CollectionFieldsBuilder {
   }
 
   public CollectionFieldsBuilder stringMap(String k1, String v1,
-                                               String k2, String v2,
-                                               String k3, String v3,
-                                               String k4, String v4) {
+                                           String k2, String v2,
+                                           String k3, String v3,
+                                           String k4, String v4) {
     stringMap(k1, v1, k2, v2, k3, v3);
     if (k4 == null) {
       throw new NullPointerException("stringMap: k4");
@@ -316,10 +402,10 @@ public final class CollectionFieldsBuilder {
   }
 
   public CollectionFieldsBuilder stringMap(String k1, String v1,
-                                               String k2, String v2,
-                                               String k3, String v3,
-                                               String k4, String v4,
-                                               String k5, String v5) {
+                                           String k2, String v2,
+                                           String k3, String v3,
+                                           String k4, String v4,
+                                           String k5, String v5) {
     stringMap(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("stringMap: k5");
