@@ -58,6 +58,14 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @AutoService(Processor.class)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
+  public static final Set<String> KEYWORDS = ImmutableSet.of(
+      "abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package",
+      "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements",
+      "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum",
+      "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char",
+      "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
+      "const", "float", "native", "super", "while");
+
   private Filer filer;
   private Elements elements;
   private Messager messager;
@@ -786,7 +794,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private String singular(final String name) {
     final String singular = INFLECTOR.singularize(name);
-    // TODO: verify that the singular is not a reserved keyword
+    if (KEYWORDS.contains(singular)) {
+      return null;
+    }
+    if (elements.getTypeElement("java.lang." + singular) != null) {
+      return null;
+    }
     return name.equals(singular) ? null : singular;
   }
 

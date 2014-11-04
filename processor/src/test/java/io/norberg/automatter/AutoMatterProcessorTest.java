@@ -120,11 +120,18 @@ public class AutoMatterProcessorTest {
         JavaFileObjects.forResource("expected/CollectionFieldsBuilder.java"));
   }
 
-
   @Test
   public void testSingularCollectionFields() {
     assert_().about(javaSource())
         .that(JavaFileObjects.forResource("good/SingularCollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  public void testReservedCollectionFieldNames() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/ReservedCollectionFieldNames.java"))
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError();
   }
