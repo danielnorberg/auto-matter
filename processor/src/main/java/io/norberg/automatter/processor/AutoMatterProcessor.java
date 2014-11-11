@@ -2,6 +2,7 @@ package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -30,12 +31,13 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
 
 import io.norberg.automatter.AutoMatter;
-
 import static java.lang.String.format;
 import static java.util.Collections.reverse;
 import static javax.lang.model.element.ElementKind.PACKAGE;
@@ -180,7 +182,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   throws IOException {
     writer.emitEmptyLine();
     for (ExecutableElement field : descriptor.fields) {
-      writer.emitField(fieldType(field), fieldName(field), EnumSet.of(PRIVATE));
+      writer.emitField(fieldType(field), fieldName(field), EnumSet.of(PRIVATE), defaultValueOf(field));
     }
   }
 
@@ -441,6 +443,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
       emitSetter(writer, descriptor.builderSimpleName, field);
+      if (isOptionalElement(field)) {
+        Optional<String> optionalParameterType = optionalParameterType(field);
+        if (optionalParameterType.isPresent()) {
+          emitOptionalSetter(writer, descriptor.builderSimpleName, optionalParameterType.get(), field);
+        }
+      }
     }
   }
 
@@ -455,6 +463,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitStatement("return this");
     writer.endMethod();
   }
+
+  private void emitOptionalSetter(JavaWriter writer, String builderName, String optionalParameterType, ExecutableElement field)
+      throws IOException {
+    writer.emitEmptyLine();
+    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
+                       optionalParameterType, fieldName(field));
+    emitNullCheck(writer, "", field);
+    writer.emitStatement("this.%1$s = %2$s.of(%1$s)", fieldName(field), Optional.class.getName());
+    writer.emitStatement("return this");
+    writer.endMethod();
+  }
+
 
   private void emitGetter(final JavaWriter writer,
                           final ExecutableElement field)
@@ -487,6 +507,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     } else {
       return name;
     }
+  }
+
+  private Optional<String> optionalParameterType(final ExecutableElement field) {
+    if (field.getReturnType().getKind() != TypeKind.DECLARED) {
+      Optional.absent();
+    }
+    TypeMirror type = ((DeclaredType) field.getReturnType()).getTypeArguments().get(0);
+    if (type.getKind() == TypeKind.DECLARED) {
+      return Optional.of(type.toString());
+    }
+    return Optional.absent();
+  }
+
+  private String defaultValueOf(ExecutableElement field) {
+    if (isOptionalElement(field)) {
+      return Optional.class.getName() + ".absent()";
+    }
+    return null;
   }
 
   private static String simpleName(String fullyQualifiedName) {
@@ -571,6 +609,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private boolean isNullableAnnotated(final ExecutableElement field) {
     return nullableAnnotation(field) != null;
+  }
+
+  private boolean isOptionalElement(final ExecutableElement field) {
+    if (field.getReturnType().getKind() == TypeKind.DECLARED) {
+      return Optional.class.getName().equals(((DeclaredType) field.getReturnType()).asElement().toString());
+    }
+    return false;
   }
 
   private AnnotationMirror nullableAnnotation(final ExecutableElement field) {
