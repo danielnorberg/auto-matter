@@ -3,6 +3,7 @@ package io.norberg.automatter;
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.JavaFileObjects;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
@@ -154,5 +155,25 @@ public class AutoMatterProcessorTest {
         .compilesWithoutError()
         .and().generatesSources(
         JavaFileObjects.forResource("expected/GuavaOptionalFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testJUTOptionalFields() {
+    Assume.assumeTrue(hasJutOptional());
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/JUTOptionalFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/JUTOptionalFieldsBuilder.java"));
+  }
+
+  private boolean hasJutOptional() {
+    try {
+      Class.forName("java.util.Optional");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 }
