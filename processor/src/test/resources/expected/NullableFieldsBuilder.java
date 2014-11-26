@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class NullableFieldsBuilder {
+public final class NullableFieldsBuilder implements NullableFields {
 
   private String nullableFoo;
   private String customNullableBar;
@@ -40,6 +40,7 @@ public final class NullableFieldsBuilder {
     this.nonNullPrimitive = v.nonNullPrimitive;
   }
 
+  @Override
   public String nullableFoo() {
     return nullableFoo;
   }
@@ -49,6 +50,7 @@ public final class NullableFieldsBuilder {
     return this;
   }
 
+  @Override
   public String customNullableBar() {
     return customNullableBar;
   }
@@ -58,6 +60,7 @@ public final class NullableFieldsBuilder {
     return this;
   }
 
+  @Override
   public String nonNullQuux() {
     return nonNullQuux;
   }
@@ -70,6 +73,7 @@ public final class NullableFieldsBuilder {
     return this;
   }
 
+  @Override
   public int nonNullPrimitive() {
     return nonNullPrimitive;
   }
@@ -118,14 +122,12 @@ public final class NullableFieldsBuilder {
       this.nonNullPrimitive = nonNullPrimitive;
     }
 
-    @javax.annotation.Nullable
     @AutoMatter.Field
     @Override
     public String nullableFoo() {
       return nullableFoo;
     }
 
-    @Nullable(simple = "foo", complex = java.util.Date.class)
     @AutoMatter.Field
     @Override
     public String customNullableBar() {

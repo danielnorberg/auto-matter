@@ -121,6 +121,16 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testNullableCollectionFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/NullableCollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/NullableCollectionFieldsBuilder.java"));
+  }
+
+  @Test
   public void testSingularCollectionFields() {
     assert_().about(javaSource())
         .that(JavaFileObjects.forResource("good/SingularCollectionFields.java"))

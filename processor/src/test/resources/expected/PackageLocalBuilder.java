@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-final class PackageLocalBuilder {
+final class PackageLocalBuilder implements PackageLocal {
 
   public PackageLocalBuilder() {
   }

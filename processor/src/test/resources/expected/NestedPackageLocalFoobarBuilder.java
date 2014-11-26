@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-final class NestedPackageLocalFoobarBuilder {
+final class NestedPackageLocalFoobarBuilder implements NestedPackageLocal.NestedPackageLocalFoobar {
 
   public NestedPackageLocalFoobarBuilder() {
   }

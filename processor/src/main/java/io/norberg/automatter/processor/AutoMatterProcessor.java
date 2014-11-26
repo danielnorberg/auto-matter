@@ -124,10 +124,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         ImmutableMap.of("value", "\"" + AutoMatterProcessor.class.getName() + "\""));
     writer.beginType(d.builderSimpleName, "class", d.isPublic
                                                    ? EnumSet.of(PUBLIC, FINAL)
-                                                   : EnumSet.of(FINAL));
+                                                   : EnumSet.of(FINAL),
+                     null,
+                     d.targetSimpleName);
     emitFields(writer, d);
     emitConstructors(writer, d);
     emitAccessors(writer, d);
+    emitBuilderToBuilder(writer, d);
     emitBuild(writer, d);
     emitFactoryMethods(writer, d);
     emitValue(writer, d);
@@ -332,6 +335,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
+  private void emitBuilderToBuilder(final JavaWriter writer,
+                                    final Descriptor descriptor) throws IOException {
+    // Only toBuilder if the target asked for it.
+    if (descriptor.toBuilder) {
+      writer.emitEmptyLine();
+      writer.emitAnnotation(Override.class);
+      writer.beginMethod(descriptor.builderFullName, "builder", EnumSet.of(PUBLIC));
+      writer.emitStatement("return new %s(this)", descriptor.builderSimpleName);
+      writer.endMethod();
+    }
+  }
+
   private void emitValueConstructor(final JavaWriter writer, final List<ExecutableElement> fields)
       throws IOException {
     writer.emitEmptyLine();
@@ -342,11 +357,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
     writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
     for (ExecutableElement field : fields) {
-      emitNullCheck(writer, "", field);
+      if (shouldEnforceNonNull(field)) {
+        emitNullCheck(writer, "", field);
+      }
     }
     for (ExecutableElement field : fields) {
-      writer.emitStatement("this.%s = %s",
-                           fieldName(field), valueConstructorFieldCopy(writer, field));
+      final String rhs;
+      if (shouldEnforceNonNull(field)) {
+        rhs = valueConstructorFieldCopy(writer, field);
+      } else {
+        rhs = fieldName(field);
+      }
+      writer.emitStatement("this.%s = %s", fieldName(field), rhs);
     }
     writer.endConstructor();
   }
@@ -401,26 +423,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
     writer.emitEmptyLine();
-    emitValueGetterNullableAnnotation(writer, field);
     writer.emitAnnotation("AutoMatter.Field");
     writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
-    writer.emitStatement("return %s", unmodifiableValueField(field));
+    writer.emitStatement("return %s", fieldName(field));
     writer.endMethod();
-  }
-
-  private void emitValueGetterNullableAnnotation(final JavaWriter writer,
-                                                 final ExecutableElement field) throws IOException {
-    if (isPrimitive(field)) {
-      return;
-    }
-    final AnnotationMirror nullableAnnotation = nullableAnnotation(field);
-    if (nullableAnnotation != null) {
-      final Element annotationElement = nullableAnnotation.getAnnotationType().asElement();
-      final String annotationString = annotationElement.asType().toString();
-      final Map<String, String> values = annotationValues(nullableAnnotation);
-      writer.emitAnnotation(annotationString, values);
-    }
   }
 
   private boolean isPrimitive(final ExecutableElement field) {
@@ -578,13 +585,21 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private String buildFieldCopy(final JavaWriter writer, final ExecutableElement field) {
     if (isCollection(field)) {
-      return format("(%1$s != null) ? new %3$s<%2$s>(%1$s) : Collections.<%2$s>%4$s()",
-                    fieldName(field), fieldTypeArguments(writer, field),
-                    collection(field), emptyCollection(field));
-    }
-    if (isMap(field)) {
-      return format("(%1$s != null) ? new HashMap<%2$s>(%1$s) : Collections.<%2$s>emptyMap()",
-                    fieldName(field), fieldTypeArguments(writer, field));
+      final String absent = shouldEnforceNonNull(field)
+                            ? format("Collections.<%s>%s()",
+                                     fieldTypeArguments(writer, field), emptyCollection(field))
+                            : "null";
+      final String present = format("Collections.%s(new %s<%s>(%s))",
+                                    unmodifiableCollection(field), collection(field),
+                                    fieldTypeArguments(writer, field), fieldName(field));
+      return format("(%s != null) ? %s : %s", fieldName(field), present, absent);
+    } else if (isMap(field)) {
+      final String absent = shouldEnforceNonNull(field)
+                            ? format("Collections.<%s>emptyMap()", fieldTypeArguments(writer, field))
+                            : "null";
+      final String present = format("Collections.unmodifiableMap(new HashMap<%s>(%s))",
+                                    fieldTypeArguments(writer, field), fieldName(field));
+      return format("(%s != null) ? %s : %s", fieldName(field), present, absent);
     } else {
       return fieldName(field);
     }
@@ -595,7 +610,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
       if (isCollection(field)) {
-        emitListMutators(writer, descriptor.builderSimpleName, field);
+        emitCollectionMutators(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
         emitMapMutators(writer, descriptor.builderSimpleName, field);
       } else {
@@ -625,11 +640,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Null checks
     final String entry = variableName("entry", name);
-    emitNullCheck(writer, name, name);
-    beginFor(writer, "Map.Entry<" + extendedType + ">", entry, name + ".entrySet()");
-    emitNullCheck(writer, entry + ".getKey()", name + ": null key");
-    emitNullCheck(writer, entry + ".getValue()", name + ": null value");
-    endFor(writer);
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, name, name);
+      beginFor(writer, "Map.Entry<" + extendedType + ">", entry, name + ".entrySet()");
+      emitNullCheck(writer, entry + ".getKey()", name + ": null key");
+      emitNullCheck(writer, entry + ".getValue()", name + ": null value");
+      endFor(writer);
+    } else {
+      writer.beginControlFlow("if (" + name + " == null)");
+      writer.emitStatement("this.%s = null", name);
+      writer.emitStatement("return this");
+      writer.endControlFlow();
+    }
 
     writer.beginControlFlow("if (this." + name + " == null)");
     writer.emitStatement("this.%1$s = new HashMap<%2$s>(%1$s)", name, type);
@@ -673,8 +695,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     // Null checks
-    emitNullCheck(writer, keyName, name + ": " + keyName);
-    emitNullCheck(writer, valueName, name + ": " + valueName);
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, keyName, name + ": " + keyName);
+      emitNullCheck(writer, valueName, name + ": " + valueName);
+    }
 
     // Map instantiation
     if (entries == 1) {
@@ -718,8 +742,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        keyType, "key", valueType, "value");
 
     // Null checks
-    emitNullCheck(writer, "key", singular + ": key");
-    emitNullCheck(writer, "value", singular + ": value");
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, "key", singular + ": key");
+      emitNullCheck(writer, "value", singular + ": value");
+    }
     emitLazyMapFieldInstantiation(writer, field);
 
     // Put
@@ -729,13 +755,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitListMutators(final JavaWriter writer, final String builderName,
-                                final ExecutableElement field) throws IOException {
+  private void emitCollectionMutators(final JavaWriter writer, final String builderName,
+                                      final ExecutableElement field) throws IOException {
     emitCollectionAddAll(writer, builderName, field);
     emitCollectionCollectionAddAll(writer, builderName, field);
     emitCollectionIterableAddAll(writer, builderName, field);
     emitCollectionIteratorAddAll(writer, builderName, field);
-    emitListVarArgAddAll(writer, builderName, field);
+    emitCollectionVarArgAddAll(writer, builderName, field);
     emitCollectionItemAdd(writer, builderName, field);
   }
 
@@ -749,11 +775,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
                        "Iterator<" + extendedType + ">", name);
 
-    emitListNullGuard(writer, field);
+    emitCollectionNullGuard(writer, field);
     emitLazyCollectionFieldInstantiation(writer, field);
     writer.beginControlFlow("while (" + name + ".hasNext())");
     writer.emitStatement("%s %s = %s.next()", type, item, name);
-    emitNullCheck(writer, item, name + ": null item");
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, item, name + ": null item");
+    }
     writer.emitStatement("this.%s.add(%s)", name, item);
     writer.endControlFlow();
 
@@ -784,7 +812,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
                        fieldTypeArguments(writer, field), singular);
 
-    emitNullCheck(writer, singular, singular);
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, singular, singular);
+    }
     emitLazyCollectionFieldInstantiation(writer, field);
     writer.emitStatement("%s.add(%s)", fieldName(field), singular);
 
@@ -811,7 +841,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), iterableType, name);
 
-    emitListNullGuard(writer, field);
+    emitCollectionNullGuard(writer, field);
 
     final String item = variableName("item", name);
 
@@ -824,7 +854,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     emitLazyCollectionFieldInstantiation(writer, field);
 
     beginFor(writer, fieldTypeArguments(writer, field), item, name);
-    emitNullCheck(writer, item, name + ": null item");
+    if (shouldEnforceNonNull(field)) {
+      emitNullCheck(writer, item, name + ": null item");
+    }
     writer.emitStatement("this.%s.add(%s)", name, item);
     endFor(writer);
 
@@ -841,28 +873,34 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
                        "Collection<" + extendedType + ">", name);
 
-    emitListNullGuard(writer, field);
+    emitCollectionNullGuard(writer, field);
 
     final String item = variableName("item", name);
 
     writer.beginControlFlow("if (this." + name + " == null)");
-    beginFor(writer, type, item, name);
-    emitNullCheck(writer, item, name + ": null item");
-    endFor(writer);
+    if (shouldEnforceNonNull(field)) {
+      beginFor(writer, type, item, name);
+      emitNullCheck(writer, item, name + ": null item");
+      endFor(writer);
+    }
     writer.emitStatement("this.%1$s = new %3$s<%2$s>(%1$s)", name, type, collection(field));
 
     writer.nextControlFlow("else");
-    beginFor(writer, type, item, name);
-    emitNullCheck(writer, item, name + ": null item");
-    writer.emitStatement("this.%s.add(%s)", name, item);
-    endFor(writer);
+    if (shouldEnforceNonNull(field)) {
+      beginFor(writer, type, item, name);
+      emitNullCheck(writer, item, name + ": null item");
+      writer.emitStatement("this.%s.add(%s)", name, item);
+      endFor(writer);
+    } else {
+      writer.emitStatement("this.%s.addAll(%s)", name, name);
+    }
     writer.endControlFlow();
 
     writer.emitStatement("return this");
     writer.endMethod();
   }
 
-  private void emitListNullGuard(final JavaWriter writer, final ExecutableElement field)
+  private void emitCollectionNullGuard(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
     final String name = fieldName(field);
     writer.beginControlFlow("if (" + name + " == null)");
@@ -927,14 +965,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return arguments;
   }
 
-  private void emitListVarArgAddAll(final JavaWriter writer, final String builderName,
-                                    final ExecutableElement field) throws IOException {
+  private void emitCollectionVarArgAddAll(final JavaWriter writer, final String builderName,
+                                          final ExecutableElement field) throws IOException {
     final String type = fieldTypeArguments(writer, field);
     final String vararg = type + "...";
     writer.emitEmptyLine();
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
                        vararg, fieldName(field));
-    emitNullCheck(writer, "", field);
+    emitCollectionNullGuard(writer, field);
     writer.emitStatement("return %1$s(Arrays.asList(%1$s))", fieldName(field));
     writer.endMethod();
   }
@@ -955,6 +993,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                           final ExecutableElement field)
       throws IOException {
     writer.emitEmptyLine();
+    writer.emitAnnotation(Override.class);
     writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
     if (isCollection(field)) {
       emitCollectionGetterBody(writer, field);
@@ -968,7 +1007,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitCollectionGetterBody(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
-    emitLazyCollectionFieldInstantiation(writer, field);
+    if (shouldEnforceNonNull(field)) {
+      emitLazyCollectionFieldInstantiation(writer, field);
+    }
     writer.emitStatement("return %s", fieldName(field));
   }
 
@@ -984,7 +1025,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void emitMapGetterBody(final JavaWriter writer, final ExecutableElement field)
       throws IOException {
-    emitLazyMapFieldInstantiation(writer, field);
+    if (shouldEnforceNonNull(field)) {
+      emitLazyMapFieldInstantiation(writer, field);
+    }
     writer.emitStatement("return %s", fieldName(field));
   }
 

@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class TopLevelBuilder {
+public final class TopLevelBuilder implements TopLevel {
 
   public TopLevelBuilder() {
   }
