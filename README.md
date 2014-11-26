@@ -183,26 +183,34 @@ assert foobar.foo() == null;
 The `@Nullable` annotation can be e.g. `javax.annotation.Nullable` from [jsr305](http://search.maven.org/#search%7Cga%7C1%7Cjsr305). A `@Nullable` annotation from any other package will also work.
 
 
-TODO
-----
+### Collections
 
-* Recursive builders, like protobuf.
-* Optional support. E.g. something like below:
+AutoMatter emits convenient adders for List, Set and Map fields.
 
 ```java
 @AutoMatter
 interface Foobar {
-  // Allow both Guava and JDK8 Optional
-  Optional<String> foo();
-  Optional<String> bar();
+    List<String> oxen();
+    List<String> cows();
+    List<Integer> foo();
+
+    Map<String, Integer> ages();
 }
 
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .foo("hello")
+    .ox("moo!")
+    .ox("mooo!!")
+    .cow("moooo!!!")
+    .foo(17, 18)
+    .age("cassie", 5)
+    .age("henrietta", 7)
     .build();
 
-assert foobar.foo().get().equals("hello);
-assert !foobar.bar().isPresent();
+assert foobar.oxen().equals(asList("moo!", "mooo!!"));
+assert foobar.cows().equals(asList("moooo!!!"));
+assert foobar.foo().equals(asList(17, 18));
+assert foobar.ages().equals(ImmutableMap.of("cassie", 5,
+                                            "henrietta", 7);
 ```
