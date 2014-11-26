@@ -1,11 +1,15 @@
 package io.norberg.automatter;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.emptyCollectionOf;
@@ -21,6 +25,7 @@ public class ListFieldBuilderTest {
     List<String> apples();
     List<Integer> oxen();
     List<Integer> serial();
+    List<Map<String, Integer>> maps();
   }
 
   ListsBuilder builder;
@@ -114,5 +119,10 @@ public class ListFieldBuilderTest {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apples");
     builder.apples((String[])null);
+  }
+
+  @Test
+  public void verifySettingExtendingValue() {
+    builder.maps(ImmutableList.of(ImmutableMap.of("foo", 17)));
   }
 }

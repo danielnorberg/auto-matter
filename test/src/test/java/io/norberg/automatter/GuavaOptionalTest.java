@@ -1,11 +1,14 @@
 package io.norberg.automatter;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +24,7 @@ public class GuavaOptionalTest {
   interface GuavaOptionals {
 
     Optional<String> foo();
-    Optional<String> bar();
+    Optional<List<String>> bar();
 
     @Nullable Optional<String> baz();
   }
@@ -37,7 +40,7 @@ public class GuavaOptionalTest {
   public void testDefaults() {
     final GuavaOptionals foobar = builder.build();
     assertThat(foobar.foo(), is(Optional.<String>absent()));
-    assertThat(foobar.bar(), is(Optional.<String>absent()));
+    assertThat(foobar.bar(), is(Optional.<List<String>>absent()));
     assertThat(foobar.baz(), is(nullValue()));
   }
 
@@ -68,5 +71,10 @@ public class GuavaOptionalTest {
     builder.baz((Optional<String>) null);
     final GuavaOptionals foobar = builder.build();
     assertThat(foobar.baz(), is(nullValue()));
+  }
+
+  @Test
+  public void verifySettingExtendingValue() {
+    builder.bar(Optional.fromNullable(ImmutableList.of("foo", "bar")));
   }
 }
