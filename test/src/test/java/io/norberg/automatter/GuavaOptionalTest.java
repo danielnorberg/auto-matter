@@ -64,7 +64,7 @@ public class GuavaOptionalTest {
 
   @Test
   public void verifySettingNullableNull() {
-    builder.bar("hello");
+    builder.baz("hello");
     builder.baz((Optional<String>) null);
     final GuavaOptionals foobar = builder.build();
     assertThat(foobar.baz(), is(nullValue()));
