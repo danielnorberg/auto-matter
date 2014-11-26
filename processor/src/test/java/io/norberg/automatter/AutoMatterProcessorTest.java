@@ -145,4 +145,14 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError();
   }
+
+  @Test
+  public void testGuavaOptionalFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/GuavaOptionalFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/GuavaOptionalFieldsBuilder.java"));
+  }
 }

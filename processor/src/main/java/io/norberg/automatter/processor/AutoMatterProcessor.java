@@ -142,7 +142,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private void emitConstructors(final JavaWriter writer,
                                 final Descriptor descriptor)
       throws IOException {
-    emitDefaultConstructor(writer);
+    emitDefaultConstructor(writer, descriptor);
     emitCopyValueConstructor(writer, descriptor);
     emitCopyBuilderConstructor(writer, descriptor);
   }
@@ -171,10 +171,26 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.endMethod();
   }
 
-  private void emitDefaultConstructor(final JavaWriter writer) throws IOException {
+  private void emitDefaultConstructor(final JavaWriter writer,
+                                      final Descriptor descriptor) throws IOException {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PUBLIC));
+    for (ExecutableElement field : descriptor.fields) {
+      if (isOptional(field)) {
+        writer.emitStatement("this.%s = %s", fieldName(field), optionalAbsent(writer, field));
+      }
+    }
     writer.endConstructor();
+  }
+
+  private String optionalAbsent(final JavaWriter writer, final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("java.util.Optional<")) {
+      return writer.compressType("java.util.Optional") + ".empty()";
+    } else if (returnType.startsWith("com.google.common.base.Optional<")) {
+      return writer.compressType("com.google.common.base.Optional") + ".absent()";
+    }
+    return returnType;
   }
 
   private void emitCopyValueConstructor(final JavaWriter writer, final Descriptor descriptor)
@@ -609,6 +625,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                              final Descriptor descriptor) throws IOException {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
+      if (isOptional(field)) {
+        emitOptionalSetter(writer, descriptor.builderSimpleName, field);
+      }
       if (isCollection(field)) {
         emitCollectionMutators(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
@@ -617,6 +636,33 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         emitRawSetter(writer, descriptor.builderSimpleName, field);
       }
     }
+  }
+
+  private void emitOptionalSetter(final JavaWriter writer, final String builderName,
+                                  final ExecutableElement field) throws IOException {
+    writer.emitEmptyLine();
+
+    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
+                       fieldTypeArguments(writer, field), fieldName(field));
+    writer.emitStatement("return %1$s(%2$s(%1$s))", fieldName(field), optionalMaybe(writer, field));
+    writer.endMethod();
+
+  }
+
+  private String optionalMaybe(final JavaWriter writer, final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("java.util.Optional<")) {
+      return writer.compressType("java.util.Optional") + ".ofNullable";
+    } else if (returnType.startsWith("com.google.common.base.Optional<")) {
+      return writer.compressType("com.google.common.base.Optional") + ".fromNullable";
+    }
+    return returnType;
+  }
+
+  private boolean isOptional(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    return returnType.startsWith("java.util.Optional<") ||
+           returnType.startsWith("com.google.common.base.Optional<");
   }
 
   private void emitMapMutators(final JavaWriter writer, final String builderName,
