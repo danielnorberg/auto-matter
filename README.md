@@ -217,7 +217,8 @@ assert foobar.ages().equals(ImmutableMap.of("cassie", 5,
 
 ### Optional
 
-AutoMatter also supports optional fields, which can be a safer alternative to `@Nullable`.
+AutoMatter also supports Guava and JDK8+ `Optional` fields, which can be a safer alternative to
+`@Nullable`.
 
 ```java
 @AutoMatter
