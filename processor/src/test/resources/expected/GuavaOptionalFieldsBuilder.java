@@ -45,11 +45,11 @@ public final class GuavaOptionalFieldsBuilder
     return foo(com.google.common.base.Optional.fromNullable(foo));
   }
 
-  public GuavaOptionalFieldsBuilder foo(com.google.common.base.Optional<String> foo) {
+  public GuavaOptionalFieldsBuilder foo(com.google.common.base.Optional<? extends String> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
-    this.foo = foo;
+    this.foo = (com.google.common.base.Optional<String>) foo;
     return this;
   }
 
@@ -62,8 +62,8 @@ public final class GuavaOptionalFieldsBuilder
     return bar(com.google.common.base.Optional.fromNullable(bar));
   }
 
-  public GuavaOptionalFieldsBuilder bar(com.google.common.base.Optional<String> bar) {
-    this.bar = bar;
+  public GuavaOptionalFieldsBuilder bar(com.google.common.base.Optional<? extends String> bar) {
+    this.bar = (com.google.common.base.Optional<String>) bar;
     return this;
   }
 

@@ -45,11 +45,11 @@ public final class JUTOptionalFieldsBuilder
     return foo(java.util.Optional.ofNullable(foo));
   }
 
-  public JUTOptionalFieldsBuilder foo(java.util.Optional<String> foo) {
+  public JUTOptionalFieldsBuilder foo(java.util.Optional<? extends String> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
-    this.foo = foo;
+    this.foo = (java.util.Optional<String>) foo;
     return this;
   }
 
@@ -62,8 +62,8 @@ public final class JUTOptionalFieldsBuilder
     return bar(java.util.Optional.ofNullable(bar));
   }
 
-  public JUTOptionalFieldsBuilder bar(java.util.Optional<String> bar) {
-    this.bar = bar;
+  public JUTOptionalFieldsBuilder bar(java.util.Optional<? extends String> bar) {
+    this.bar = (java.util.Optional<String>) bar;
     return this;
   }
 

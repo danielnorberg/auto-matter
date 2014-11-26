@@ -304,6 +304,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
+  private String optionalType(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("java.util.Optional<")) {
+      return "java.util.Optional";
+    } else if (returnType.startsWith("com.google.common.base.Optional<")) {
+      return "com.google.common.base.Optional";
+    }
+    return returnType;
+  }
 
   private boolean isMap(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
@@ -626,9 +635,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (final ExecutableElement field : descriptor.fields) {
       emitGetter(writer, field);
       if (isOptional(field)) {
-        emitOptionalSetter(writer, descriptor.builderSimpleName, field);
-      }
-      if (isCollection(field)) {
+        emitOptionalSetters(writer, descriptor.builderSimpleName, field);
+      } else if (isCollection(field)) {
         emitCollectionMutators(writer, descriptor.builderSimpleName, field);
       } else if (isMap(field)) {
         emitMapMutators(writer, descriptor.builderSimpleName, field);
@@ -638,15 +646,32 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private void emitOptionalSetter(final JavaWriter writer, final String builderName,
-                                  final ExecutableElement field) throws IOException {
-    writer.emitEmptyLine();
+  private void emitOptionalSetters(final JavaWriter writer, final String builderSimpleName,
+                                   final ExecutableElement field) throws IOException {
+    emitOptionalRawSetter(writer, builderSimpleName, field);
+    emitOptionalOptionalSetter(writer, builderSimpleName, field);
+  }
 
+  private void emitOptionalRawSetter(final JavaWriter writer, final String builderName,
+                                     final ExecutableElement field) throws IOException {
+    writer.emitEmptyLine();
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
                        fieldTypeArguments(writer, field), fieldName(field));
     writer.emitStatement("return %1$s(%2$s(%1$s))", fieldName(field), optionalMaybe(writer, field));
     writer.endMethod();
+  }
 
+  private void emitOptionalOptionalSetter(final JavaWriter writer, final String builderName,
+                                          final ExecutableElement field) throws IOException {
+    writer.emitEmptyLine();
+    final String argType = format("%s<? extends %s>",
+                                  optionalType(field), fieldTypeArguments(writer, field));
+    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
+                       argType, fieldName(field));
+    emitNullCheck(writer, "", field);
+    writer.emitStatement("this.%1$s = (%2$s)%1$s", fieldName(field), fieldType(writer, field));
+    writer.emitStatement("return this");
+    writer.endMethod();
   }
 
   private String optionalMaybe(final JavaWriter writer, final ExecutableElement field) {
