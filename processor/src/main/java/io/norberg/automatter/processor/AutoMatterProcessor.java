@@ -176,7 +176,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     writer.beginConstructor(EnumSet.of(PUBLIC));
     for (ExecutableElement field : descriptor.fields) {
-      if (isOptional(field)) {
+      if (isOptional(field) && shouldEnforceNonNull(field)) {
         writer.emitStatement("this.%s = %s", fieldName(field), optionalAbsent(writer, field));
       }
     }

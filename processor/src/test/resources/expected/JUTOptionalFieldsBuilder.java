@@ -20,6 +20,7 @@ public final class JUTOptionalFieldsBuilder
     implements JUTOptionalFields {
 
   private java.util.Optional<String> foo;
+  private java.util.Optional<String> bar;
 
   public JUTOptionalFieldsBuilder() {
     this.foo = java.util.Optional.empty();
@@ -27,10 +28,12 @@ public final class JUTOptionalFieldsBuilder
 
   private JUTOptionalFieldsBuilder(JUTOptionalFields v) {
     this.foo = v.foo();
+    this.bar = v.bar();
   }
 
   private JUTOptionalFieldsBuilder(JUTOptionalFieldsBuilder v) {
     this.foo = v.foo;
+    this.bar = v.bar;
   }
 
   @Override
@@ -50,8 +53,22 @@ public final class JUTOptionalFieldsBuilder
     return this;
   }
 
+  @Override
+  public java.util.Optional<String> bar() {
+    return bar;
+  }
+
+  public JUTOptionalFieldsBuilder bar(String bar) {
+    return bar(java.util.Optional.ofNullable(bar));
+  }
+
+  public JUTOptionalFieldsBuilder bar(java.util.Optional<String> bar) {
+    this.bar = bar;
+    return this;
+  }
+
   public JUTOptionalFields build() {
-    return new Value(foo);
+    return new Value(foo, bar);
   }
 
   public static JUTOptionalFieldsBuilder from(JUTOptionalFields v) {
@@ -66,18 +83,27 @@ public final class JUTOptionalFieldsBuilder
       implements JUTOptionalFields {
 
     private final java.util.Optional<String> foo;
+    private final java.util.Optional<String> bar;
 
-    private Value(@AutoMatter.Field("foo") java.util.Optional<String> foo) {
+    private Value(@AutoMatter.Field("foo") java.util.Optional<String> foo,
+                  @AutoMatter.Field("bar") java.util.Optional<String> bar) {
       if (foo == null) {
         throw new NullPointerException("foo");
       }
       this.foo = foo;
+      this.bar = bar;
     }
 
     @AutoMatter.Field
     @Override
     public java.util.Optional<String> foo() {
       return foo;
+    }
+
+    @AutoMatter.Field
+    @Override
+    public java.util.Optional<String> bar() {
+      return bar;
     }
 
     public JUTOptionalFieldsBuilder builder() {
@@ -98,6 +124,9 @@ public final class JUTOptionalFieldsBuilder
       if (foo != null ? !foo.equals(that.foo()) : that.foo() != null) {
         return false;
       }
+      if (bar != null ? !bar.equals(that.bar()) : that.bar() != null) {
+        return false;
+      }
 
       return true;
     }
@@ -107,6 +136,7 @@ public final class JUTOptionalFieldsBuilder
       int result = 1;
       long temp;
       result = 31 * result + (foo != null ? foo.hashCode() : 0);
+      result = 31 * result + (bar != null ? bar.hashCode() : 0);
       return result;
     }
 
@@ -114,6 +144,7 @@ public final class JUTOptionalFieldsBuilder
     public String toString() {
       return "JUTOptionalFields{" +
              "foo=" + foo +
+             ", bar=" + bar +
              '}';
     }
   }

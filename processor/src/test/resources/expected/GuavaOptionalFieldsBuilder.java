@@ -20,6 +20,7 @@ public final class GuavaOptionalFieldsBuilder
     implements GuavaOptionalFields {
 
   private com.google.common.base.Optional<String> foo;
+  private com.google.common.base.Optional<String> bar;
 
   public GuavaOptionalFieldsBuilder() {
     this.foo = com.google.common.base.Optional.absent();
@@ -27,10 +28,12 @@ public final class GuavaOptionalFieldsBuilder
 
   private GuavaOptionalFieldsBuilder(GuavaOptionalFields v) {
     this.foo = v.foo();
+    this.bar = v.bar();
   }
 
   private GuavaOptionalFieldsBuilder(GuavaOptionalFieldsBuilder v) {
     this.foo = v.foo;
+    this.bar = v.bar;
   }
 
   @Override
@@ -50,8 +53,22 @@ public final class GuavaOptionalFieldsBuilder
     return this;
   }
 
+  @Override
+  public com.google.common.base.Optional<String> bar() {
+    return bar;
+  }
+
+  public GuavaOptionalFieldsBuilder bar(String bar) {
+    return bar(com.google.common.base.Optional.fromNullable(bar));
+  }
+
+  public GuavaOptionalFieldsBuilder bar(com.google.common.base.Optional<String> bar) {
+    this.bar = bar;
+    return this;
+  }
+
   public GuavaOptionalFields build() {
-    return new Value(foo);
+    return new Value(foo, bar);
   }
 
   public static GuavaOptionalFieldsBuilder from(GuavaOptionalFields v) {
@@ -66,18 +83,27 @@ public final class GuavaOptionalFieldsBuilder
       implements GuavaOptionalFields {
 
     private final com.google.common.base.Optional<String> foo;
+    private final com.google.common.base.Optional<String> bar;
 
-    private Value(@AutoMatter.Field("foo") com.google.common.base.Optional<String> foo) {
+    private Value(@AutoMatter.Field("foo") com.google.common.base.Optional<String> foo,
+                  @AutoMatter.Field("bar") com.google.common.base.Optional<String> bar) {
       if (foo == null) {
         throw new NullPointerException("foo");
       }
       this.foo = foo;
+      this.bar = bar;
     }
 
     @AutoMatter.Field
     @Override
     public com.google.common.base.Optional<String> foo() {
       return foo;
+    }
+
+    @AutoMatter.Field
+    @Override
+    public com.google.common.base.Optional<String> bar() {
+      return bar;
     }
 
     public GuavaOptionalFieldsBuilder builder() {
@@ -98,6 +124,9 @@ public final class GuavaOptionalFieldsBuilder
       if (foo != null ? !foo.equals(that.foo()) : that.foo() != null) {
         return false;
       }
+      if (bar != null ? !bar.equals(that.bar()) : that.bar() != null) {
+        return false;
+      }
 
       return true;
     }
@@ -107,6 +136,7 @@ public final class GuavaOptionalFieldsBuilder
       int result = 1;
       long temp;
       result = 31 * result + (foo != null ? foo.hashCode() : 0);
+      result = 31 * result + (bar != null ? bar.hashCode() : 0);
       return result;
     }
 
@@ -114,6 +144,7 @@ public final class GuavaOptionalFieldsBuilder
     public String toString() {
       return "GuavaOptionalFields{" +
              "foo=" + foo +
+             ", bar=" + bar +
              '}';
     }
   }
