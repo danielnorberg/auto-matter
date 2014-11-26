@@ -187,26 +187,22 @@ TODO
 ----
 
 * Recursive builders, like protobuf.
-* Collection support. E.g. something like below:
+* Optional support. E.g. something like below:
 
 ```java
 @AutoMatter
 interface Foobar {
-  List<String> foos();
-  Map<String, String> bars();
+  // Allow both Guava and JDK8 Optional
+  Optional<String> foo();
+  Optional<String> bar();
 }
-
 
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .foo("1")
-    .foo("2")
-    .bar("k1", "v2")
-    .bar("k2", "v2")
+    .foo("hello")
     .build();
 
-assert foobar.foos().equals(asList("1", "2"));
-assert foobar.bars().equals(ImmutableMap.of("k1", "v1",
-                                            "k2", "v2"));
+assert foobar.foo().get().equals("hello);
+assert !foobar.bar().isPresent();
 ```
