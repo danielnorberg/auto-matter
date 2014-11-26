@@ -214,3 +214,27 @@ assert foobar.foo().equals(asList(17, 18));
 assert foobar.ages().equals(ImmutableMap.of("cassie", 5,
                                             "henrietta", 7);
 ```
+
+### Optional
+
+AutoMatter also supports optional fields, which can be a safer alternative to `@Nullable`.
+
+```java
+@AutoMatter
+interface Foobar {
+    Optional<String> foo();
+    Optional<String> bar();
+    Optional<String> baz();
+}
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .foo("hello")
+    .bar(null)
+    .build();
+
+assert foobar.foo().get().equals("hello");
+assert !foobar.bar().isPresent();
+assert !foobar.baz().isPresent();
+```
