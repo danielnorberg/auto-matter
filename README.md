@@ -184,30 +184,59 @@ assert foobar.foo() == null;
 The `@Nullable` annotation can be e.g. `javax.annotation.Nullable` from [jsr305](http://search.maven.org/#search%7Cga%7C1%7Cjsr305). A `@Nullable` annotation from any other package will also work.
 
 
-TODO
-----
+### Collections
 
-* Recursive builders, like protobuf.
-* Collection support. E.g. something like below:
+AutoMatter emits convenient adders for List, Set and Map fields.
 
 ```java
 @AutoMatter
 interface Foobar {
-  List<String> foos();
-  Map<String, String> bars();
-}
+    List<String> oxen();
+    List<String> cows();
+    List<Integer> foo();
 
+    Map<String, Integer> ages();
+}
 
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .foo("1")
-    .foo("2")
-    .bar("k1", "v2")
-    .bar("k2", "v2")
+    .ox("moo!")
+    .ox("mooo!!")
+    .cow("moooo!!!")
+    .foo(17, 18)
+    .age("cassie", 5)
+    .age("henrietta", 7)
     .build();
 
-assert foobar.foos().equals(asList("1", "2"));
-assert foobar.bars().equals(ImmutableMap.of("k1", "v1",
-                                            "k2", "v2"));
+assert foobar.oxen().equals(asList("moo!", "mooo!!"));
+assert foobar.cows().equals(asList("moooo!!!"));
+assert foobar.foo().equals(asList(17, 18));
+assert foobar.ages().equals(ImmutableMap.of("cassie", 5,
+                                            "henrietta", 7);
+```
+
+### Optional
+
+AutoMatter also supports Guava and JDK8+ `Optional` fields, which can be a safer alternative to
+`@Nullable`.
+
+```java
+@AutoMatter
+interface Foobar {
+    Optional<String> foo();
+    Optional<String> bar();
+    Optional<String> baz();
+}
+
+// ...
+
+Foobar foobar = new FoobarBuilder()
+    .foo("hello")
+    .bar(null)
+    .build();
+
+assert foobar.foo().get().equals("hello");
+assert !foobar.bar().isPresent();
+assert !foobar.baz().isPresent();
 ```

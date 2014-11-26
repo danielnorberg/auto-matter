@@ -1,11 +1,22 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class FooBuilder {
+public final class FooBuilder implements Foo {
 
   private boolean aBoolean;
   private byte aByte;
@@ -47,6 +58,7 @@ public final class FooBuilder {
     this.array = v.array;
   }
 
+  @Override
   public boolean aBoolean() {
     return aBoolean;
   }
@@ -56,6 +68,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public byte aByte() {
     return aByte;
   }
@@ -65,6 +78,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public short aShort() {
     return aShort;
   }
@@ -74,6 +88,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public int aInt() {
     return aInt;
   }
@@ -83,6 +98,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public long aLong() {
     return aLong;
   }
@@ -92,6 +108,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public char aChar() {
     return aChar;
   }
@@ -101,6 +118,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public float aFloat() {
     return aFloat;
   }
@@ -110,6 +128,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public double aDouble() {
     return aDouble;
   }
@@ -119,6 +138,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public Object object() {
     return object;
   }
@@ -131,6 +151,7 @@ public final class FooBuilder {
     return this;
   }
 
+  @Override
   public Object[] array() {
     return array;
   }
@@ -141,6 +162,11 @@ public final class FooBuilder {
     }
     this.array = array;
     return this;
+  }
+
+  @Override
+  public FooBuilder builder() {
+    return new FooBuilder(this);
   }
 
   public Foo build() {
@@ -191,6 +217,12 @@ public final class FooBuilder {
         @AutoMatter.Field("object") Object object,
         @AutoMatter.Field("array") Object[] array
     ) {
+      if (object == null) {
+        throw new NullPointerException("object");
+      }
+      if (array == null) {
+        throw new NullPointerException("array");
+      }
       this.aBoolean = aBoolean;
       this.aByte = aByte;
       this.aShort = aShort;
@@ -201,12 +233,6 @@ public final class FooBuilder {
       this.aDouble = aDouble;
       this.object = object;
       this.array = array;
-      if (this.object == null) {
-        throw new NullPointerException("object");
-      }
-      if (this.array == null) {
-        throw new NullPointerException("array");
-      }
     }
 
     @AutoMatter.Field

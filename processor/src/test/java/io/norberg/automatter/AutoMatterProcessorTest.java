@@ -3,6 +3,7 @@ package io.norberg.automatter;
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.JavaFileObjects;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
@@ -110,5 +111,69 @@ public class AutoMatterProcessorTest {
         JavaFileObjects.forResource("expected/NullableFieldsBuilder.java"));
   }
 
+  @Test
+  public void testCollectionFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/CollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/CollectionFieldsBuilder.java"));
+  }
 
+  @Test
+  public void testNullableCollectionFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/NullableCollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/NullableCollectionFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testSingularCollectionFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/SingularCollectionFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  public void testReservedCollectionFieldNames() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/ReservedCollectionFieldNames.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  public void testGuavaOptionalFields() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/GuavaOptionalFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/GuavaOptionalFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testJUTOptionalFields() {
+    Assume.assumeTrue(hasJutOptional());
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/JUTOptionalFields.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/JUTOptionalFieldsBuilder.java"));
+  }
+
+  private boolean hasJutOptional() {
+    try {
+      Class.forName("java.util.Optional");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
 }
