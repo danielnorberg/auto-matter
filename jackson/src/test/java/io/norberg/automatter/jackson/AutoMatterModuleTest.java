@@ -32,6 +32,9 @@ public class AutoMatterModuleTest {
       .aCamelCaseField(true)
       .build();
 
+  static WithCollections WITH_COLLECTIONS = new WithCollectionsBuilder()
+      .build();
+
   ObjectMapper mapper;
 
   @Before
@@ -80,4 +83,23 @@ public class AutoMatterModuleTest {
     assertThat(parsed, is(FOO));
   }
 
+  @Test
+  public void testEmptyCollections() throws Exception {
+    final String json = mapper.writeValueAsString(WITH_COLLECTIONS);
+    final WithCollections parsed = mapper.readValue(json, WithCollections.class);
+    assertThat(parsed, is(WITH_COLLECTIONS));
+    assertThat(parsed.list().isEmpty(), is(true));
+    assertThat(parsed.set().isEmpty(), is(true));
+    assertThat(parsed.map().isEmpty(), is(true));
+  }
+
+  @Test
+  public void testDefaultEmptyCollections() throws Exception {
+    final String json = "{}";
+    final WithCollections parsed = mapper.readValue(json, WithCollections.class);
+    assertThat(parsed, is(WITH_COLLECTIONS));
+    assertThat(parsed.list().isEmpty(), is(true));
+    assertThat(parsed.set().isEmpty(), is(true));
+    assertThat(parsed.map().isEmpty(), is(true));
+  }
 }

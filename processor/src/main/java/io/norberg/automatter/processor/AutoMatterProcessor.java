@@ -382,7 +382,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
     writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
     for (ExecutableElement field : fields) {
-      if (shouldEnforceNonNull(field)) {
+      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
         emitNullCheck(writer, "", field);
       }
     }
