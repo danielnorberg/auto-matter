@@ -355,15 +355,6 @@ public final class CollectionFieldsBuilder
     private Value(@AutoMatter.Field("strings") List<String> strings,
                   @AutoMatter.Field("integers") Map<String,Integer> integers,
                   @AutoMatter.Field("numbers") Set<Long> numbers) {
-      if (strings == null) {
-        throw new NullPointerException("strings");
-      }
-      if (integers == null) {
-        throw new NullPointerException("integers");
-      }
-      if (numbers == null) {
-        throw new NullPointerException("numbers");
-      }
       this.strings = (strings != null) ? strings : Collections.<String>emptyList();
       this.integers = (integers != null) ? integers : Collections.<String,Integer>emptyMap();
       this.numbers = (numbers != null) ? numbers : Collections.<Long>emptySet();
