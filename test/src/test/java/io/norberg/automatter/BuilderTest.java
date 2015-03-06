@@ -7,6 +7,7 @@ import org.junit.rules.ExpectedException;
 
 import javax.annotation.Nullable;
 
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -39,6 +40,9 @@ public class BuilderTest {
     assertThat(foobar.foo(), is(0));
     assertThat(foobar.bar(), is("bar"));
     assertThat(foobar.quux(), is(nullValue()));
+
+    // Ensure that builders are not instances of the interface, avoiding bugs
+    assertThat(builder, is(not(instanceOf(Foobar.class))));
   }
 
   @Test

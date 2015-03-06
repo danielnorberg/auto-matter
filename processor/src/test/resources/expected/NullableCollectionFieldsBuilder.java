@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class NullableCollectionFieldsBuilder implements NullableCollectionFields {
+public final class NullableCollectionFieldsBuilder {
 
   private List<String> strings;
   private Map<String,Integer> integers;
@@ -40,7 +40,6 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     this.numbers = (v.numbers == null) ? null : new HashSet<Long>(v.numbers);
   }
 
-  @Override
   public List<String> strings() {
     return strings;
   }
@@ -110,7 +109,6 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return this;
   }
 
-  @Override
   public Map<String,Integer> integers() {
     return integers;
   }
@@ -178,7 +176,6 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return this;
   }
 
-  @Override
   public Set<Long> numbers() {
     return numbers;
   }

@@ -16,8 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class JUTOptionalFieldsBuilder
-    implements JUTOptionalFields {
+public final class JUTOptionalFieldsBuilder {
 
   private java.util.Optional<String> foo;
   private java.util.Optional<String> bar;
@@ -36,7 +35,6 @@ public final class JUTOptionalFieldsBuilder
     this.bar = v.bar;
   }
 
-  @Override
   public java.util.Optional<String> foo() {
     return foo;
   }
@@ -53,7 +51,6 @@ public final class JUTOptionalFieldsBuilder
     return this;
   }
 
-  @Override
   public java.util.Optional<String> bar() {
     return bar;
   }
