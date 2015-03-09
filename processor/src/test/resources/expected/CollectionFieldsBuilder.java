@@ -57,21 +57,12 @@ public final class CollectionFieldsBuilder
     if (strings == null) {
       throw new NullPointerException("strings");
     }
-    if (this.strings == null) {
-      for (String item : strings) {
-        if (item == null) {
-          throw new NullPointerException("strings: null item");
-        }
-      }
-      this.strings = new ArrayList<String>(strings);
-    } else {
-      for (String item : strings) {
-        if (item == null) {
-          throw new NullPointerException("strings: null item");
-        }
-        this.strings.add(item);
+    for (String item : strings) {
+      if (item == null) {
+        throw new NullPointerException("strings: null item");
       }
     }
+    this.strings = new ArrayList<String>(strings);
     return this;
   }
 
@@ -82,25 +73,15 @@ public final class CollectionFieldsBuilder
     if (strings instanceof Collection) {
       return strings((Collection<? extends String>) strings);
     }
-    if (this.strings == null) {
-      this.strings = new ArrayList<String>();
-    }
-    for (String item : strings) {
-      if (item == null) {
-        throw new NullPointerException("strings: null item");
-      }
-      this.strings.add(item);
-    }
-    return this;
+    return strings(strings.iterator());
   }
 
   public CollectionFieldsBuilder strings(Iterator<? extends String> strings) {
     if (strings == null) {
       throw new NullPointerException("strings");
     }
-    if (this.strings == null) {
-      this.strings = new ArrayList<String>();
-    }
+
+    this.strings = new ArrayList<String>();
     while (strings.hasNext()) {
       String item = strings.next();
       if (item == null) {
@@ -118,7 +99,7 @@ public final class CollectionFieldsBuilder
     return strings(Arrays.asList(strings));
   }
 
-  public CollectionFieldsBuilder string(String string) {
+  public CollectionFieldsBuilder appendString(String string) {
     if (string == null) {
       throw new NullPointerException("string");
     }
@@ -259,21 +240,12 @@ public final class CollectionFieldsBuilder
     if (numbers == null) {
       throw new NullPointerException("numbers");
     }
-    if (this.numbers == null) {
-      for (Long item : numbers) {
-        if (item == null) {
-          throw new NullPointerException("numbers: null item");
-        }
-      }
-      this.numbers = new HashSet<Long>(numbers);
-    } else {
-      for (Long item : numbers) {
-        if (item == null) {
-          throw new NullPointerException("numbers: null item");
-        }
-        this.numbers.add(item);
+    for (Long item : numbers) {
+      if (item == null) {
+        throw new NullPointerException("numbers: null item");
       }
     }
+    this.numbers = new HashSet<Long>(numbers);
     return this;
   }
 
@@ -284,25 +256,14 @@ public final class CollectionFieldsBuilder
     if (numbers instanceof Collection) {
       return numbers((Collection<? extends Long>) numbers);
     }
-    if (this.numbers == null) {
-      this.numbers = new HashSet<Long>();
-    }
-    for (Long item : numbers) {
-      if (item == null) {
-        throw new NullPointerException("numbers: null item");
-      }
-      this.numbers.add(item);
-    }
-    return this;
+    return numbers(numbers.iterator());
   }
 
   public CollectionFieldsBuilder numbers(Iterator<? extends Long> numbers) {
     if (numbers == null) {
       throw new NullPointerException("numbers");
     }
-    if (this.numbers == null) {
-      this.numbers = new HashSet<Long>();
-    }
+    this.numbers = new HashSet<Long>();
     while (numbers.hasNext()) {
       Long item = numbers.next();
       if (item == null) {
@@ -320,7 +281,7 @@ public final class CollectionFieldsBuilder
     return numbers(Arrays.asList(numbers));
   }
 
-  public CollectionFieldsBuilder number(Long number) {
+  public CollectionFieldsBuilder appendNumber(Long number) {
     if (number == null) {
       throw new NullPointerException("number");
     }

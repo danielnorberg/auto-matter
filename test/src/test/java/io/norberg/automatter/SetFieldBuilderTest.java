@@ -40,7 +40,7 @@ public class SetFieldBuilderTest {
 
   @Test
   public void verifyBuilderSetIsMutable() {
-    builder.apple("red");
+    builder.appendApple("red");
     final Set<String> apples = builder.apples();
     apples.remove("red");
     apples.add("green");
@@ -54,7 +54,7 @@ public class SetFieldBuilderTest {
     final Sets lists1 = builder
         .apples("red")
         .build();
-    builder.apple("green");
+    builder.appendApple("green");
     final Sets lists2 = builder.build();
     assertThat(lists1.apples(), is(set("red")));
     assertThat(lists2.apples(), is(set("red", "green")));
@@ -63,7 +63,7 @@ public class SetFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable1() {
     final Sets lists = builder
-        .apple("red").apple("green")
+        .appendApple("red").appendApple("green")
         .build();
     lists.apples().remove("red");
   }
@@ -71,7 +71,7 @@ public class SetFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable2() {
     final Sets lists = builder
-        .apple("red").apple("green")
+        .appendApple("red").appendApple("green")
         .build();
     lists.apples().add("blue");
   }
@@ -79,14 +79,14 @@ public class SetFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable3() {
     final Sets lists = builder
-        .apple("red").apple("green")
+        .appendApple("red").appendApple("green")
         .build();
     lists.apples().clear();
   }
 
   @Test
   public void testEnglishPlurals() {
-    final Sets lists = builder.ox(17).ox(4711).build();
+    final Sets lists = builder.appendOx(17).appendOx(4711).build();
     assertThat(lists.oxen(), is(set(17, 4711)));
   }
 
@@ -100,7 +100,7 @@ public class SetFieldBuilderTest {
   public void verifyAddingNullThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apple");
-    builder.apple(null);
+    builder.appendApple(null);
   }
 
   @Test

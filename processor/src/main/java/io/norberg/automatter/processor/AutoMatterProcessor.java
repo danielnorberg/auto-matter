@@ -6,48 +6,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import com.squareup.javawriter.JavaWriter;
-
+import io.norberg.automatter.AutoMatter;
 import org.modeshape.common.text.Inflector;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.annotation.Generated;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.JavaFileObject;
-
-import io.norberg.automatter.AutoMatter;
+import java.io.IOException;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Collections.reverse;
 import static javax.lang.model.element.ElementKind.PACKAGE;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
@@ -166,7 +144,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                                       final Descriptor descriptor) throws IOException {
     writer.emitEmptyLine();
     writer.beginMethod(descriptor.builderSimpleName, "from", EnumSet.of(STATIC, PUBLIC),
-                       descriptor.builderSimpleName, "v");
+        descriptor.builderSimpleName, "v");
     writer.emitStatement("return new %s(v)", descriptor.builderSimpleName);
     writer.endMethod();
   }
@@ -656,7 +634,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                                      final ExecutableElement field) throws IOException {
     writer.emitEmptyLine();
     writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
-                       fieldTypeArguments(writer, field), fieldName(field));
+        fieldTypeArguments(writer, field), fieldName(field));
     writer.emitStatement("return %1$s(%2$s(%1$s))", fieldName(field), optionalMaybe(writer, field));
     writer.endMethod();
   }
@@ -847,7 +825,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                        "Iterator<" + extendedType + ">", name);
 
     emitCollectionNullGuard(writer, field);
-    emitLazyCollectionFieldInstantiation(writer, field);
+    writer.emitStatement("this.%1$s = new %3$s<%2$s>()", name, type, collection(field));
     writer.beginControlFlow("while (" + name + ".hasNext())");
     writer.emitStatement("%s %s = %s.next()", type, item, name);
     if (shouldEnforceNonNull(field)) {
@@ -867,7 +845,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     writer.emitEmptyLine();
     final String fullType = collectionType(field) + "<" + extendedType + ">";
     writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       fullType, name);
+        fullType, name);
     writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
     writer.endMethod();
   }
@@ -876,11 +854,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                                      final ExecutableElement field) throws IOException {
     final String name = fieldName(field);
     final String singular = singular(name);
-    if (singular == null) {
+    if (singular == null || singular.isEmpty()) {
       return;
     }
+    final String appendMethodName = "append" + capitalizeFirstLetter(singular);
     writer.emitEmptyLine();
-    writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
+    writer.beginMethod(builderName, appendMethodName, EnumSet.of(PUBLIC),
                        fieldTypeArguments(writer, field), singular);
 
     if (shouldEnforceNonNull(field)) {
@@ -914,24 +893,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     emitCollectionNullGuard(writer, field);
 
-    final String item = variableName("item", name);
-
     // Collection optimization
     writer.beginControlFlow("if (" + name + " instanceof Collection)");
     writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
     writer.endControlFlow();
 
-    // Iterator fallback
-    emitLazyCollectionFieldInstantiation(writer, field);
-
-    beginFor(writer, fieldTypeArguments(writer, field), item, name);
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, item, name + ": null item");
-    }
-    writer.emitStatement("this.%s.add(%s)", name, item);
-    endFor(writer);
-
-    writer.emitStatement("return this");
+    // Emit the iterator if it is not a collection
+    writer.emitStatement("return %1$s(%1$s.iterator())", name);
     writer.endMethod();
   }
 
@@ -948,24 +916,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     final String item = variableName("item", name);
 
-    writer.beginControlFlow("if (this." + name + " == null)");
     if (shouldEnforceNonNull(field)) {
       beginFor(writer, type, item, name);
       emitNullCheck(writer, item, name + ": null item");
       endFor(writer);
     }
     writer.emitStatement("this.%1$s = new %3$s<%2$s>(%1$s)", name, type, collection(field));
-
-    writer.nextControlFlow("else");
-    if (shouldEnforceNonNull(field)) {
-      beginFor(writer, type, item, name);
-      emitNullCheck(writer, item, name + ": null item");
-      writer.emitStatement("this.%s.add(%s)", name, item);
-      endFor(writer);
-    } else {
-      writer.emitStatement("this.%s.addAll(%s)", name, name);
-    }
-    writer.endControlFlow();
 
     writer.emitStatement("return this");
     writer.endMethod();
@@ -1244,6 +1200,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void error(final String s, final Element element) {
     messager.printMessage(ERROR, s, element);
+  }
+
+  private String capitalizeFirstLetter(String s) {
+    if (s == null) {
+      throw new NullPointerException("s");
+    }
+    if (s.isEmpty()) {
+      return "";
+    }
+    return s.substring(0, 1).toUpperCase() + (s.length() > 1 ? s.substring(1) : "");
   }
 
   @Override

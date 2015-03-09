@@ -201,9 +201,9 @@ interface Foobar {
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .ox("moo!")
-    .ox("mooo!!")
-    .cow("moooo!!!")
+    .appendOx("moo!")
+    .appendOx("mooo!!")
+    .appendCow("moooo!!!")
     .foo(17, 18)
     .age("cassie", 5)
     .age("henrietta", 7)
