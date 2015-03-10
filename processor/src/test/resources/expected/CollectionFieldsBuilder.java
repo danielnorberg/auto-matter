@@ -130,11 +130,7 @@ public final class CollectionFieldsBuilder
         throw new NullPointerException("integers: null value");
       }
     }
-    if (this.integers == null) {
-      this.integers = new HashMap<String,Integer>(integers);
-    } else {
-      this.integers.putAll(integers);
-    }
+    this.integers = new HashMap<String,Integer>(integers);
     return this;
   }
 
@@ -145,9 +141,7 @@ public final class CollectionFieldsBuilder
     if (v1 == null) {
       throw new NullPointerException("integers: v1");
     }
-    if (integers == null) {
-      integers = new HashMap<String,Integer>();
-    }
+    integers = new HashMap<String,Integer>();
     integers.put(k1, v1);
     return this;
   }
@@ -210,7 +204,7 @@ public final class CollectionFieldsBuilder
     return this;
   }
 
-  public CollectionFieldsBuilder integer(String key, Integer value) {
+  public CollectionFieldsBuilder addInteger(String key, Integer value) {
     if (key == null) {
       throw new NullPointerException("integer: key");
     }

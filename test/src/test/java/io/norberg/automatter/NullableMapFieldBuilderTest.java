@@ -1,19 +1,15 @@
 package io.norberg.automatter;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.Assert.assertThat;
 
@@ -41,7 +37,7 @@ public class NullableMapFieldBuilderTest {
 
   @Test
   public void testAddingEntryInstantiatesMap() {
-    builder.price("red", 17);
+    builder.addPrice("red", 17);
     final NullableMap map = builder.build();
     assertThat(map.prices(), is((Map<String, Integer>)ImmutableMap.of("red", 17)));
   }

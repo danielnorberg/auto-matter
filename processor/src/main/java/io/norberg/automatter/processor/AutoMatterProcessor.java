@@ -702,11 +702,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       writer.endControlFlow();
     }
 
-    writer.beginControlFlow("if (this." + name + " == null)");
     writer.emitStatement("this.%1$s = new HashMap<%2$s>(%1$s)", name, type);
-    writer.nextControlFlow("else");
-    writer.emitStatement("this.%1$s.putAll(%1$s)", name);
-    writer.endControlFlow();
 
     writer.emitStatement("return this");
     writer.endMethod();
@@ -751,9 +747,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Map instantiation
     if (entries == 1) {
-      writer.beginControlFlow("if (" + name + " == null)");
       writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
-      writer.endControlFlow();
     }
 
     // Put
@@ -783,11 +777,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (singular == null) {
       return;
     }
+    final String addSingular = "add" + capitalizeFirstLetter(singular);
     final String keyType = keyType(writer, field);
     final String valueType = valueType(writer, field);
 
     writer.emitEmptyLine();
-    writer.beginMethod(builderName, singular, EnumSet.of(PUBLIC),
+    writer.beginMethod(builderName, addSingular, EnumSet.of(PUBLIC),
                        keyType, "key", valueType, "value");
 
     // Null checks
@@ -1202,7 +1197,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     messager.printMessage(ERROR, s, element);
   }
 
-  private String capitalizeFirstLetter(String s) {
+  private static String capitalizeFirstLetter(String s) {
     if (s == null) {
       throw new NullPointerException("s");
     }

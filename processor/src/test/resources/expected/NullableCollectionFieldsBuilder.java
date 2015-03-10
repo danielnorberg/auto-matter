@@ -108,18 +108,12 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
       this.integers = null;
       return this;
     }
-    if (this.integers == null) {
-      this.integers = new HashMap<String,Integer>(integers);
-    } else {
-      this.integers.putAll(integers);
-    }
+    this.integers = new HashMap<String,Integer>(integers);
     return this;
   }
 
   public NullableCollectionFieldsBuilder integers(String k1, Integer v1) {
-    if (integers == null) {
-      integers = new HashMap<String,Integer>();
-    }
+    integers = new HashMap<String,Integer>();
     integers.put(k1, v1);
     return this;
   }
@@ -158,7 +152,7 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integer(String key, Integer value) {
+  public NullableCollectionFieldsBuilder addInteger(String key, Integer value) {
     if (integers == null) {
       integers = new HashMap<String,Integer>();
     }
