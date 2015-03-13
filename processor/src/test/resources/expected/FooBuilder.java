@@ -16,7 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class FooBuilder implements Foo {
+public final class FooBuilder {
 
   private boolean aBoolean;
   private byte aByte;
@@ -58,7 +58,6 @@ public final class FooBuilder implements Foo {
     this.array = v.array;
   }
 
-  @Override
   public boolean aBoolean() {
     return aBoolean;
   }
@@ -68,7 +67,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public byte aByte() {
     return aByte;
   }
@@ -78,7 +76,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public short aShort() {
     return aShort;
   }
@@ -88,7 +85,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public int aInt() {
     return aInt;
   }
@@ -98,7 +94,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public long aLong() {
     return aLong;
   }
@@ -108,7 +103,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public char aChar() {
     return aChar;
   }
@@ -118,7 +112,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public float aFloat() {
     return aFloat;
   }
@@ -128,7 +121,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public double aDouble() {
     return aDouble;
   }
@@ -138,7 +130,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public Object object() {
     return object;
   }
@@ -151,7 +142,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public Object[] array() {
     return array;
   }
@@ -164,7 +154,6 @@ public final class FooBuilder implements Foo {
     return this;
   }
 
-  @Override
   public FooBuilder builder() {
     return new FooBuilder(this);
   }

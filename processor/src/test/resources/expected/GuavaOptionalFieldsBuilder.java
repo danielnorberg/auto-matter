@@ -16,8 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class GuavaOptionalFieldsBuilder
-    implements GuavaOptionalFields {
+public final class GuavaOptionalFieldsBuilder {
 
   private com.google.common.base.Optional<String> foo;
   private com.google.common.base.Optional<String> bar;
@@ -36,7 +35,6 @@ public final class GuavaOptionalFieldsBuilder
     this.bar = v.bar;
   }
 
-  @Override
   public com.google.common.base.Optional<String> foo() {
     return foo;
   }
@@ -53,7 +51,6 @@ public final class GuavaOptionalFieldsBuilder
     return this;
   }
 
-  @Override
   public com.google.common.base.Optional<String> bar() {
     return bar;
   }

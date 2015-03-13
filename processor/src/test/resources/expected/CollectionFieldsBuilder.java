@@ -16,8 +16,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class CollectionFieldsBuilder
-    implements CollectionFields {
+public final class CollectionFieldsBuilder {
 
   private List<String> strings;
   private Map<String,Integer> integers;
@@ -41,7 +40,6 @@ public final class CollectionFieldsBuilder
     this.numbers = (v.numbers == null) ? null : new HashSet<Long>(v.numbers);
   }
 
-  @Override
   public List<String> strings() {
     if (this.strings == null) {
       this.strings = new ArrayList<String>();
@@ -129,7 +127,6 @@ public final class CollectionFieldsBuilder
     return this;
   }
 
-  @Override
   public Map<String,Integer> integers() {
     if (integers == null) {
       integers = new HashMap<String,Integer>();
@@ -243,7 +240,6 @@ public final class CollectionFieldsBuilder
     return this;
   }
 
-  @Override
   public Set<Long> numbers() {
     if (this.numbers == null) {
       this.numbers = new HashSet<Long>();
