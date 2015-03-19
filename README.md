@@ -205,8 +205,8 @@ Foobar foobar = new FoobarBuilder()
     .addOx("mooo!!")
     .addCow("moooo!!!")
     .foo(17, 18)
-    .addAge("cassie", 5)
-    .addAge("henrietta", 7)
+    .putAge("cassie", 5)
+    .putAge("henrietta", 7)
     .build();
 
 assert foobar.oxen().equals(asList("moo!", "mooo!!"));

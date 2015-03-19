@@ -25,8 +25,8 @@ public class CollectionExample {
         .addOx("mooo!!")
         .addCow("moooo!!!")
         .foo(17, 18)
-        .addAge("cassie", 5)
-        .addAge("henrietta", 7)
+        .putAge("cassie", 5)
+        .putAge("henrietta", 7)
         .build();
 
     out.println("oxen: " + foobar.oxen());

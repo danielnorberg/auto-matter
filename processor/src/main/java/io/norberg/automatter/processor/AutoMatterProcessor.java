@@ -777,7 +777,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (singular == null) {
       return;
     }
-    final String addSingular = "add" + capitalizeFirstLetter(singular);
+    final String addSingular = "put" + capitalizeFirstLetter(singular);
     final String keyType = keyType(writer, field);
     final String valueType = valueType(writer, field);
 

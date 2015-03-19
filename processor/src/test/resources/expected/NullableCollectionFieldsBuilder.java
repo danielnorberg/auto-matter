@@ -152,7 +152,7 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return this;
   }
 
-  public NullableCollectionFieldsBuilder addInteger(String key, Integer value) {
+  public NullableCollectionFieldsBuilder putInteger(String key, Integer value) {
     if (integers == null) {
       integers = new HashMap<String,Integer>();
     }

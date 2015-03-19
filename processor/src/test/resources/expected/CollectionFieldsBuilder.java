@@ -204,7 +204,7 @@ public final class CollectionFieldsBuilder
     return this;
   }
 
-  public CollectionFieldsBuilder addInteger(String key, Integer value) {
+  public CollectionFieldsBuilder putInteger(String key, Integer value) {
     if (key == null) {
       throw new NullPointerException("integer: key");
     }

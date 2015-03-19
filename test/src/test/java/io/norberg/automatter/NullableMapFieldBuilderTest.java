@@ -37,7 +37,7 @@ public class NullableMapFieldBuilderTest {
 
   @Test
   public void testAddingEntryInstantiatesMap() {
-    builder.addPrice("red", 17);
+    builder.putPrice("red", 17);
     final NullableMap map = builder.build();
     assertThat(map.prices(), is((Map<String, Integer>)ImmutableMap.of("red", 17)));
   }
