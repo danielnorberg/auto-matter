@@ -99,7 +99,7 @@ public final class CollectionFieldsBuilder
     return strings(Arrays.asList(strings));
   }
 
-  public CollectionFieldsBuilder appendString(String string) {
+  public CollectionFieldsBuilder addString(String string) {
     if (string == null) {
       throw new NullPointerException("string");
     }
@@ -275,7 +275,7 @@ public final class CollectionFieldsBuilder
     return numbers(Arrays.asList(numbers));
   }
 
-  public CollectionFieldsBuilder appendNumber(Long number) {
+  public CollectionFieldsBuilder addNumber(Long number) {
     if (number == null) {
       throw new NullPointerException("number");
     }

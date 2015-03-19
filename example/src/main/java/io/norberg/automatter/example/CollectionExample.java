@@ -21,9 +21,9 @@ public class CollectionExample {
 
   public static void main(final String... args) throws IOException {
     CollectionsFoobar foobar = new CollectionsFoobarBuilder()
-        .appendOx("moo!")
-        .appendOx("mooo!!")
-        .appendCow("moooo!!!")
+        .addOx("moo!")
+        .addOx("mooo!!")
+        .addCow("moooo!!!")
         .foo(17, 18)
         .addAge("cassie", 5)
         .addAge("henrietta", 7)

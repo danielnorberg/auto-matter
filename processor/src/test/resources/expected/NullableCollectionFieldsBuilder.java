@@ -90,7 +90,7 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return strings(Arrays.asList(strings));
   }
 
-  public NullableCollectionFieldsBuilder appendString(String string) {
+  public NullableCollectionFieldsBuilder addString(String string) {
     if (this.strings == null) {
       this.strings = new ArrayList<String>();
     }
@@ -210,7 +210,7 @@ public final class NullableCollectionFieldsBuilder implements NullableCollection
     return numbers(Arrays.asList(numbers));
   }
 
-  public NullableCollectionFieldsBuilder appendNumber(Long number) {
+  public NullableCollectionFieldsBuilder addNumber(Long number) {
     if (this.numbers == null) {
       this.numbers = new HashSet<Long>();
     }

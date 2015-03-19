@@ -43,7 +43,7 @@ public class ListFieldBuilderTest {
 
   @Test
   public void verifyBuilderListIsMutable() {
-    builder.appendApple("red");
+    builder.addApple("red");
     final List<String> apples = builder.apples();
     apples.remove("red");
     apples.add("green");
@@ -57,7 +57,7 @@ public class ListFieldBuilderTest {
     final Lists lists1 = builder
         .apples("red")
         .build();
-    builder.appendApple("green");
+    builder.addApple("green");
     final Lists lists2 = builder.build();
     assertThat(lists1.apples(), is(asList("red")));
     assertThat(lists2.apples(), is(asList("red", "green")));
@@ -66,7 +66,7 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable1() {
     final Lists lists = builder
-        .appendApple("red").appendApple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().remove("red");
   }
@@ -74,7 +74,7 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable2() {
     final Lists lists = builder
-        .appendApple("red").appendApple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().add("blue");
   }
@@ -82,14 +82,14 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable3() {
     final Lists lists = builder
-        .appendApple("red").appendApple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().clear();
   }
 
   @Test
   public void testEnglishPlurals() {
-    final Lists lists = builder.appendOx(17).appendOx(4711).build();
+    final Lists lists = builder.addOx(17).addOx(4711).build();
     assertThat(lists.oxen(), is(asList(17, 4711)));
   }
 
@@ -103,7 +103,7 @@ public class ListFieldBuilderTest {
   public void verifyAddingNullThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apple");
-    builder.appendApple(null);
+    builder.addApple(null);
   }
 
   @Test

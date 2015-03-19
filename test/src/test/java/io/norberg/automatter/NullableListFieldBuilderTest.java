@@ -36,7 +36,7 @@ public class NullableListFieldBuilderTest {
 
   @Test
   public void testAddingItemInstantiatesList() {
-    builder.appendApple("red");
+    builder.addApple("red");
     final NullableLists lists = builder.build();
     assertThat(lists.apples(), is(asList("red")));
   }
@@ -65,7 +65,7 @@ public class NullableListFieldBuilderTest {
 
   @Test
   public void testAddingNull() {
-    builder.appendApple(null);
+    builder.addApple(null);
     final NullableLists lists = builder.build();
     List<String> apples = lists.apples();
     assertThat(apples, is(notNullValue()));

@@ -852,7 +852,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (singular == null || singular.isEmpty()) {
       return;
     }
-    final String appendMethodName = "append" + capitalizeFirstLetter(singular);
+    final String appendMethodName = "add" + capitalizeFirstLetter(singular);
     writer.emitEmptyLine();
     writer.beginMethod(builderName, appendMethodName, EnumSet.of(PUBLIC),
                        fieldTypeArguments(writer, field), singular);
