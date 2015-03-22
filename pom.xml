@@ -98,7 +98,7 @@
             <id>enforce</id>
             <configuration>
               <rules>
-                <requireUpperBoundDeps />
+                <requireUpperBoundDeps/>
               </rules>
             </configuration>
             <goals>

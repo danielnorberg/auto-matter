@@ -5,6 +5,7 @@ import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
 class AutoMatterProcessorException extends Exception {
+
   private final Element element;
 
   public AutoMatterProcessorException(final String message, final Element element) {

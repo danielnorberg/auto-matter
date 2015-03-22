@@ -4,10 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import io.norberg.automatter.AutoMatter;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import io.norberg.automatter.AutoMatter;
 
 public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 

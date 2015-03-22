@@ -96,7 +96,7 @@ public class ListFieldBuilderTest {
 
   @Test
   public void testSingular() {
-    final Lists lists = builder.serial(1, 2, 3,4).build();
+    final Lists lists = builder.serial(1, 2, 3, 4).build();
     assertThat(lists.serial(), is(asList(1, 2, 3, 4)));
   }
 
@@ -111,14 +111,14 @@ public class ListFieldBuilderTest {
   public void verifySettingNullIterableThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apples");
-    builder.apples((Iterable<String>)null);
+    builder.apples((Iterable<String>) null);
   }
 
   @Test
   public void verifySettingNullArrayThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apples");
-    builder.apples((String[])null);
+    builder.apples((String[]) null);
   }
 
   @Test

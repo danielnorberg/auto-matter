@@ -2,9 +2,10 @@ package io.norberg.automatter.example;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.norberg.automatter.gson.AutoMatterTypeAdapterFactory;
 
 import java.io.IOException;
+
+import io.norberg.automatter.gson.AutoMatterTypeAdapterFactory;
 
 import static java.lang.System.out;
 

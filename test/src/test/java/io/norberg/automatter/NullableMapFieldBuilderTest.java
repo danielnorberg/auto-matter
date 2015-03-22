@@ -43,7 +43,7 @@ public class NullableMapFieldBuilderTest {
   public void testAddingEntryInstantiatesMap() {
     builder.price("red", 17);
     final NullableMap map = builder.build();
-    assertThat(map.prices(), is((Map<String, Integer>)ImmutableMap.of("red", 17)));
+    assertThat(map.prices(), is((Map<String, Integer>) ImmutableMap.of("red", 17)));
   }
 
   @Test
@@ -51,8 +51,8 @@ public class NullableMapFieldBuilderTest {
     builder.prices("red", 17,
                    "green", 18);
     final NullableMap map = builder.build();
-    assertThat(map.prices(), is((Map<String, Integer>)ImmutableMap.of("red", 17,
-                                                                      "green", 18)));
+    assertThat(map.prices(), is((Map<String, Integer>) ImmutableMap.of("red", 17,
+                                                                       "green", 18)));
   }
 
   @Test

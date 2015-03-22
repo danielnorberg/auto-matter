@@ -61,7 +61,7 @@ public class NullableListFieldBuilderTest {
   @Test
   public void testSettingNull() {
     builder.apples("foo", "bar");
-    builder.apples((List<String>)null);
+    builder.apples((List<String>) null);
     final NullableLists lists = builder.build();
     assertThat(lists.apples(), is(nullValue()));
   }

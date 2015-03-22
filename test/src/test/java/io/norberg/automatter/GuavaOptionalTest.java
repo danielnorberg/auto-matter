@@ -46,7 +46,7 @@ public class GuavaOptionalTest {
 
   @Test
   public void verifySettingNullGivesAbsent() {
-    builder.foo((String)null);
+    builder.foo((String) null);
     final GuavaOptionals foobar = builder.build();
     assertThat(foobar.foo(), is(Optional.<String>absent()));
   }
@@ -62,7 +62,7 @@ public class GuavaOptionalTest {
   public void verifySettingNonNullableNullNPEs() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("foo");
-    builder.foo((Optional<String>)null);
+    builder.foo((Optional<String>) null);
   }
 
   @Test
