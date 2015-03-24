@@ -5,14 +5,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class NullableListFieldBuilderTest {
@@ -39,7 +36,7 @@ public class NullableListFieldBuilderTest {
 
   @Test
   public void testAddingItemInstantiatesList() {
-    builder.apple("red");
+    builder.addApple("red");
     final NullableLists lists = builder.build();
     assertThat(lists.apples(), is(asList("red")));
   }
@@ -68,7 +65,7 @@ public class NullableListFieldBuilderTest {
 
   @Test
   public void testAddingNull() {
-    builder.apple(null);
+    builder.addApple(null);
     final NullableLists lists = builder.build();
     List<String> apples = lists.apples();
     assertThat(apples, is(notNullValue()));

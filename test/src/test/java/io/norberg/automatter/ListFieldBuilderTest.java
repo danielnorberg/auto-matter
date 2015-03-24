@@ -2,7 +2,6 @@ package io.norberg.automatter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,7 +43,7 @@ public class ListFieldBuilderTest {
 
   @Test
   public void verifyBuilderListIsMutable() {
-    builder.apple("red");
+    builder.addApple("red");
     final List<String> apples = builder.apples();
     apples.remove("red");
     apples.add("green");
@@ -58,7 +57,7 @@ public class ListFieldBuilderTest {
     final Lists lists1 = builder
         .apples("red")
         .build();
-    builder.apple("green");
+    builder.addApple("green");
     final Lists lists2 = builder.build();
     assertThat(lists1.apples(), is(asList("red")));
     assertThat(lists2.apples(), is(asList("red", "green")));
@@ -67,7 +66,7 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable1() {
     final Lists lists = builder
-        .apple("red").apple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().remove("red");
   }
@@ -75,7 +74,7 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable2() {
     final Lists lists = builder
-        .apple("red").apple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().add("blue");
   }
@@ -83,14 +82,14 @@ public class ListFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable3() {
     final Lists lists = builder
-        .apple("red").apple("green")
+        .addApple("red").addApple("green")
         .build();
     lists.apples().clear();
   }
 
   @Test
   public void testEnglishPlurals() {
-    final Lists lists = builder.ox(17).ox(4711).build();
+    final Lists lists = builder.addOx(17).addOx(4711).build();
     assertThat(lists.oxen(), is(asList(17, 4711)));
   }
 
@@ -104,7 +103,7 @@ public class ListFieldBuilderTest {
   public void verifyAddingNullThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("apple");
-    builder.apple(null);
+    builder.addApple(null);
   }
 
   @Test
@@ -124,5 +123,20 @@ public class ListFieldBuilderTest {
   @Test
   public void verifySettingExtendingValue() {
     builder.maps(ImmutableList.of(ImmutableMap.of("foo", 17)));
+  }
+
+  @Test
+  public void testListMethodsReplaceOldValue() {
+    final Lists list = builder
+        .apples("red", "green")
+        .apples("green")
+        .build();
+
+    assertThat(list.apples(), is(asList("green")));
+
+    final Lists listWithRed = ListsBuilder.from(list)
+        .apples("red")
+        .build();
+    assertThat(listWithRed.apples(), is(asList("red")));
   }
 }

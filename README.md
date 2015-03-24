@@ -201,12 +201,12 @@ interface Foobar {
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .ox("moo!")
-    .ox("mooo!!")
-    .cow("moooo!!!")
+    .addOx("moo!")
+    .addOx("mooo!!")
+    .addCow("moooo!!!")
     .foo(17, 18)
-    .age("cassie", 5)
-    .age("henrietta", 7)
+    .putAge("cassie", 5)
+    .putAge("henrietta", 7)
     .build();
 
 assert foobar.oxen().equals(asList("moo!", "mooo!!"));

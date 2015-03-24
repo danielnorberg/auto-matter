@@ -53,11 +53,7 @@ public final class NullableCollectionFieldsBuilder {
       this.strings = null;
       return this;
     }
-    if (this.strings == null) {
-      this.strings = new ArrayList<String>(strings);
-    } else {
-      this.strings.addAll(strings);
-    }
+    this.strings = new ArrayList<String>(strings);
     return this;
   }
 
@@ -69,13 +65,7 @@ public final class NullableCollectionFieldsBuilder {
     if (strings instanceof Collection) {
       return strings((Collection<? extends String>) strings);
     }
-    if (this.strings == null) {
-      this.strings = new ArrayList<String>();
-    }
-    for (String item : strings) {
-      this.strings.add(item);
-    }
-    return this;
+    return strings(strings.iterator());
   }
 
   public NullableCollectionFieldsBuilder strings(Iterator<? extends String> strings) {
@@ -83,9 +73,7 @@ public final class NullableCollectionFieldsBuilder {
       this.strings = null;
       return this;
     }
-    if (this.strings == null) {
-      this.strings = new ArrayList<String>();
-    }
+    this.strings = new ArrayList<String>();
     while (strings.hasNext()) {
       String item = strings.next();
       this.strings.add(item);
@@ -101,7 +89,7 @@ public final class NullableCollectionFieldsBuilder {
     return strings(Arrays.asList(strings));
   }
 
-  public NullableCollectionFieldsBuilder string(String string) {
+  public NullableCollectionFieldsBuilder addString(String string) {
     if (this.strings == null) {
       this.strings = new ArrayList<String>();
     }
@@ -118,18 +106,12 @@ public final class NullableCollectionFieldsBuilder {
       this.integers = null;
       return this;
     }
-    if (this.integers == null) {
-      this.integers = new HashMap<String,Integer>(integers);
-    } else {
-      this.integers.putAll(integers);
-    }
+    this.integers = new HashMap<String,Integer>(integers);
     return this;
   }
 
   public NullableCollectionFieldsBuilder integers(String k1, Integer v1) {
-    if (integers == null) {
-      integers = new HashMap<String,Integer>();
-    }
+    integers = new HashMap<String,Integer>();
     integers.put(k1, v1);
     return this;
   }
@@ -168,7 +150,7 @@ public final class NullableCollectionFieldsBuilder {
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integer(String key, Integer value) {
+  public NullableCollectionFieldsBuilder putInteger(String key, Integer value) {
     if (integers == null) {
       integers = new HashMap<String,Integer>();
     }
@@ -189,11 +171,7 @@ public final class NullableCollectionFieldsBuilder {
       this.numbers = null;
       return this;
     }
-    if (this.numbers == null) {
-      this.numbers = new HashSet<Long>(numbers);
-    } else {
-      this.numbers.addAll(numbers);
-    }
+    this.numbers = new HashSet<Long>(numbers);
     return this;
   }
 
@@ -205,13 +183,7 @@ public final class NullableCollectionFieldsBuilder {
     if (numbers instanceof Collection) {
       return numbers((Collection<? extends Long>) numbers);
     }
-    if (this.numbers == null) {
-      this.numbers = new HashSet<Long>();
-    }
-    for (Long item : numbers) {
-      this.numbers.add(item);
-    }
-    return this;
+    return numbers(numbers.iterator());
   }
 
   public NullableCollectionFieldsBuilder numbers(Iterator<? extends Long> numbers) {
@@ -219,9 +191,7 @@ public final class NullableCollectionFieldsBuilder {
       this.numbers = null;
       return this;
     }
-    if (this.numbers == null) {
-      this.numbers = new HashSet<Long>();
-    }
+    this.numbers = new HashSet<Long>();
     while (numbers.hasNext()) {
       Long item = numbers.next();
       this.numbers.add(item);
@@ -237,7 +207,7 @@ public final class NullableCollectionFieldsBuilder {
     return numbers(Arrays.asList(numbers));
   }
 
-  public NullableCollectionFieldsBuilder number(Long number) {
+  public NullableCollectionFieldsBuilder addNumber(Long number) {
     if (this.numbers == null) {
       this.numbers = new HashSet<Long>();
     }

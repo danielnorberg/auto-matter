@@ -44,7 +44,7 @@ public class MapFieldBuilderTest {
 
   @Test
   public void verifyBuilderMapIsMutable() {
-    builder.price("apple", 17);
+    builder.putPrice("apple", 17);
     final Map<String, Integer> prices = builder.prices();
     prices.remove("apple");
     prices.put("orange", 18);
@@ -58,7 +58,7 @@ public class MapFieldBuilderTest {
     final Maps maps1 = builder
         .prices("apple", 17)
         .build();
-    builder.price("orange", 18);
+    builder.putPrice("orange", 18);
     final Maps maps2 = builder.build();
     assertThat(maps1.prices(), is(singletonMap("apple", 17)));
     assertEquals(ImmutableMap.of("apple", 17, "orange", 18), maps2.prices());
@@ -103,11 +103,11 @@ public class MapFieldBuilderTest {
 
   @Test
   public void testPuttingAdditionalEntries() {
-    builder.price("a", 1);
+    builder.putPrice("a", 1);
     assertEquals(ImmutableMap.of("a", 1), builder.prices());
     assertEquals(ImmutableMap.of("a", 1), builder.build().prices());
 
-    builder.price("b", 2);
+    builder.putPrice("b", 2);
     assertEquals(ImmutableMap.of("a", 1, "b", 2), builder.prices());
     assertEquals(ImmutableMap.of("a", 1, "b", 2), builder.build().prices());
   }
@@ -115,8 +115,8 @@ public class MapFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueMapIsImmutable1() {
     final Maps maps = builder
-        .price("apple", 17)
-        .price("orange", 18)
+        .putPrice("apple", 17)
+        .putPrice("orange", 18)
         .build();
     maps.prices().remove("apple");
   }
@@ -124,7 +124,7 @@ public class MapFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable2() {
     final Maps maps = builder
-        .price("apple", 17)
+        .putPrice("apple", 17)
         .build();
     maps.prices().put("orange", 18);
   }
@@ -132,14 +132,14 @@ public class MapFieldBuilderTest {
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable3() {
     final Maps maps = builder
-        .price("apple", 17)
+        .putPrice("apple", 17)
         .build();
     maps.prices().clear();
   }
 
   @Test
   public void testEnglishPlurals() {
-    final Maps maps = builder.ox(17, "foo").ox(4711, "bar").build();
+    final Maps maps = builder.putOx(17, "foo").putOx(4711, "bar").build();
     assertEquals(ImmutableMap.of(17, "foo", 4711, "bar"), maps.oxen());
   }
 
@@ -153,14 +153,14 @@ public class MapFieldBuilderTest {
   public void verifyPuttingNullKeyThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("price: key");
-    builder.price(null, 17);
+    builder.putPrice(null, 17);
   }
 
   @Test
   public void verifyPuttingNullValueThrowsNPE() {
     expectedException.expect(NullPointerException.class);
     expectedException.expectMessage("price: value");
-    builder.price("apple", null);
+    builder.putPrice("apple", null);
   }
 
   @Test
@@ -173,5 +173,19 @@ public class MapFieldBuilderTest {
   @Test
   public void verifySettingExtendingValue() {
     builder.lists(ImmutableMap.of(1, ImmutableList.of("foo", "bar")));
+  }
+
+  @Test
+  public void verifyMapMethodsReplaceValue() {
+    final Maps onlyApples = builder.prices("apples", 2, "pears", 3)
+        .prices("apples", 4)
+        .build();
+
+    assertEquals(ImmutableMap.of("apples", 4), onlyApples.prices());
+
+    final Maps pearsAndOranges = MapsBuilder.from(onlyApples)
+        .prices("pears", 5, "orange", 6)
+        .build();
+    assertEquals(ImmutableMap.of("pears", 5, "orange", 6), pearsAndOranges.prices());
   }
 }
