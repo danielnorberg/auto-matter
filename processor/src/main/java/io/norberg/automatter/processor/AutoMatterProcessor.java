@@ -16,7 +16,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import com.squareup.javawriter.JavaWriter;
 import io.norberg.automatter.AutoMatter;
 import org.modeshape.common.text.Inflector;
 
@@ -29,7 +28,6 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -42,10 +40,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -241,6 +237,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           result.add(adder);
         }
       } else if (isMap(field)) {
+        result.add(mapSetter(d, field));
+        for (int i=1; i<=5; i++) {
+          result.add(mapSetterPairs(d, field, i));
+        }
+
+        MethodSpec putter = mapPutter(d, field);
+        if (putter != null) {
+          result.add(putter);
+        }
       } else {
         result.add(setter(d, field));
       }
@@ -443,6 +448,123 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .endControlFlow();
   }
 
+  private MethodSpec mapSetter(final Descriptor d, final ExecutableElement field) {
+    final String fieldName = fieldName(field);
+    final TypeName keyType = WildcardTypeName.subtypeOf(genericArgument(field, 0));
+    final TypeName valueType = WildcardTypeName.subtypeOf(genericArgument(field, 1));
+    final TypeName paramType = ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(paramType, fieldName)
+        .returns(builderType(d));
+
+    if (shouldEnforceNonNull(field)) {
+      final String entryName = variableName("entry", fieldName);
+      assertNotNull(setter, fieldName);
+      setter.beginControlFlow(
+          "for ($T<$T, $T> $L : $N.entrySet())",
+          ClassName.get(Map.Entry.class), keyType, valueType, entryName, fieldName);
+      assertNotNull(setter, entryName + ".getKey()", fieldName + ": null key");
+      assertNotNull(setter, entryName + ".getValue()", fieldName + ": null value");
+      setter.endControlFlow();
+    } else {
+      setter.beginControlFlow("if ($N == null)", fieldName)
+          .addStatement("this.$N = null", fieldName)
+          .addStatement("return this")
+          .endControlFlow();
+    }
+
+    setter.addStatement(
+        "this.$N = new $T<$T, $T>($N)",
+        fieldName, ClassName.get(HashMap.class), genericArgument(field, 0), genericArgument(field, 1), fieldName);
+
+    return setter.addStatement("return this").build();
+  }
+
+  private MethodSpec mapSetterPairs(final Descriptor d, final ExecutableElement field, int entries) {
+    checkArgument(entries > 0, "entries");
+    final String fieldName = fieldName(field);
+    final TypeName keyType = genericArgument(field, 0);
+    final TypeName valueType = genericArgument(field, 1);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .returns(builderType(d));
+
+    for (int i = 1; i < entries + 1; i++) {
+      setter.addParameter(keyType, "k" + i);
+      setter.addParameter(valueType, "v" + i);
+    }
+
+    // Recursion
+    if (entries > 1) {
+      final List<String> recursionParameters = Lists.newArrayList();
+      for (int i = 1; i < entries; i++) {
+        recursionParameters.add("k" + i);
+        recursionParameters.add("v" + i);
+      }
+      setter.addStatement("$L($L)", fieldName, Joiner.on(", ").join(recursionParameters));
+    }
+
+    // Null checks
+    final String keyName = "k" + entries;
+    final String valueName = "v" + entries;
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(setter, keyName, fieldName + ": " + keyName);
+      assertNotNull(setter, valueName, fieldName + ": " + valueName);
+    }
+
+    // Map instantiation
+    if (entries == 1) {
+      setter.addStatement("$N = new $T<$T, $T>()", fieldName, ClassName.get(HashMap.class), keyType, valueType);
+    }
+
+    // Put
+    setter.addStatement("$N.put($N, $N)", fieldName, keyName, valueName);
+
+    return setter.addStatement("return this").build();
+  }
+
+  private MethodSpec mapPutter(final Descriptor d, final ExecutableElement field) {
+    final String fieldName = fieldName(field);
+    final String singular = singular(fieldName);
+    if (singular == null) {
+      return null;
+    }
+
+    final String putSingular = "put" + capitalizeFirstLetter(singular);
+    final TypeName keyType = genericArgument(field, 0);
+    final TypeName valueType = genericArgument(field, 1);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(putSingular)
+        .addModifiers(PUBLIC)
+        .addParameter(keyType, "key")
+        .addParameter(valueType, "value")
+        .returns(builderType(d));
+
+    // Null checks
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(setter, "key", singular + ": key");
+      assertNotNull(setter, "value", singular + ": value");
+    }
+
+    // Put
+    lazMapInitialization(setter, field);
+    setter.addStatement("$N.put(key, value)", fieldName);
+
+    return setter.addStatement("return this").build();
+  }
+
+  private void lazMapInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
+    final String fieldName = fieldName(field);
+    final TypeName keyType = genericArgument(field, 0);
+    final TypeName valueType = genericArgument(field, 1);
+    spec.beginControlFlow("if ($N == null)", fieldName)
+        .addStatement("this.$N = new $T<$T, $T>()", fieldName, ClassName.get(HashMap.class), keyType, valueType)
+        .endControlFlow();
+  }
+
   private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
 
@@ -522,7 +644,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         parameters.add(fieldName(field));
       }
     }
-
 
     return build.addStatement("return new Value($N)", Joiner.on(", ").join(parameters))
         .build();
@@ -786,123 +907,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return "ofNullable";
   }
 
-  /*
-  private void emitConstructors(final JavaWriter writer,
-                                final Descriptor descriptor)
-      throws IOException {
-    emitDefaultConstructor(writer, descriptor);
-    emitCopyValueConstructor(writer, descriptor);
-    emitCopyBuilderConstructor(writer, descriptor);
-  }
-
-  private void emitFactoryMethods(final JavaWriter writer, final Descriptor descriptor)
-      throws IOException {
-    emitFromValueFactory(writer, descriptor);
-    emitFromBuilderFactory(writer, descriptor);
-  }
-
-  private void emitFromValueFactory(final JavaWriter writer, final Descriptor descriptor)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(descriptor.builderSimpleName, "from", EnumSet.of(STATIC, PUBLIC),
-                       descriptor.targetSimpleName, "v");
-    writer.emitStatement("return new %s(v)", descriptor.builderSimpleName);
-    writer.endMethod();
-  }
-
-  private void emitFromBuilderFactory(final JavaWriter writer,
-                                      final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(descriptor.builderSimpleName, "from", EnumSet.of(STATIC, PUBLIC),
-        descriptor.builderSimpleName, "v");
-    writer.emitStatement("return new %s(v)", descriptor.builderSimpleName);
-    writer.endMethod();
-  }
-
-  private void emitDefaultConstructor(final JavaWriter writer,
-                                      final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    writer.beginConstructor(EnumSet.of(PUBLIC));
-    for (ExecutableElement field : descriptor.fields) {
-      if (isOptional(field) && shouldEnforceNonNull(field)) {
-        writer.emitStatement("this.%s = %s", fieldName(field), optionalAbsent(writer, field));
-      }
-    }
-    writer.endConstructor();
-  }
-
-  private String optionalAbsent(final JavaWriter writer, final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    if (returnType.startsWith("java.util.Optional<")) {
-      return writer.compressType("java.util.Optional") + ".empty()";
-    } else if (returnType.startsWith("com.google.common.base.Optional<")) {
-      return writer.compressType("com.google.common.base.Optional") + ".absent()";
-    }
-    return returnType;
-  }
-
-  private void emitCopyValueConstructor(final JavaWriter writer, final Descriptor descriptor)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.targetSimpleName, "v");
-    for (ExecutableElement field : descriptor.fields) {
-      emitCopyValueConstructorFieldCopy(writer, field);
-    }
-    writer.endConstructor();
-  }
-
-  private void emitCopyValueConstructorFieldCopy(final JavaWriter writer,
-                                                 final ExecutableElement field) throws IOException {
-    final String name = fieldName(field);
-    final String copy;
-    if (isCollection(field)) {
-      writer.emitStatement("%1$s _%2$s = v.%2$s()", fieldType(writer, field), name);
-      copy = constructorCollectionCopy("_" + name, writer, field);
-    } else if (isMap(field)) {
-      writer.emitStatement("%1$s _%2$s = v.%2$s()", fieldType(writer, field), name);
-      copy = constructorMapCopy("_" + name, fieldTypeArguments(writer, field));
-    } else {
-      copy = "v." + name + "()";
-    }
-    writer.emitStatement("this.%s = %s", name, copy);
-  }
-
-  private String constructorCollectionCopy(final String original, final JavaWriter writer,
-                                           final ExecutableElement field) {
-    return format("(%1$s == null) ? null : new %3$s<%2$s>(%1$s)",
-                  original, fieldTypeArguments(writer, field), collection(field));
-  }
-
-  private String constructorMapCopy(final String original, final String typeArguments) {
-    return format("(%1$s == null) ? null : new HashMap<%2$s>(%1$s)", original, typeArguments);
-  }
-
-  private void emitCopyBuilderConstructor(final JavaWriter writer,
-                                          final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    writer.beginConstructor(EnumSet.of(PRIVATE), descriptor.builderSimpleName, "v");
-    for (ExecutableElement field : descriptor.fields) {
-      emitCopyBuilderConstructorFieldCopy(writer, field);
-    }
-    writer.endConstructor();
-  }
-
-  private void emitCopyBuilderConstructorFieldCopy(final JavaWriter writer,
-                                                   final ExecutableElement field)
-      throws IOException {
-    final String name = fieldName(field);
-    final String copy;
-    if (isCollection(field)) {
-      copy = constructorCollectionCopy("v." + name, writer, field);
-    } else if (isMap(field)) {
-      copy = constructorMapCopy("v." + name, fieldTypeArguments(writer, field));
-    } else {
-      copy = "v." + name;
-    }
-    writer.emitStatement("this.%s = %s", name, copy);
-  }
-  */
-
   private boolean isCollection(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.List<") ||
@@ -968,174 +972,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return returnType.startsWith("java.util.Map<");
   }
 
-  private String fullyQualifedName(final String packageName, final String simpleName) {
-    return packageName.isEmpty()
-           ? simpleName
-           : packageName + "." + simpleName;
-  }
-
-  private void emitFields(final JavaWriter writer, final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    for (ExecutableElement field : descriptor.fields) {
-      writer.emitField(fieldType(writer, field), fieldName(field), EnumSet.of(PRIVATE));
-    }
-  }
-
-  private void emitValue(final JavaWriter writer,
-                         final Descriptor descriptor)
-      throws IOException, AutoMatterProcessorException {
-    writer.emitEmptyLine();
-    writer.beginType("Value", "class", EnumSet.of(PRIVATE, STATIC, FINAL),
-                     null, descriptor.targetSimpleName);
-    emitValueFields(writer, descriptor.fields);
-    emitValueConstructor(writer, descriptor.fields);
-    emitValueGetters(writer, descriptor.fields);
-    emitValueToBuilder(writer, descriptor);
-    emitValueEquals(writer, descriptor);
-    emitValueHashCode(writer, descriptor.fields);
-    emitValueToString(writer, descriptor.fields, descriptor.targetSimpleName);
-    writer.endType();
-  }
-
-  private void emitValueToBuilder(final JavaWriter writer,
-                                  final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    // Always emit toBuilder, but only annotate it with @Override if the target asked for it.
-    if (descriptor.toBuilder) {
-      writer.emitAnnotation(Override.class);
-    }
-    writer.beginMethod(descriptor.builderFullName, "builder", EnumSet.of(PUBLIC));
-    writer.emitStatement("return new %s(this)", descriptor.builderSimpleName);
-    writer.endMethod();
-  }
-
-  private void emitBuilderToBuilder(final JavaWriter writer,
-                                    final Descriptor descriptor) throws IOException {
-    // Only toBuilder if the target asked for it.
-    if (descriptor.toBuilder) {
-      writer.emitEmptyLine();
-      writer.beginMethod(descriptor.builderFullName, "builder", EnumSet.of(PUBLIC));
-      writer.emitStatement("return new %s(this)", descriptor.builderSimpleName);
-      writer.endMethod();
-    }
-  }
-
-  private void emitValueConstructor(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException {
-    writer.emitEmptyLine();
-    final List<String> parameters = Lists.newArrayList();
-    for (ExecutableElement field : fields) {
-      parameters.add("@AutoMatter.Field(\"" + fieldName(field) + "\") " + fieldType(writer, field));
-      parameters.add(fieldName(field));
-    }
-    writer.beginConstructor(EnumSet.of(PRIVATE), parameters, null);
-    for (ExecutableElement field : fields) {
-      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
-        emitNullCheck(writer, "", field);
-      }
-    }
-    for (ExecutableElement field : fields) {
-      final String rhs;
-      if (shouldEnforceNonNull(field)) {
-        rhs = valueConstructorFieldCopy(writer, field);
-      } else {
-        rhs = fieldName(field);
-      }
-      writer.emitStatement("this.%s = %s", fieldName(field), rhs);
-    }
-    writer.endConstructor();
-  }
-
-  private String valueConstructorFieldCopy(final JavaWriter writer, final ExecutableElement field) {
-    if (isCollection(field)) {
-      return format("(%1$s != null) ? %1$s : Collections.<%2$s>%3$s()",
-                    fieldName(field), fieldTypeArguments(writer, field), emptyCollection(field));
-    } else if (isMap(field)) {
-      return format("(%1$s != null) ? %1$s : Collections.<%2$s>emptyMap()",
-                    fieldName(field), fieldTypeArguments(writer, field));
-    } else {
-      return fieldName(field);
-    }
-  }
-
-  private void emitNullCheck(final JavaWriter writer, final String scope,
-                             final ExecutableElement field)
-      throws IOException {
-    if (!shouldEnforceNonNull(field)) {
-      return;
-    }
-    final String variable = scope.isEmpty()
-                            ? fieldName(field)
-                            : scope + "." + fieldName(field);
-    final String name = fieldName(field);
-    emitNullCheck(writer, variable, name);
-  }
-
-  private void emitNullCheck(final JavaWriter writer, final String variable, final String name)
-      throws IOException {
-    writer.beginControlFlow("if (" + variable + " == null)");
-    emitNPE(writer, name);
-    writer.endControlFlow();
-  }
-
-  private void emitValueFields(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException {
-    writer.emitEmptyLine();
-    for (ExecutableElement field : fields) {
-      writer.emitField(fieldType(writer, field), fieldName(field), EnumSet.of(PRIVATE, FINAL));
-    }
-  }
-
-  private void emitValueGetters(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException {
-    for (ExecutableElement field : fields) {
-      emitValueGetter(writer, field);
-    }
-  }
-
-  private void emitValueGetter(final JavaWriter writer, final ExecutableElement field)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.emitAnnotation("AutoMatter.Field");
-    writer.emitAnnotation(Override.class);
-    writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
-    writer.emitStatement("return %s", fieldName(field));
-    writer.endMethod();
-  }
-
   private boolean isPrimitive(final ExecutableElement field) {
     return field.getReturnType().getKind().isPrimitive();
-  }
-
-  private void emitValueEquals(final JavaWriter writer, final Descriptor descriptor)
-      throws IOException, AutoMatterProcessorException {
-
-    writer.emitEmptyLine();
-    writer.emitAnnotation(Override.class);
-    writer.beginMethod("boolean", "equals", EnumSet.of(PUBLIC), "Object", "o");
-
-    writer.beginControlFlow("if (this == o)");
-    writer.emitStatement("return true");
-    writer.endControlFlow();
-
-    writer.beginControlFlow("if (!(o instanceof " + descriptor.targetSimpleName + "))");
-    writer.emitStatement("return false");
-    writer.endControlFlow();
-
-    if (!descriptor.fields.isEmpty()) {
-      writer.emitEmptyLine();
-      writer.emitStatement("final %1$s that = (%1$s) o", descriptor.targetSimpleName);
-      writer.emitEmptyLine();
-      for (ExecutableElement field : descriptor.fields) {
-        writer.beginControlFlow(fieldNotEqualCondition(field));
-        writer.emitStatement("return false");
-        writer.endControlFlow();
-      }
-    }
-
-    writer.emitEmptyLine();
-    writer.emitStatement("return true");
-    writer.endMethod();
   }
 
   private String fieldNotEqualCondition(final ExecutableElement field)
@@ -1165,376 +1003,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private void emitValueHashCode(final JavaWriter writer, final List<ExecutableElement> fields)
-      throws IOException, AutoMatterProcessorException {
-    writer.emitEmptyLine();
-    writer.emitAnnotation(Override.class);
-    writer.beginMethod("int", "hashCode", EnumSet.of(PUBLIC));
-    writer.emitStatement("int result = 1");
-    writer.emitStatement("long temp");
-    for (ExecutableElement field : fields) {
-      final String name = field.getSimpleName().toString();
-      final TypeMirror type = field.getReturnType();
-      switch (type.getKind()) {
-        case LONG:
-          writer.emitStatement("result = 31 * result + (int) (%1$s ^ (%1$s >>> 32))", name);
-          break;
-        case INT:
-          writer.emitStatement("result = 31 * result + %s", name);
-          break;
-        case BOOLEAN:
-          writer.emitStatement("result = 31 * result + (%s ? 1231 : 1237)", name);
-          break;
-        case BYTE:
-        case SHORT:
-        case CHAR:
-          writer.emitStatement("result = 31 * result + (int) %s", name);
-          break;
-        case FLOAT:
-          writer.emitStatement("result = 31 * result + " +
-                               "(%1$s != +0.0f ? Float.floatToIntBits(%1$s) : 0)", name);
-          break;
-        case DOUBLE:
-          writer.emitStatement("temp = Double.doubleToLongBits(%s)", name);
-          writer.emitStatement("result = 31 * result + (int) (temp ^ (temp >>> 32))");
-          break;
-        case ARRAY:
-          writer.emitStatement("result = 31 * result + " +
-                               "(%1$s != null ? Arrays.hashCode(%1$s) : 0)", name);
-          break;
-        case DECLARED:
-          writer.emitStatement("result = 31 * result + (%1$s != null ? %1$s.hashCode() : 0)", name);
-          break;
-        case ERROR:
-          throw fail("Cannot resolve type, might be missing import: " + type, field);
-        default:
-          throw fail("Unsupported type: " + type, field);
-      }
-    }
-    writer.emitStatement("return result");
-    writer.endMethod();
-  }
-
-  private void emitValueToString(final JavaWriter writer, final List<ExecutableElement> fields,
-                                 final String targetName)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.emitAnnotation(Override.class);
-    writer.beginMethod("String", "toString", EnumSet.of(PUBLIC));
-    emitToStringStatement(writer, fields, targetName);
-    writer.endMethod();
-  }
-
-  private void emitToStringStatement(final JavaWriter writer, final List<ExecutableElement> fields,
-                                     final String targetName) throws IOException {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("return \"").append(targetName).append("{\" +\n");
-    boolean first = true;
-    for (ExecutableElement field : fields) {
-      final String comma = first ? "" : ", ";
-      final String name = fieldName(field);
-      if (field.getReturnType().getKind() == ARRAY) {
-        builder.append(format("\"%1$s%2$s=\" + Arrays.toString(%2$s) +\n", comma, name));
-      } else {
-        builder.append(format("\"%1$s%2$s=\" + %2$s +\n", comma, name));
-      }
-      first = false;
-    }
-    builder.append("'}'");
-    writer.emitStatement(builder.toString());
-  }
-
-  private void emitBuild(final JavaWriter writer,
-                         final Descriptor descriptor) throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(descriptor.targetSimpleName, "build", EnumSet.of(PUBLIC));
-    final List<String> parameters = Lists.newArrayList();
-    for (ExecutableElement field : descriptor.fields) {
-      parameters.add(buildFieldCopy(writer, field));
-    }
-    writer.emitStatement("return new Value(%s)", Joiner.on(", ").join(parameters));
-    writer.endMethod();
-  }
-
-  private String buildFieldCopy(final JavaWriter writer, final ExecutableElement field) {
-    if (isCollection(field)) {
-      final String absent = shouldEnforceNonNull(field)
-                            ? format("Collections.<%s>%s()",
-                                     fieldTypeArguments(writer, field), emptyCollection(field))
-                            : "null";
-      final String present = format("Collections.%s(new %s<%s>(%s))",
-                                    unmodifiableCollection(field), collection(field),
-                                    fieldTypeArguments(writer, field), fieldName(field));
-      return format("(%s != null) ? %s : %s", fieldName(field), present, absent);
-    } else if (isMap(field)) {
-      final String absent = shouldEnforceNonNull(field)
-                            ? format("Collections.<%s>emptyMap()", fieldTypeArguments(writer, field))
-                            : "null";
-      final String present = format("Collections.unmodifiableMap(new HashMap<%s>(%s))",
-                                    fieldTypeArguments(writer, field), fieldName(field));
-      return format("(%s != null) ? %s : %s", fieldName(field), present, absent);
-    } else {
-      return fieldName(field);
-    }
-  }
-
-  private void emitAccessors(final JavaWriter writer,
-                             final Descriptor descriptor) throws IOException {
-    for (final ExecutableElement field : descriptor.fields) {
-      emitGetter(writer, field);
-      if (isOptional(field)) {
-        emitOptionalSetters(writer, descriptor.builderSimpleName, field);
-      } else if (isCollection(field)) {
-        emitCollectionMutators(writer, descriptor.builderSimpleName, field);
-      } else if (isMap(field)) {
-        emitMapMutators(writer, descriptor.builderSimpleName, field);
-      } else {
-        emitRawSetter(writer, descriptor.builderSimpleName, field);
-      }
-    }
-  }
-
-  private void emitOptionalSetters(final JavaWriter writer, final String builderSimpleName,
-                                   final ExecutableElement field) throws IOException {
-    emitOptionalRawSetter(writer, builderSimpleName, field);
-    emitOptionalOptionalSetter(writer, builderSimpleName, field);
-  }
-
-  private void emitOptionalRawSetter(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
-        fieldTypeArguments(writer, field), fieldName(field));
-    writer.emitStatement("return %1$s(%2$s(%1$s))", fieldName(field), optionalMaybe(writer, field));
-    writer.endMethod();
-  }
-
-  private void emitOptionalOptionalSetter(final JavaWriter writer, final String builderName,
-                                          final ExecutableElement field) throws IOException {
-    writer.emitEmptyLine();
-    final String argType = format("%s<? extends %s>",
-                                  optionalType(field), fieldTypeArguments(writer, field));
-    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
-                       argType, fieldName(field));
-    emitNullCheck(writer, "", field);
-    writer.emitStatement("this.%1$s = (%2$s)%1$s", fieldName(field), fieldType(writer, field));
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private String optionalMaybe(final JavaWriter writer, final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    if (returnType.startsWith("java.util.Optional<")) {
-      return writer.compressType("java.util.Optional") + ".ofNullable";
-    } else if (returnType.startsWith("com.google.common.base.Optional<")) {
-      return writer.compressType("com.google.common.base.Optional") + ".fromNullable";
-    }
-    return returnType;
-  }
-
   private boolean isOptional(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.Optional<") ||
            returnType.startsWith("com.google.common.base.Optional<");
-  }
-
-  private void emitMapMutators(final JavaWriter writer, final String builderName,
-                               final ExecutableElement field) throws IOException {
-    emitMapPutAll(writer, builderName, field);
-    for (int i = 1; i <= 5; i++) {
-      emitMapEntriesPutAll(writer, builderName, field, i);
-    }
-    emitMapEntryPut(writer, builderName, field);
-  }
-
-  private void emitMapPutAll(final JavaWriter writer, final String builderName,
-                             final ExecutableElement field) throws IOException {
-    final String name = fieldName(field);
-    final String type = fieldTypeArguments(writer, field);
-    final String extendedType = fieldTypeArgumentsExtended(writer, field);
-
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       "Map<" + extendedType + ">", name);
-
-    // Null checks
-    final String entry = variableName("entry", name);
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, name, name);
-      beginFor(writer, "Map.Entry<" + extendedType + ">", entry, name + ".entrySet()");
-      emitNullCheck(writer, entry + ".getKey()", name + ": null key");
-      emitNullCheck(writer, entry + ".getValue()", name + ": null value");
-      endFor(writer);
-    } else {
-      writer.beginControlFlow("if (" + name + " == null)");
-      writer.emitStatement("this.%s = null", name);
-      writer.emitStatement("return this");
-      writer.endControlFlow();
-    }
-
-    writer.emitStatement("this.%1$s = new HashMap<%2$s>(%1$s)", name, type);
-
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private void emitMapEntriesPutAll(final JavaWriter writer, final String builderName,
-                                    final ExecutableElement field, final int entries)
-      throws IOException {
-    checkArgument(entries > 0, "entries");
-    final String name = fieldName(field);
-    final String keyName = "k" + entries;
-    final String valueName = "v" + entries;
-    final String keyType = keyType(writer, field);
-    final String valueType = valueType(writer, field);
-
-    final List<String> parameters = Lists.newArrayList();
-    for (int i = 1; i < entries + 1; i++) {
-      parameters.add(keyType);
-      parameters.add("k" + i);
-      parameters.add(valueType);
-      parameters.add("v" + i);
-    }
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), parameters,
-                       Collections.<String>emptyList());
-
-    // Recursion
-    if (entries > 1) {
-      final List<String> recursionParameters = Lists.newArrayList();
-      for (int i = 1; i < entries; i++) {
-        recursionParameters.add("k" + i);
-        recursionParameters.add("v" + i);
-      }
-      writer.emitStatement("%s(%s)", name, Joiner.on(", ").join(recursionParameters));
-    }
-
-    // Null checks
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, keyName, name + ": " + keyName);
-      emitNullCheck(writer, valueName, name + ": " + valueName);
-    }
-
-    // Map instantiation
-    if (entries == 1) {
-      writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
-    }
-
-    // Put
-    writer.emitStatement("%s.put(%s, %s)", name, keyName, valueName);
-
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private String keyType(final JavaWriter writer, final ExecutableElement field) {
-    checkArgument(isMap(field), "field is not a Map");
-    final List<String> arguments = typeArguments(writer, field);
-    return arguments.get(0);
-  }
-
-  private String valueType(final JavaWriter writer, final ExecutableElement field) {
-    checkArgument(isMap(field), "field is not a Map");
-    final List<String> arguments = typeArguments(writer, field);
-    return arguments.get(1);
-  }
-
-  private void emitMapEntryPut(final JavaWriter writer, final String builderName,
-                               final ExecutableElement field) throws IOException {
-
-    final String name = fieldName(field);
-    final String singular = singular(name);
-    if (singular == null) {
-      return;
-    }
-    final String addSingular = "put" + capitalizeFirstLetter(singular);
-    final String keyType = keyType(writer, field);
-    final String valueType = valueType(writer, field);
-
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, addSingular, EnumSet.of(PUBLIC),
-                       keyType, "key", valueType, "value");
-
-    // Null checks
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, "key", singular + ": key");
-      emitNullCheck(writer, "value", singular + ": value");
-    }
-    emitLazyMapFieldInstantiation(writer, field);
-
-    // Put
-    writer.emitStatement("%s.put(key, value)", name);
-
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private void emitCollectionMutators(final JavaWriter writer, final String builderName,
-                                      final ExecutableElement field) throws IOException {
-    emitCollectionAddAll(writer, builderName, field);
-    emitCollectionCollectionAddAll(writer, builderName, field);
-    emitCollectionIterableAddAll(writer, builderName, field);
-    emitCollectionIteratorAddAll(writer, builderName, field);
-    emitCollectionVarArgAddAll(writer, builderName, field);
-    emitCollectionItemAdd(writer, builderName, field);
-  }
-
-  private void emitCollectionIteratorAddAll(final JavaWriter writer, final String builderName,
-                                            final ExecutableElement field) throws IOException {
-    final String type = fieldTypeArguments(writer, field);
-    final String extendedType = fieldTypeArgumentsExtended(writer, field);
-    final String name = fieldName(field);
-    final String item = variableName("item", name);
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       "Iterator<" + extendedType + ">", name);
-
-    emitCollectionNullGuard(writer, field);
-    writer.emitStatement("this.%1$s = new %3$s<%2$s>()", name, type, collection(field));
-    writer.beginControlFlow("while (" + name + ".hasNext())");
-    writer.emitStatement("%s %s = %s.next()", type, item, name);
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, item, name + ": null item");
-    }
-    writer.emitStatement("this.%s.add(%s)", name, item);
-    writer.endControlFlow();
-
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private void emitCollectionAddAll(final JavaWriter writer, final String builderName,
-                                    final ExecutableElement field) throws IOException {
-    final String extendedType = fieldTypeArgumentsExtended(writer, field);
-    final String name = fieldName(field);
-    writer.emitEmptyLine();
-    final String fullType = collectionType(field) + "<" + extendedType + ">";
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-        fullType, name);
-    writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
-    writer.endMethod();
-  }
-
-  private void emitCollectionItemAdd(final JavaWriter writer, final String builderName,
-                                     final ExecutableElement field) throws IOException {
-    final String name = fieldName(field);
-    final String singular = singular(name);
-    if (singular == null || singular.isEmpty()) {
-      return;
-    }
-    final String appendMethodName = "add" + capitalizeFirstLetter(singular);
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, appendMethodName, EnumSet.of(PUBLIC),
-                       fieldTypeArguments(writer, field), singular);
-
-    if (shouldEnforceNonNull(field)) {
-      emitNullCheck(writer, singular, singular);
-    }
-    emitLazyCollectionFieldInstantiation(writer, field);
-    writer.emitStatement("%s.add(%s)", fieldName(field), singular);
-
-    writer.emitStatement("return this");
-    writer.endMethod();
   }
 
   private String singular(final String name) {
@@ -1548,63 +1020,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return name.equals(singular) ? null : singular;
   }
 
-  private void emitCollectionIterableAddAll(final JavaWriter writer, final String builderName,
-                                            final ExecutableElement field) throws IOException {
-    final String name = fieldName(field);
-    final String extendedType = fieldTypeArgumentsExtended(writer, field);
-    final String iterableType = "Iterable<" + extendedType + ">";
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC), iterableType, name);
-
-    emitCollectionNullGuard(writer, field);
-
-    // Collection optimization
-    writer.beginControlFlow("if (" + name + " instanceof Collection)");
-    writer.emitStatement("return %1$s((Collection<%2$s>) %1$s)", name, extendedType);
-    writer.endControlFlow();
-
-    // Emit the iterator if it is not a collection
-    writer.emitStatement("return %1$s(%1$s.iterator())", name);
-    writer.endMethod();
-  }
-
-  private void emitCollectionCollectionAddAll(final JavaWriter writer, final String builderName,
-                                              final ExecutableElement field) throws IOException {
-    writer.emitEmptyLine();
-    final String name = fieldName(field);
-    final String type = fieldTypeArguments(writer, field);
-    final String extendedType = fieldTypeArgumentsExtended(writer, field);
-    writer.beginMethod(builderName, name, EnumSet.of(PUBLIC),
-                       "Collection<" + extendedType + ">", name);
-
-    emitCollectionNullGuard(writer, field);
-
-    final String item = variableName("item", name);
-
-    if (shouldEnforceNonNull(field)) {
-      beginFor(writer, type, item, name);
-      emitNullCheck(writer, item, name + ": null item");
-      endFor(writer);
-    }
-    writer.emitStatement("this.%1$s = new %3$s<%2$s>(%1$s)", name, type, collection(field));
-
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private void emitCollectionNullGuard(final JavaWriter writer, final ExecutableElement field)
-      throws IOException {
-    final String name = fieldName(field);
-    writer.beginControlFlow("if (" + name + " == null)");
-    if (shouldEnforceNonNull(field)) {
-      emitNPE(writer, name);
-    } else {
-      writer.emitStatement("this.%s = null", name);
-      writer.emitStatement("return this");
-    }
-    writer.endControlFlow();
-  }
-
   private String variableName(final String name, final String... scope) {
     return variableName(name, ImmutableSet.copyOf(scope));
   }
@@ -1616,152 +1031,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return variableName("_" + name, scope);
   }
 
-  private void endFor(final JavaWriter writer) throws IOException {
-    writer.endControlFlow();
-  }
-
-  private void beginFor(final JavaWriter writer, final String type, final String item,
-                        final String collection) throws IOException {
-    writer.beginControlFlow("for (" + type + " " + item + " : " + collection + ")");
-  }
-
-  private void emitNPE(final JavaWriter writer, final String name) throws IOException {
-    writer.emitStatement("throw new NullPointerException(\"%s\")", name);
-  }
-
-  private String fieldTypeArguments(final JavaWriter writer, final ExecutableElement field) {
-    return Joiner.on(",").join(typeArguments(writer, field));
-  }
-
-  private String fieldTypeArgumentsExtended(final JavaWriter writer,
-                                            final ExecutableElement field) {
-    return Joiner.on(",").join(typeArgumentsExtended(writer, field));
-  }
-
-  private List<String> typeArgumentsExtended(final JavaWriter writer,
-                                             final ExecutableElement field) {
-    final List<String> typeArguments = typeArguments(writer, field);
-    final List<String> extended = Lists.newArrayList();
-    for (String type : typeArguments) {
-      extended.add("? extends " + type);
-    }
-    return extended;
-  }
-
-  private List<String> typeArguments(final JavaWriter writer, final ExecutableElement field) {
-    final DeclaredType type = (DeclaredType) field.getReturnType();
-    final List<String> arguments = Lists.newArrayList();
-    for (TypeMirror argument : type.getTypeArguments()) {
-      arguments.add(writer.compressType(argument.toString()));
-    }
-    return arguments;
-  }
-
-  private void emitCollectionVarArgAddAll(final JavaWriter writer, final String builderName,
-                                          final ExecutableElement field) throws IOException {
-    final String type = fieldTypeArguments(writer, field);
-    final String vararg = type + "...";
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
-                       vararg, fieldName(field));
-    emitCollectionNullGuard(writer, field);
-    writer.emitStatement("return %1$s(Arrays.asList(%1$s))", fieldName(field));
-    writer.endMethod();
-  }
-
-  private void emitRawSetter(final JavaWriter writer, final String builderName,
-                             final ExecutableElement field)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(builderName, fieldName(field), EnumSet.of(PUBLIC),
-                       fieldType(writer, field), fieldName(field));
-    emitNullCheck(writer, "", field);
-    writer.emitStatement("this.%1$s = %1$s", fieldName(field));
-    writer.emitStatement("return this");
-    writer.endMethod();
-  }
-
-  private void emitGetter(final JavaWriter writer,
-                          final ExecutableElement field)
-      throws IOException {
-    writer.emitEmptyLine();
-    writer.beginMethod(fieldType(writer, field), fieldName(field), EnumSet.of(PUBLIC));
-    if (isCollection(field)) {
-      emitCollectionGetterBody(writer, field);
-    } else if (isMap(field)) {
-      emitMapGetterBody(writer, field);
-    } else {
-      emitDefaultGetterBody(writer, field);
-    }
-    writer.endMethod();
-  }
-
-  private void emitCollectionGetterBody(final JavaWriter writer, final ExecutableElement field)
-      throws IOException {
-    if (shouldEnforceNonNull(field)) {
-      emitLazyCollectionFieldInstantiation(writer, field);
-    }
-    writer.emitStatement("return %s", fieldName(field));
-  }
-
-  private void emitLazyCollectionFieldInstantiation(final JavaWriter writer,
-                                                    final ExecutableElement field)
-      throws IOException {
-    final String name = fieldName(field);
-    writer.beginControlFlow("if (this." + name + " == null)");
-    writer.emitStatement("this.%s = new %s<%s>()",
-                         name, collection(field), fieldTypeArguments(writer, field));
-    writer.endControlFlow();
-  }
-
-  private void emitMapGetterBody(final JavaWriter writer, final ExecutableElement field)
-      throws IOException {
-    if (shouldEnforceNonNull(field)) {
-      emitLazyMapFieldInstantiation(writer, field);
-    }
-    writer.emitStatement("return %s", fieldName(field));
-  }
-
-  private void emitLazyMapFieldInstantiation(final JavaWriter writer,
-                                             final ExecutableElement field) throws IOException {
-    final String name = fieldName(field);
-    writer.beginControlFlow("if (" + name + " == null)");
-    writer.emitStatement("%s = new HashMap<%s>()", name, fieldTypeArguments(writer, field));
-    writer.endControlFlow();
-  }
-
-  private void emitDefaultGetterBody(final JavaWriter writer, final ExecutableElement field)
-      throws IOException {
-    writer.emitStatement("return %s", fieldName(field));
-  }
-
-  private String unmodifiableValueField(final ExecutableElement field) {
-    if (isCollection(field)) {
-      return format("Collections.%s(%s)", unmodifiableCollection(field), fieldName(field));
-    } else if (isMap(field)) {
-      return format("Collections.unmodifiableMap(%s)", fieldName(field));
-    } else {
-      return fieldName(field);
-    }
-  }
-
-  private Map<String, String> annotationValues(final AnnotationMirror annotation) {
-    final Map<String, String> values = new LinkedHashMap<String, String>();
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
-        annotation.getElementValues().entrySet()) {
-      final String key = entry.getKey().getSimpleName().toString();
-      final String value = entry.getValue().toString();
-      values.put(key, value);
-    }
-    return values;
-  }
-
   private String fieldName(final ExecutableElement field) {
     return field.getSimpleName().toString();
-  }
-
-  private String fieldType(final JavaWriter writer, final ExecutableElement field) {
-    return writer.compressType(field.getReturnType().toString());
   }
 
   private static String simpleName(String fullyQualifiedName) {
@@ -1837,6 +1108,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       }
       reverse(classes);
       return classes;
+    }
+
+    private String fullyQualifedName(final String packageName, final String simpleName) {
+      return packageName.isEmpty()
+          ? simpleName
+          : packageName + "." + simpleName;
     }
   }
 
