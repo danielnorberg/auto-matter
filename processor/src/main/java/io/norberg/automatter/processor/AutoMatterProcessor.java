@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
@@ -39,9 +40,11 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +110,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final Descriptor d = new Descriptor(element);
 
     TypeSpec builder = builder(d);
-    JavaFile javaFile = JavaFile.builder(d.packageName, builder).build();
+    JavaFile javaFile = JavaFile.builder(d.packageName, builder)
+        .skipJavaLangImports(true)
+        .build();
     javaFile.writeTo(filer);
   }
 
@@ -225,6 +230,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         result.add(optionalRawSetter(d, field));
         result.add(optionalSetter(d, field));
       } else if (isCollection(field)) {
+        result.add(collectionSetter(d, field));
+        result.add(collectionCollectionSetter(d, field));
+        result.add(collectionIterableSetter(d, field));
+        result.add(collectionIteratorSetter(d, field));
+        result.add(collectionVarargSetter(d, field));
+
+        MethodSpec adder = collectionAdder(d, field);
+        if (adder != null) {
+          result.add(adder);
+        }
       } else if (isMap(field)) {
       } else {
         result.add(setter(d, field));
@@ -244,7 +259,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       getter.beginControlFlow("if (this.$N == null)", fieldName)
           .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
           .endControlFlow();
-    } else if (isMap(field)) {
+    } else if (isMap(field) && shouldEnforceNonNull(field)) {
       getter.beginControlFlow("if (this.$N == null)", fieldName)
           .addStatement("this.$N = new $T()", fieldName, ClassName.get(HashMap.class))
           .endControlFlow();
@@ -257,7 +272,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec optionalRawSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName type = ClassName.bestGuess(optionalType(field));
-    TypeName valueType = fieldGenericTypeArgument(field);
+    TypeName valueType = collectionGenericArgument(field);
 
     return MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
@@ -269,7 +284,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
-    TypeName valueType = fieldGenericTypeArgument(field);
+    TypeName valueType = collectionGenericArgument(field);
     ClassName optionalType = ClassName.bestGuess(optionalType(field));
     TypeName parameterType = ParameterizedTypeName.get(optionalType, WildcardTypeName.subtypeOf(valueType));
 
@@ -280,6 +295,152 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("this.$N = ($T)$N", fieldName, fieldType(field), fieldName)
         .addStatement("return this")
         .build();
+  }
+
+  private MethodSpec collectionSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    ClassName collectionType = collectionRawType(field);
+    TypeName itemType = collectionGenericArgument(field);
+    WildcardTypeName extendedType = WildcardTypeName.subtypeOf(itemType);
+
+    return MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(ParameterizedTypeName.get(collectionType, extendedType), fieldName)
+        .returns(builderType(d))
+        .addStatement("return $N((Collection<$T>) $N)", fieldName, extendedType, fieldName)
+        .build();
+  }
+
+  private MethodSpec collectionCollectionSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    ClassName collectionType = ClassName.get(Collection.class);
+    TypeName itemType = collectionGenericArgument(field);
+    WildcardTypeName extendedType = WildcardTypeName.subtypeOf(itemType);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(ParameterizedTypeName.get(collectionType, extendedType), fieldName)
+        .returns(builderType(d));
+
+    collectionNullGuard(setter, field);
+    if (shouldEnforceNonNull(field)) {
+      setter.beginControlFlow("for ($T item : $N)", itemType, fieldName);
+      assertNotNull(setter, "item", fieldName + ": null item");
+      setter.endControlFlow();
+    }
+
+    setter.addStatement("this.$N = new $T<$T>($N)", fieldName, collectionImplType(field), itemType, fieldName)
+        .addStatement("return this");
+    return setter.build();
+  }
+
+  private MethodSpec collectionIterableSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    ClassName iterableType = ClassName.get(Iterable.class);
+    TypeName itemType = collectionGenericArgument(field);
+    WildcardTypeName extendedType = WildcardTypeName.subtypeOf(itemType);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(ParameterizedTypeName.get(iterableType, extendedType), fieldName)
+        .returns(builderType(d));
+
+    collectionNullGuard(setter, field);
+
+    ClassName collectionType = ClassName.get(Collection.class);
+    setter.beginControlFlow("if ($N instanceof $T)", fieldName, collectionType)
+        .addStatement("return $N(($T<$T>) $N)", fieldName, collectionType, extendedType, fieldName)
+        .endControlFlow();
+
+    setter.addStatement("return $N($N.iterator())", fieldName, fieldName);
+    return setter.build();
+  }
+
+  private MethodSpec collectionIteratorSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    ClassName iteratorType = ClassName.get(Iterator.class);
+    TypeName itemType = collectionGenericArgument(field);
+    WildcardTypeName extendedType = WildcardTypeName.subtypeOf(itemType);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(ParameterizedTypeName.get(iteratorType, extendedType), fieldName)
+        .returns(builderType(d));
+
+    collectionNullGuard(setter, field);
+
+    setter.addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType(field), itemType)
+        .beginControlFlow("while ($N.hasNext())", fieldName)
+        .addStatement("$T item = $N.next()", itemType, fieldName);
+
+    assertNotNull(setter, "item", fieldName + ": null item");
+
+    setter.addStatement("this.$N.add(item)", fieldName)
+        .endControlFlow()
+        .addStatement("return this");
+    return setter.build();
+  }
+
+  private MethodSpec collectionVarargSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    TypeName itemType = collectionGenericArgument(field);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(ArrayTypeName.of(itemType), fieldName)
+        .varargs()
+        .returns(builderType(d));
+
+    collectionNullGuard(setter, field);
+
+    return setter.addStatement("return $N($T.asList($N))", fieldName, ClassName.get(Arrays.class), fieldName)
+        .build();
+  }
+
+  private MethodSpec collectionAdder(final Descriptor d, final ExecutableElement field) {
+    final String fieldName = fieldName(field);
+    final String singular = singular(fieldName);
+    if (singular == null || singular.isEmpty()) {
+      return null;
+    }
+
+    final String appendMethodName = "add" + capitalizeFirstLetter(singular);
+    final TypeName itemType = collectionGenericArgument(field);
+    MethodSpec.Builder adder = MethodSpec.methodBuilder(appendMethodName)
+        .addModifiers(PUBLIC)
+        .addParameter(itemType, singular)
+        .returns(builderType(d));
+
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(adder, singular);
+    }
+    lazyCollectionInitialization(adder, field);
+
+
+    return adder.addStatement("$L.add($L)", fieldName, singular)
+        .addStatement("return this")
+        .build();
+  }
+
+  private void collectionNullGuard(final MethodSpec.Builder spec, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(spec, fieldName);
+    } else {
+      spec.beginControlFlow("if ($N == null)", fieldName)
+          .addStatement("this.$N = null", fieldName)
+          .addStatement("return this")
+          .endControlFlow();
+    }
+  }
+
+  private void lazyCollectionInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
+    final String fieldName = fieldName(field);
+    final ClassName collectionImplType = collectionImplType(field);
+    final TypeName itemType = collectionGenericArgument(field);
+    spec.beginControlFlow("if ($N == null)", fieldName)
+        .addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType, itemType)
+        .endControlFlow();
   }
 
   private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
@@ -308,15 +469,62 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec build(final Descriptor d) {
+    MethodSpec.Builder build = MethodSpec.methodBuilder("build")
+        .addModifiers(PUBLIC)
+        .returns(valueType(d));
+
     final List<String> parameters = Lists.newArrayList();
     for (ExecutableElement field : d.fields) {
-      parameters.add(fieldName(field));
+      final String fieldName = fieldName(field);
+      final TypeName fieldType = fieldType(field);
+
+      if (isCollection(field) && shouldEnforceNonNull(field)) {
+        TypeName genericArg = collectionGenericArgument(field);
+        ClassName collections = ClassName.get(Collections.class);
+
+        build.addStatement(
+            "$T _$L = ($L != null) ? $T.$L(new $T<$T>($N)) : $T.<$T>$L()",
+            fieldType, fieldName, fieldName,
+            collections, unmodifiableCollection(field), collectionImplType(field), genericArg, fieldName,
+            collections, genericArg, emptyCollection(field));
+        parameters.add("_" + fieldName);
+      } else if (isCollection(field)) {
+        TypeName genericArg = collectionGenericArgument(field);
+        ClassName collections = ClassName.get(Collections.class);
+
+        build.addStatement(
+            "$T _$L = ($L != null) ? $T.$L(new $T<$T>($N)) : null",
+            fieldType, fieldName, fieldName,
+            collections, unmodifiableCollection(field), collectionImplType(field), genericArg, fieldName);
+        parameters.add("_" + fieldName);
+      } else if (isMap(field) && shouldEnforceNonNull(field)) {
+        ClassName collections = ClassName.get(Collections.class);
+        TypeName keyType = genericArgument(field, 0);
+        TypeName valueType = genericArgument(field, 1);
+
+        build.addStatement(
+            "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T<$T, $T>($N)) : $T.<$T, $T>emptyMap()",
+            fieldType, fieldName, fieldName,
+            collections, ClassName.get(HashMap.class), keyType, valueType, fieldName,
+            collections, keyType, valueType);
+        parameters.add("_" + fieldName);
+      } else if (isMap(field)) {
+        ClassName collections = ClassName.get(Collections.class);
+        TypeName keyType = genericArgument(field, 0);
+        TypeName valueType = genericArgument(field, 1);
+
+        build.addStatement(
+            "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T<$T, $T>($N)) : null",
+            fieldType, fieldName, fieldName,
+            collections, ClassName.get(HashMap.class), keyType, valueType, fieldName);
+        parameters.add("_" + fieldName);
+      } else {
+        parameters.add(fieldName(field));
+      }
     }
 
-    return MethodSpec.methodBuilder("build")
-        .addModifiers(PUBLIC)
-        .returns(valueType(d))
-        .addStatement("return new Value($N)", Joiner.on(", ").join(parameters))
+
+    return build.addStatement("return new Value($N)", Joiner.on(", ").join(parameters))
         .build();
   }
 
@@ -522,8 +730,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void assertNotNull(MethodSpec.Builder spec, String name) {
+    assertNotNull(spec, name, name);
+  }
+
+  private void assertNotNull(MethodSpec.Builder spec, String name, String msg) {
     spec.beginControlFlow("if ($N == null)", name)
-        .addStatement("throw new $T($S)", ClassName.get(NullPointerException.class), name)
+        .addStatement("throw new $T($S)", ClassName.get(NullPointerException.class), msg)
         .endControlFlow();
   }
 
@@ -539,14 +751,23 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return TypeName.get(field.getReturnType());
   }
 
-  private TypeName fieldGenericTypeArgument(final ExecutableElement field) {
-    final DeclaredType type = (DeclaredType) field.getReturnType();
-    checkArgument(type.getTypeArguments().size() == 1);
-    return TypeName.get(type.getTypeArguments().get(0));
+  private TypeName collectionGenericArgument(final ExecutableElement field) {
+    return genericArgument(field, 0);
   }
 
-  private TypeName collectionImplType(final ExecutableElement field) {
+  private TypeName genericArgument(final ExecutableElement field, int index) {
+    final DeclaredType type = (DeclaredType) field.getReturnType();
+    checkArgument(type.getTypeArguments().size() >= index);
+    return TypeName.get(type.getTypeArguments().get(index));
+  }
+
+  private ClassName collectionImplType(final ExecutableElement field) {
     return ClassName.get("java.util", collection(field));
+  }
+
+  private ClassName collectionRawType(final ExecutableElement field) {
+    final DeclaredType type = (DeclaredType) field.getReturnType();
+    return ClassName.get("java.util", type.asElement().getSimpleName().toString());
   }
 
   private static String optionalEmptyName(final ExecutableElement field) {
@@ -565,6 +786,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return "ofNullable";
   }
 
+  /*
   private void emitConstructors(final JavaWriter writer,
                                 final Descriptor descriptor)
       throws IOException {
@@ -679,6 +901,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
     writer.emitStatement("this.%s = %s", name, copy);
   }
+  */
 
   private boolean isCollection(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();

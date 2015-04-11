@@ -2,6 +2,7 @@ package foo;
 
 import io.norberg.automatter.AutoMatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -278,9 +279,10 @@ public final class CollectionFieldsBuilder {
   }
 
   public CollectionFields build() {
-    return new Value((strings != null) ? Collections.unmodifiableList(new ArrayList<String>(strings)) : Collections.<String>emptyList(),
-                     (integers != null) ? Collections.unmodifiableMap(new HashMap<String,Integer>(integers)) : Collections.<String,Integer>emptyMap(),
-                     (numbers != null) ? Collections.unmodifiableSet(new HashSet<Long>(numbers)) : Collections.<Long>emptySet());
+    List<String> _strings = (strings != null) ? Collections.unmodifiableList(new ArrayList<String>(strings)) : Collections.<String>emptyList();
+    Map<String, Integer> _integers = (integers != null) ? Collections.unmodifiableMap(new HashMap<String, Integer>(integers)) : Collections.<String, Integer>emptyMap();
+    Set<Long> _numbers = (numbers != null) ? Collections.unmodifiableSet(new HashSet<Long>(numbers)) : Collections.<Long>emptySet();
+    return new Value(_strings, _integers, _numbers);
   }
 
   public static CollectionFieldsBuilder from(CollectionFields v) {
