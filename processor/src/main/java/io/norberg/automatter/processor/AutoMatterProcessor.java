@@ -3,29 +3,58 @@ package io.norberg.automatter.processor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import com.squareup.javawriter.JavaWriter;
 import io.norberg.automatter.AutoMatter;
 import org.modeshape.common.text.Inflector;
 
 import javax.annotation.Generated;
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Collections.reverse;
 import static javax.lang.model.element.ElementKind.PACKAGE;
-import static javax.lang.model.element.Modifier.*;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
@@ -77,42 +106,463 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                                                           AutoMatterProcessorException {
     final Descriptor d = new Descriptor(element);
 
-    final JavaFileObject sourceFile = filer.createSourceFile(d.builderFullName);
-    final JavaWriter writer = new JavaWriter(sourceFile.openWriter());
+    TypeSpec builder = builder(d);
+    JavaFile javaFile = JavaFile.builder(d.packageName, builder).build();
+    javaFile.writeTo(filer);
+  }
 
-    writer.emitPackage(d.packageName);
-    writer.emitImports("io.norberg.automatter.AutoMatter");
-    writer.emitEmptyLine();
-    writer.emitImports("java.util.ArrayList",
-                       "java.util.Arrays",
-                       "java.util.Collection",
-                       "java.util.Collections",
-                       "java.util.HashMap",
-                       "java.util.HashSet",
-                       "java.util.Iterator",
-                       "java.util.List",
-                       "java.util.Map",
-                       "java.util.Set");
-    writer.emitEmptyLine();
-    writer.emitImports("javax.annotation.Generated");
+  private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {
+    Modifier[] modifiers = d.isPublic ? new Modifier[]{PUBLIC, FINAL} : new Modifier[]{FINAL};
 
-    writer.emitEmptyLine();
-    writer.emitAnnotation(
-        Generated.class,
-        ImmutableMap.of("value", "\"" + AutoMatterProcessor.class.getName() + "\""));
-    writer.beginType(d.builderSimpleName, "class",
-                     d.isPublic ? EnumSet.of(PUBLIC, FINAL) : EnumSet.of(FINAL),
-                     null);
-    emitFields(writer, d);
-    emitConstructors(writer, d);
-    emitAccessors(writer, d);
-    emitBuilderToBuilder(writer, d);
-    emitBuild(writer, d);
-    emitFactoryMethods(writer, d);
-    emitValue(writer, d);
+    AnnotationSpec generatedAnnotation = AnnotationSpec.builder(Generated.class)
+        .addMember("value", "$S", AutoMatterProcessor.class.getName())
+        .build();
 
-    writer.endType();
-    writer.close();
+    TypeSpec.Builder builder = TypeSpec.classBuilder(d.builderSimpleName)
+        .addModifiers(modifiers)
+        .addAnnotation(generatedAnnotation);
+
+    for (ExecutableElement field : d.fields) {
+      builder.addField(FieldSpec.builder(fieldType(field), fieldName(field), PRIVATE).build());
+    }
+
+    builder.addMethod(defaultConstructor(d));
+    builder.addMethod(copyValueConstructor(d));
+    builder.addMethod(copyBuilderConstructor(d));
+
+    for (MethodSpec accessor: accessors(d)) {
+      builder.addMethod(accessor);
+    }
+
+    if (d.toBuilder) {
+      builder.addMethod(toBuilder(d));
+    }
+
+    builder.addMethod(build(d));
+    builder.addMethod(fromValue(d));
+    builder.addMethod(fromBuilder(d));
+
+    builder.addType(valueClass(d));
+
+    return builder.build();
+  }
+
+  private MethodSpec defaultConstructor(final Descriptor d) {
+    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+        .addModifiers(PUBLIC);
+
+    for (ExecutableElement field : d.fields) {
+      if (isOptional(field) && shouldEnforceNonNull(field)) {
+        ClassName type = ClassName.bestGuess(optionalType(field));
+        constructor.addStatement("this.$N = $T.$L()", fieldName(field), type, optionalEmptyName(field));
+      }
+    }
+
+    return constructor.build();
+  }
+
+  private MethodSpec copyValueConstructor(final Descriptor d) {
+    ClassName valueClass = ClassName.get(d.packageName, d.targetSimpleName);
+
+    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+        .addModifiers(PRIVATE)
+        .addParameter(valueClass, "v");
+
+    for (ExecutableElement field : d.fields) {
+      String fieldName = fieldName(field);
+      TypeName fieldType = fieldType(field);
+
+      if (isCollection(field)) {
+        constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
+        constructor.addStatement(
+            "this.$N = (_$N == null) ? null : new $T(_$N)",
+            fieldName, fieldName, collectionImplType(field), fieldName);
+      } else if (isMap(field)) {
+        constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
+        constructor.addStatement(
+            "this.$N = (_$N == null) ? null : new $T(_$N)",
+            fieldName, fieldName, ClassName.get(HashMap.class), fieldName);
+      } else {
+        constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
+      }
+    }
+
+    return constructor.build();
+  }
+
+  private MethodSpec copyBuilderConstructor(final Descriptor d) {
+    ClassName builderClass = builderType(d);
+
+    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+        .addModifiers(PRIVATE)
+        .addParameter(builderClass, "v");
+
+    for (ExecutableElement field : d.fields) {
+      String fieldName = fieldName(field);
+
+      if (isCollection(field)) {
+        constructor.addStatement(
+            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+            fieldName, fieldName, collectionImplType(field), fieldName);
+      } else if (isMap(field)) {
+        constructor.addStatement(
+            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+            fieldName, fieldName, ClassName.get(HashMap.class), fieldName);
+      } else {
+        constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
+      }
+    }
+
+    return constructor.build();
+  }
+
+  private Set<MethodSpec> accessors(final Descriptor d) {
+    ImmutableSet.Builder<MethodSpec> result = ImmutableSet.builder();
+    for (ExecutableElement field : d.fields) {
+      result.add(getter(field));
+
+      if (isOptional(field)) {
+        result.add(optionalRawSetter(d, field));
+        result.add(optionalSetter(d, field));
+      } else if (isCollection(field)) {
+      } else if (isMap(field)) {
+      } else {
+        result.add(setter(d, field));
+      }
+    }
+    return result.build();
+  }
+
+  private MethodSpec getter(final ExecutableElement field) {
+    String fieldName = fieldName(field);
+
+    MethodSpec.Builder getter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .returns(fieldType(field));
+
+    if (isCollection(field) && shouldEnforceNonNull(field)) {
+      getter.beginControlFlow("if (this.$N == null)", fieldName)
+          .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+          .endControlFlow();
+    } else if (isMap(field)) {
+      getter.beginControlFlow("if (this.$N == null)", fieldName)
+          .addStatement("this.$N = new $T()", fieldName, ClassName.get(HashMap.class))
+          .endControlFlow();
+    }
+    getter.addStatement("return $N", fieldName);
+
+    return getter.build();
+  }
+
+  private MethodSpec optionalRawSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    ClassName type = ClassName.bestGuess(optionalType(field));
+    TypeName valueType = fieldGenericTypeArgument(field);
+
+    return MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(valueType, fieldName)
+        .returns(builderType(d))
+        .addStatement("return $N($T.$N($N))", fieldName, type, optionalMaybeName(field), fieldName)
+        .build();
+  }
+
+  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+    TypeName valueType = fieldGenericTypeArgument(field);
+    ClassName optionalType = ClassName.bestGuess(optionalType(field));
+    TypeName parameterType = ParameterizedTypeName.get(optionalType, WildcardTypeName.subtypeOf(valueType));
+
+    return MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(parameterType, fieldName)
+        .returns(builderType(d))
+        .addStatement("this.$N = ($T)$N", fieldName, fieldType(field), fieldName)
+        .addStatement("return this")
+        .build();
+  }
+
+  private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
+    String fieldName = fieldName(field);
+
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addModifiers(PUBLIC)
+        .addParameter(fieldType(field), fieldName)
+        .returns(builderType(d));
+
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(setter, fieldName);
+    }
+
+    return setter.addStatement("this.$N = $N", fieldName, fieldName)
+        .addStatement("return this")
+        .build();
+  }
+
+  private MethodSpec toBuilder(final Descriptor d) {
+    return MethodSpec.methodBuilder("builder")
+        .addModifiers(PUBLIC)
+        .returns(builderType(d))
+        .addStatement("return new $T(this)", builderType(d))
+        .build();
+  }
+
+  private MethodSpec build(final Descriptor d) {
+    final List<String> parameters = Lists.newArrayList();
+    for (ExecutableElement field : d.fields) {
+      parameters.add(fieldName(field));
+    }
+
+    return MethodSpec.methodBuilder("build")
+        .addModifiers(PUBLIC)
+        .returns(valueType(d))
+        .addStatement("return new Value($N)", Joiner.on(", ").join(parameters))
+        .build();
+  }
+
+  private MethodSpec fromValue(final Descriptor d) {
+    return MethodSpec.methodBuilder("from")
+        .addModifiers(PUBLIC, STATIC)
+        .addParameter(valueType(d), "v")
+        .returns(builderType(d))
+        .addStatement("return new $T(v)", builderType(d))
+        .build();
+  }
+
+  private MethodSpec fromBuilder(final Descriptor d) {
+    return MethodSpec.methodBuilder("from")
+        .addModifiers(PUBLIC, STATIC)
+        .addParameter(builderType(d), "v")
+        .returns(builderType(d))
+        .addStatement("return new $T(v)", builderType(d))
+        .build();
+  }
+
+  private TypeSpec valueClass(final Descriptor d) throws AutoMatterProcessorException {
+    TypeSpec.Builder value = TypeSpec.classBuilder("Value")
+        .addModifiers(PRIVATE, STATIC, FINAL)
+        .addSuperinterface(valueType(d));
+
+    for (ExecutableElement field : d.fields) {
+      value.addField(FieldSpec.builder(fieldType(field), fieldName(field), PRIVATE, FINAL).build());
+    }
+
+    value.addMethod(valueConstructor(d));
+
+    for (ExecutableElement field : d.fields) {
+      value.addMethod(valueGetter(field));
+    }
+    value.addMethod(valueToBuilder(d));
+    value.addMethod(valueEquals(d));
+    value.addMethod(valueHashCode(d));
+    value.addMethod(valueToString(d));
+
+    return value.build();
+  }
+
+  private MethodSpec valueConstructor(final Descriptor d) {
+    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+        .addModifiers(PRIVATE);
+
+    for (ExecutableElement field : d.fields) {
+      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
+        assertNotNull(constructor, fieldName(field));
+      }
+    }
+
+    for (ExecutableElement field : d.fields) {
+      String fieldName = fieldName(field);
+      AnnotationSpec annotation = AnnotationSpec.builder(AutoMatter.Field.class)
+          .addMember("value", "$S", fieldName)
+          .build();
+      ParameterSpec parameter = ParameterSpec.builder(fieldType(field), fieldName)
+          .addAnnotation(annotation)
+          .build();
+      constructor.addParameter(parameter);
+      constructor.addStatement("this.$N = $N", fieldName, fieldName);
+    }
+
+    return constructor.build();
+  }
+
+  private MethodSpec valueGetter(final ExecutableElement field) {
+    String fieldName = fieldName(field);
+
+    return MethodSpec.methodBuilder(fieldName)
+        .addAnnotation(AutoMatter.Field.class)
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .returns(fieldType(field))
+        .addStatement("return $N", fieldName)
+        .build();
+  }
+
+  private MethodSpec valueToBuilder(final Descriptor d) {
+    MethodSpec.Builder toBuilder = MethodSpec.methodBuilder("builder")
+        .addModifiers(PUBLIC)
+        .returns(builderType(d))
+        .addStatement("return new $T(this)", builderType(d));
+
+    // Always emit toBuilder, but only annotate it with @Override if the target asked for it.
+    if (d.toBuilder) {
+      toBuilder.addAnnotation(Override.class);
+    }
+
+    return toBuilder.build();
+  }
+
+  private MethodSpec valueEquals(final Descriptor d) throws AutoMatterProcessorException {
+    MethodSpec.Builder equals = MethodSpec.methodBuilder("equals")
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .addParameter(ClassName.get(Object.class), "o")
+        .returns(TypeName.BOOLEAN);
+
+    equals.beginControlFlow("if (this == o)")
+        .addStatement("return true")
+        .endControlFlow();
+
+    equals.beginControlFlow("if (!(o instanceof $T))", valueType(d))
+        .addStatement("return false")
+        .endControlFlow();
+
+    if (! d.fields.isEmpty()) {
+      equals.addStatement("final $T that = ($T) o", valueType(d), valueType(d));
+
+      for (ExecutableElement field : d.fields) {
+        equals.beginControlFlow(fieldNotEqualCondition(field))
+            .addStatement("return false")
+            .endControlFlow();
+      }
+    }
+
+    equals.addStatement("return true");
+    return equals.build();
+  }
+
+  private MethodSpec valueHashCode(final Descriptor d) throws AutoMatterProcessorException {
+    MethodSpec.Builder hashcode = MethodSpec.methodBuilder("hashCode")
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .returns(TypeName.INT)
+        .addStatement("int result = 1")
+        .addStatement("long temp");
+
+    for (ExecutableElement field : d.fields) {
+      final String name = fieldName(field);
+      final TypeMirror type = field.getReturnType();
+      switch (type.getKind()) {
+        case LONG:
+          hashcode.addStatement("result = 31 * result + (int) ($N ^ ($N >>> 32))", name, name);
+          break;
+        case INT:
+          hashcode.addStatement("result = 31 * result + $N", name);
+          break;
+        case BOOLEAN:
+          hashcode.addStatement("result = 31 * result + ($N ? 1231 : 1237)", name);
+          break;
+        case BYTE:
+        case SHORT:
+        case CHAR:
+          hashcode.addStatement("result = 31 * result + (int) $N", name);
+          break;
+        case FLOAT:
+          hashcode.addStatement(
+              "result = 31 * result + ($N != +0.0f ? $T.floatToIntBits($N) : 0)",
+              name, ClassName.get(Float.class), name);
+          break;
+        case DOUBLE:
+          hashcode.addStatement("temp = $T.doubleToLongBits($N)", ClassName.get(Double.class), name);
+          hashcode.addStatement("result = 31 * result + (int) (temp ^ (temp >>> 32))");
+          break;
+        case ARRAY:
+          hashcode.addStatement(
+              "result = 31 * result + ($N != null ? $T.hashCode($N) : 0)",
+              name, ClassName.get(Arrays.class), name);
+          break;
+        case DECLARED:
+          hashcode.addStatement("result = 31 * result + ($N != null ? $N.hashCode() : 0)", name, name);
+          break;
+        case ERROR:
+          throw fail("Cannot resolve type, might be missing import: " + type, field);
+        default:
+          throw fail("Unsupported type: " + type, field);
+      }
+    }
+    hashcode.addStatement("return result");
+    return hashcode.build();
+  }
+
+  private MethodSpec valueToString(final Descriptor d) {
+    return MethodSpec.methodBuilder("toString")
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .returns(ClassName.get(String.class))
+        .addStatement("return $N", toStringStatement(d.fields, d.targetSimpleName))
+        .build();
+  }
+
+  private String toStringStatement(final List<ExecutableElement> fields,
+                                     final String targetName){
+    final StringBuilder builder = new StringBuilder();
+    builder.append("\"").append(targetName).append("{\" +\n");
+    boolean first = true;
+    for (ExecutableElement field : fields) {
+      final String comma = first ? "" : ", ";
+      final String name = fieldName(field);
+      if (field.getReturnType().getKind() == ARRAY) {
+        builder.append(format("\"%1$s%2$s=\" + Arrays.toString(%2$s) +\n", comma, name));
+      } else {
+        builder.append(format("\"%1$s%2$s=\" + %2$s +\n", comma, name));
+      }
+      first = false;
+    }
+    builder.append("'}'");
+    return builder.toString();
+  }
+
+  private void assertNotNull(MethodSpec.Builder spec, String name) {
+    spec.beginControlFlow("if ($N == null)", name)
+        .addStatement("throw new $T($S)", ClassName.get(NullPointerException.class), name)
+        .endControlFlow();
+  }
+
+  private ClassName builderType(final Descriptor d) {
+    return ClassName.get(d.packageName, d.builderSimpleName);
+  }
+
+  private ClassName valueType(final Descriptor d) {
+    return ClassName.get(d.packageName, d.targetSimpleName);
+  }
+
+  private TypeName fieldType(final ExecutableElement field) {
+    return TypeName.get(field.getReturnType());
+  }
+
+  private TypeName fieldGenericTypeArgument(final ExecutableElement field) {
+    final DeclaredType type = (DeclaredType) field.getReturnType();
+    checkArgument(type.getTypeArguments().size() == 1);
+    return TypeName.get(type.getTypeArguments().get(0));
+  }
+
+  private TypeName collectionImplType(final ExecutableElement field) {
+    return ClassName.get("java.util", collection(field));
+  }
+
+  private static String optionalEmptyName(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("com.google.common.base.Optional<")) {
+      return "absent";
+    }
+    return "empty";
+  }
+
+  private static String optionalMaybeName(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    if (returnType.startsWith("com.google.common.base.Optional<")) {
+      return "fromNullable";
+    }
+    return "ofNullable";
   }
 
   private void emitConstructors(final JavaWriter writer,
