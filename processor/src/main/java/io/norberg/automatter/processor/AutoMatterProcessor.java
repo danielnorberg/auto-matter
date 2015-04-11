@@ -38,10 +38,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -173,21 +175,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       String fieldName = fieldName(field);
       TypeName fieldType = fieldType(field);
 
-      if (isCollection(field)) {
-        final ClassName collectionImplType = collectionImplType(field);
-        final TypeName itemType = genericArgument(field, 0);
+      if (isCollection(field) || isMap(field)) {
         constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         constructor.addStatement(
-            "this.$N = (_$N == null) ? null : new $T<$T>(_$N)",
-            fieldName, fieldName, collectionImplType, itemType, fieldName);
-      } else if (isMap(field)) {
-        final ClassName mapType = ClassName.get(HashMap.class);
-        final TypeName keyType = genericArgument(field, 0);
-        final TypeName valueType = genericArgument(field, 1);
-        constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
-        constructor.addStatement(
-            "this.$N = (_$N == null) ? null : new $T<$T, $T>(_$N)",
-            fieldName, fieldName, mapType, keyType, valueType, fieldName);
+            "this.$N = (_$N == null) ? null : new $T(_$N)",
+            fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
       }
@@ -206,19 +198,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : d.fields) {
       String fieldName = fieldName(field);
 
-      if (isCollection(field)) {
-        final ClassName collectionImplType = collectionImplType(field);
-        final TypeName itemType = genericArgument(field, 0);
+      if (isCollection(field) || isMap(field)) {
         constructor.addStatement(
-            "this.$N = (v.$N == null) ? null : new $T<$T>(v.$N)",
-            fieldName, fieldName, collectionImplType, itemType, fieldName);
-      } else if (isMap(field)) {
-        final ClassName mapType = ClassName.get(HashMap.class);
-        final TypeName keyType = genericArgument(field, 0);
-        final TypeName valueType = genericArgument(field, 1);
-        constructor.addStatement(
-            "this.$N = (v.$N == null) ? null : new $T<$T, $T>(v.$N)",
-            fieldName, fieldName, mapType, keyType, valueType, fieldName);
+            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+            fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
       }
@@ -270,18 +253,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addModifiers(PUBLIC)
         .returns(fieldType(field));
 
-    if (isCollection(field) && shouldEnforceNonNull(field)) {
-      final ClassName collectionImplType = collectionImplType(field);
-      final TypeName itemType = genericArgument(field, 0);
+    if ((isCollection(field) || isMap(field)) && shouldEnforceNonNull(field)) {
       getter.beginControlFlow("if (this.$N == null)", fieldName)
-          .addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType, itemType)
-          .endControlFlow();
-    } else if (isMap(field) && shouldEnforceNonNull(field)) {
-      final ClassName mapType = ClassName.get(HashMap.class);
-      final TypeName keyType = genericArgument(field, 0);
-      final TypeName valueType = genericArgument(field, 1);
-      getter.beginControlFlow("if (this.$N == null)", fieldName)
-          .addStatement("this.$N = new $T<$T, $T>()", fieldName, mapType, keyType, valueType)
+          .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
           .endControlFlow();
     }
     getter.addStatement("return $N", fieldName);
@@ -354,7 +328,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       setter.endControlFlow();
     }
 
-    setter.addStatement("this.$N = new $T<$T>($N)", fieldName, collectionImplType(field), itemType, fieldName);
+    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(field), fieldName);
     return setter.addStatement("return this").build();
   }
 
@@ -393,7 +367,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     collectionNullGuard(setter, field);
 
-    setter.addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType(field), itemType)
+    setter.addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
         .beginControlFlow("while ($N.hasNext())", fieldName)
         .addStatement("$T item = $N.next()", itemType, fieldName);
 
@@ -461,10 +435,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void lazyCollectionInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
     final String fieldName = fieldName(field);
-    final ClassName collectionImplType = collectionImplType(field);
-    final TypeName itemType = genericArgument(field, 0);
     spec.beginControlFlow("if (this.$N == null)", fieldName)
-        .addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType, itemType)
+        .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
         .endControlFlow();
   }
 
@@ -495,9 +467,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           .endControlFlow();
     }
 
-    setter.addStatement(
-        "this.$N = new $T<$T, $T>($N)",
-        fieldName, ClassName.get(HashMap.class), genericArgument(field, 0), genericArgument(field, 1), fieldName);
+    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(field), fieldName);
 
     return setter.addStatement("return this").build();
   }
@@ -537,7 +507,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Map instantiation
     if (entries == 1) {
-      setter.addStatement("$N = new $T<$T, $T>()", fieldName, ClassName.get(HashMap.class), keyType, valueType);
+      setter.addStatement("$N = new $T()", fieldName, collectionImplType(field));
     }
 
     // Put
@@ -578,10 +548,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private void lazMapInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
     final String fieldName = fieldName(field);
-    final TypeName keyType = genericArgument(field, 0);
-    final TypeName valueType = genericArgument(field, 1);
     spec.beginControlFlow("if (this.$N == null)", fieldName)
-        .addStatement("this.$N = new $T<$T, $T>()", fieldName, ClassName.get(HashMap.class), keyType, valueType)
+        .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
         .endControlFlow();
   }
 
@@ -618,41 +586,40 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : d.fields) {
       final String fieldName = fieldName(field);
       final TypeName fieldType = fieldType(field);
+      final ClassName collections = ClassName.get(Collections.class);
 
       if (isCollection(field)) {
-        final TypeName genericArg = genericArgument(field, 0);
-        final ClassName collections = ClassName.get(Collections.class);
+        final TypeName itemType = genericArgument(field, 0);
 
         if (shouldEnforceNonNull(field)) {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.$L(new $T<$T>($N)) : $T.<$T>$L()",
+              "$T _$L = ($L != null) ? $T.$L(new $T($N)) : $T.<$T>$L()",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), genericArg, fieldName,
-              collections, genericArg, emptyCollection(field));
+              collections, unmodifiableCollection(field), collectionImplType(field), fieldName,
+              collections, itemType, emptyCollection(field));
         } else {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.$L(new $T<$T>($N)) : null",
+              "$T _$L = ($L != null) ? $T.$L(new $T($N)) : null",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), genericArg, fieldName);
+              collections, unmodifiableCollection(field), collectionImplType(field), fieldName);
         }
 
         parameters.add("_" + fieldName);
       } else if (isMap(field)) {
-        final ClassName collections = ClassName.get(Collections.class);
         final TypeName keyType = genericArgument(field, 0);
         final TypeName valueType = genericArgument(field, 1);
 
         if (shouldEnforceNonNull(field)) {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T<$T, $T>($N)) : $T.<$T, $T>emptyMap()",
+              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T($N)) : $T.<$T, $T>emptyMap()",
               fieldType, fieldName, fieldName,
-              collections, ClassName.get(HashMap.class), keyType, valueType, fieldName,
+              collections, collectionImplType(field), fieldName,
               collections, keyType, valueType);
         } else {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T<$T, $T>($N)) : null",
+              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T($N)) : null",
               fieldType, fieldName, fieldName,
-              collections, ClassName.get(HashMap.class), keyType, valueType, fieldName);
+              collections, collectionImplType(field), fieldName);
         }
 
         parameters.add("_" + fieldName);
@@ -910,8 +877,23 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return TypeName.get(type.getTypeArguments().get(index));
   }
 
-  private ClassName collectionImplType(final ExecutableElement field) {
-    return ClassName.get("java.util", collection(field));
+  private TypeName collectionImplType(final ExecutableElement field) {
+    switch (collectionType(field)) {
+      case "List":
+        return ParameterizedTypeName.get(
+            ClassName.get(ArrayList.class),
+            genericArgument(field, 0));
+      case "Set":
+        return ParameterizedTypeName.get(
+            ClassName.get(HashSet.class),
+            genericArgument(field, 0));
+      case "Map":
+        return ParameterizedTypeName.get(
+            ClassName.get(HashMap.class),
+            genericArgument(field, 0), genericArgument(field, 1));
+      default:
+        throw new IllegalStateException("invalid collection type " + field);
+    }
   }
 
   private ClassName collectionRawType(final ExecutableElement field) {
@@ -941,23 +923,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         returnType.startsWith("java.util.Set<");
   }
 
-  private String collection(final ExecutableElement field) {
-    final String type = collectionType(field);
-    if (type.equals("List")) {
-      return "ArrayList";
-    } else if (type.equals("Set")) {
-      return "HashSet";
-    } else {
-      throw new AssertionError();
-    }
-  }
-
   private String unmodifiableCollection(final ExecutableElement field) {
     final String type = collectionType(field);
     if (type.equals("List")) {
       return "unmodifiableList";
     } else if (type.equals("Set")) {
       return "unmodifiableSet";
+    } else if (type.endsWith("Map")) {
+      return "unmodifiableMap";
     } else {
       throw new AssertionError();
     }
@@ -969,6 +942,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return "emptyList";
     } else if (type.equals("Set")) {
       return "emptySet";
+    } else if (type.equals("Map")) {
+      return "emptyMap";
     } else {
       throw new AssertionError();
     }
@@ -980,6 +955,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return "List";
     } else if (returnType.startsWith("java.util.Set<")) {
       return "Set";
+    } else if (returnType.startsWith("java.util.Map<")) {
+      return "Map";
     } else {
       throw new AssertionError();
     }
