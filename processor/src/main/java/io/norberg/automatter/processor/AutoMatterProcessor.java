@@ -34,6 +34,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.io.IOException;
@@ -162,7 +163,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return constructor.build();
   }
 
-  private MethodSpec copyValueConstructor(final Descriptor d) {
+  private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
     ClassName valueClass = ClassName.get(d.packageName, d.targetSimpleName);
 
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
@@ -174,15 +175,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       TypeName fieldType = fieldType(field);
 
       if (isCollection(field)) {
+        final ClassName collectionImplType = collectionImplType(field);
+        final TypeName itemType = genericArgument(field, 0);
         constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         constructor.addStatement(
-            "this.$N = (_$N == null) ? null : new $T(_$N)",
-            fieldName, fieldName, collectionImplType(field), fieldName);
+            "this.$N = (_$N == null) ? null : new $T<$T>(_$N)",
+            fieldName, fieldName, collectionImplType, itemType, fieldName);
       } else if (isMap(field)) {
+        final ClassName mapType = ClassName.get(HashMap.class);
+        final TypeName keyType = genericArgument(field, 0);
+        final TypeName valueType = genericArgument(field, 1);
         constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         constructor.addStatement(
-            "this.$N = (_$N == null) ? null : new $T(_$N)",
-            fieldName, fieldName, ClassName.get(HashMap.class), fieldName);
+            "this.$N = (_$N == null) ? null : new $T<$T, $T>(_$N)",
+            fieldName, fieldName, mapType, keyType, valueType, fieldName);
       } else {
         constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
       }
@@ -202,13 +208,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       String fieldName = fieldName(field);
 
       if (isCollection(field)) {
+        final ClassName collectionImplType = collectionImplType(field);
+        final TypeName itemType = genericArgument(field, 0);
         constructor.addStatement(
-            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
-            fieldName, fieldName, collectionImplType(field), fieldName);
+            "this.$N = (v.$N == null) ? null : new $T<$T>(v.$N)",
+            fieldName, fieldName, collectionImplType, itemType, fieldName);
       } else if (isMap(field)) {
+        final ClassName mapType = ClassName.get(HashMap.class);
+        final TypeName keyType = genericArgument(field, 0);
+        final TypeName valueType = genericArgument(field, 1);
         constructor.addStatement(
-            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
-            fieldName, fieldName, ClassName.get(HashMap.class), fieldName);
+            "this.$N = (v.$N == null) ? null : new $T<$T, $T>(v.$N)",
+            fieldName, fieldName, mapType, keyType, valueType, fieldName);
       } else {
         constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
       }
@@ -217,7 +228,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return constructor.build();
   }
 
-  private Set<MethodSpec> accessors(final Descriptor d) {
+  private Set<MethodSpec> accessors(final Descriptor d) throws AutoMatterProcessorException {
     ImmutableSet.Builder<MethodSpec> result = ImmutableSet.builder();
     for (ExecutableElement field : d.fields) {
       result.add(getter(field));
@@ -253,7 +264,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return result.build();
   }
 
-  private MethodSpec getter(final ExecutableElement field) {
+  private MethodSpec getter(final ExecutableElement field) throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
 
     MethodSpec.Builder getter = MethodSpec.methodBuilder(fieldName)
@@ -261,12 +272,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .returns(fieldType(field));
 
     if (isCollection(field) && shouldEnforceNonNull(field)) {
+      final ClassName collectionImplType = collectionImplType(field);
+      final TypeName itemType = genericArgument(field, 0);
       getter.beginControlFlow("if (this.$N == null)", fieldName)
-          .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+          .addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType, itemType)
           .endControlFlow();
     } else if (isMap(field) && shouldEnforceNonNull(field)) {
+      final ClassName mapType = ClassName.get(HashMap.class);
+      final TypeName keyType = genericArgument(field, 0);
+      final TypeName valueType = genericArgument(field, 1);
       getter.beginControlFlow("if (this.$N == null)", fieldName)
-          .addStatement("this.$N = new $T()", fieldName, ClassName.get(HashMap.class))
+          .addStatement("this.$N = new $T<$T, $T>()", fieldName, mapType, keyType, valueType)
           .endControlFlow();
     }
     getter.addStatement("return $N", fieldName);
@@ -287,19 +303,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) {
+  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
     TypeName valueType = collectionGenericArgument(field);
     ClassName optionalType = ClassName.bestGuess(optionalType(field));
     TypeName parameterType = ParameterizedTypeName.get(optionalType, WildcardTypeName.subtypeOf(valueType));
 
-    return MethodSpec.methodBuilder(fieldName)
+    MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
         .addParameter(parameterType, fieldName)
-        .returns(builderType(d))
-        .addStatement("this.$N = ($T)$N", fieldName, fieldType(field), fieldName)
-        .addStatement("return this")
-        .build();
+        .returns(builderType(d));
+
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(setter, fieldName);
+    }
+
+    setter.addStatement("this.$N = ($T)$N", fieldName, fieldType(field), fieldName);
+
+    return setter.addStatement("return this").build();
   }
 
   private MethodSpec collectionSetter(final Descriptor d, final ExecutableElement field) {
@@ -378,7 +399,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .beginControlFlow("while ($N.hasNext())", fieldName)
         .addStatement("$T item = $N.next()", itemType, fieldName);
 
-    assertNotNull(setter, "item", fieldName + ": null item");
+    if (shouldEnforceNonNull(field)) {
+      assertNotNull(setter, "item", fieldName + ": null item");
+    }
 
     setter.addStatement("this.$N.add(item)", fieldName)
         .endControlFlow()
@@ -443,7 +466,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final String fieldName = fieldName(field);
     final ClassName collectionImplType = collectionImplType(field);
     final TypeName itemType = collectionGenericArgument(field);
-    spec.beginControlFlow("if ($N == null)", fieldName)
+    spec.beginControlFlow("if (this.$N == null)", fieldName)
         .addStatement("this.$N = new $T<$T>()", fieldName, collectionImplType, itemType)
         .endControlFlow();
   }
@@ -560,12 +583,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final String fieldName = fieldName(field);
     final TypeName keyType = genericArgument(field, 0);
     final TypeName valueType = genericArgument(field, 1);
-    spec.beginControlFlow("if ($N == null)", fieldName)
+    spec.beginControlFlow("if (this.$N == null)", fieldName)
         .addStatement("this.$N = new $T<$T, $T>()", fieldName, ClassName.get(HashMap.class), keyType, valueType)
         .endControlFlow();
   }
 
-  private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
+  private MethodSpec setter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
@@ -590,7 +613,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec build(final Descriptor d) {
+  private MethodSpec build(final Descriptor d) throws AutoMatterProcessorException {
     MethodSpec.Builder build = MethodSpec.methodBuilder("build")
         .addModifiers(PUBLIC)
         .returns(valueType(d));
@@ -689,7 +712,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return value.build();
   }
 
-  private MethodSpec valueConstructor(final Descriptor d) {
+  private MethodSpec valueConstructor(final Descriptor d) throws AutoMatterProcessorException {
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE);
 
@@ -708,13 +731,28 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           .addAnnotation(annotation)
           .build();
       constructor.addParameter(parameter);
-      constructor.addStatement("this.$N = $N", fieldName, fieldName);
+
+      final ClassName collectionsType = ClassName.get(Collections.class);
+      if (shouldEnforceNonNull(field) && isCollection(field)) {
+        final TypeName itemType = genericArgument(field, 0);
+        constructor.addStatement(
+            "this.$N = ($N != null) ? $N : $T.<$T>$L()",
+            fieldName, fieldName, fieldName, collectionsType, itemType, emptyCollection(field));
+      } else if (shouldEnforceNonNull(field) && isMap(field)) {
+        final TypeName keyType = genericArgument(field, 0);
+        final TypeName valueType = genericArgument(field, 1);
+        constructor.addStatement(
+            "this.$N = ($N != null) ? $N : $T.<$T, $T>emptyMap()",
+            fieldName, fieldName, fieldName, collectionsType, keyType, valueType);
+      } else {
+        constructor.addStatement("this.$N = $N", fieldName, fieldName);
+      }
     }
 
     return constructor.build();
   }
 
-  private MethodSpec valueGetter(final ExecutableElement field) {
+  private MethodSpec valueGetter(final ExecutableElement field) throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
 
     return MethodSpec.methodBuilder(fieldName)
@@ -868,8 +906,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return ClassName.get(d.packageName, d.targetSimpleName);
   }
 
-  private TypeName fieldType(final ExecutableElement field) {
-    return TypeName.get(field.getReturnType());
+  private TypeName fieldType(final ExecutableElement field) throws AutoMatterProcessorException {
+    TypeMirror returnType = field.getReturnType();
+    if (returnType.getKind() == TypeKind.ERROR) {
+      throw fail("Cannot resolve type, might be missing import: " + returnType, field);
+    }
+    return TypeName.get(returnType);
   }
 
   private TypeName collectionGenericArgument(final ExecutableElement field) {

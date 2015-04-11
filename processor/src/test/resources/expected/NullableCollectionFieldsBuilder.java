@@ -2,8 +2,12 @@ package foo;
 
 import io.norberg.automatter.AutoMatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,8 +149,8 @@ public final class NullableCollectionFieldsBuilder {
   }
 
   public NullableCollectionFieldsBuilder putInteger(String key, Integer value) {
-    if (integers == null) {
-      integers = new HashMap<String,Integer>();
+    if (this.integers == null) {
+      this.integers = new HashMap<String,Integer>();
     }
     integers.put(key, value);
     return this;
@@ -210,9 +214,10 @@ public final class NullableCollectionFieldsBuilder {
   }
 
   public NullableCollectionFields build() {
-    return new Value((strings != null) ? Collections.unmodifiableList(new ArrayList<String>(strings)) : null,
-                     (integers != null) ? Collections.unmodifiableMap(new HashMap<String,Integer>(integers)) : null,
-                     (numbers != null) ? Collections.unmodifiableSet(new HashSet<Long>(numbers)) : null);
+    List<String> _strings = (strings != null) ? Collections.unmodifiableList(new ArrayList<String>(strings)) : null;
+    Map<String, Integer> _integers = (integers != null) ? Collections.unmodifiableMap(new HashMap<String, Integer>(integers)) : null;
+    Set<Long> _numbers = (numbers != null) ? Collections.unmodifiableSet(new HashSet<Long>(numbers)) : null;
+    return new Value(_strings, _integers, _numbers);
   }
 
   public static NullableCollectionFieldsBuilder from(NullableCollectionFields v) {

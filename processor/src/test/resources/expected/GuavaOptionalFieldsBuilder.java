@@ -1,16 +1,17 @@
 package foo;
 
+import com.google.common.base.Optional;
 import io.norberg.automatter.AutoMatter;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
 public final class GuavaOptionalFieldsBuilder {
 
-  private com.google.common.base.Optional<String> foo;
-  private com.google.common.base.Optional<String> bar;
+  private Optional<String> foo;
+  private Optional<String> bar;
 
   public GuavaOptionalFieldsBuilder() {
-    this.foo = com.google.common.base.Optional.absent();
+    this.foo = Optional.absent();
   }
 
   private GuavaOptionalFieldsBuilder(GuavaOptionalFields v) {
@@ -23,32 +24,32 @@ public final class GuavaOptionalFieldsBuilder {
     this.bar = v.bar;
   }
 
-  public com.google.common.base.Optional<String> foo() {
+  public Optional<String> foo() {
     return foo;
   }
 
   public GuavaOptionalFieldsBuilder foo(String foo) {
-    return foo(com.google.common.base.Optional.fromNullable(foo));
+    return foo(Optional.fromNullable(foo));
   }
 
-  public GuavaOptionalFieldsBuilder foo(com.google.common.base.Optional<? extends String> foo) {
+  public GuavaOptionalFieldsBuilder foo(Optional<? extends String> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
-    this.foo = (com.google.common.base.Optional<String>) foo;
+    this.foo = (Optional<String>) foo;
     return this;
   }
 
-  public com.google.common.base.Optional<String> bar() {
+  public Optional<String> bar() {
     return bar;
   }
 
   public GuavaOptionalFieldsBuilder bar(String bar) {
-    return bar(com.google.common.base.Optional.fromNullable(bar));
+    return bar(Optional.fromNullable(bar));
   }
 
-  public GuavaOptionalFieldsBuilder bar(com.google.common.base.Optional<? extends String> bar) {
-    this.bar = (com.google.common.base.Optional<String>) bar;
+  public GuavaOptionalFieldsBuilder bar(Optional<? extends String> bar) {
+    this.bar = (Optional<String>) bar;
     return this;
   }
 
@@ -67,11 +68,11 @@ public final class GuavaOptionalFieldsBuilder {
   private static final class Value
       implements GuavaOptionalFields {
 
-    private final com.google.common.base.Optional<String> foo;
-    private final com.google.common.base.Optional<String> bar;
+    private final Optional<String> foo;
+    private final Optional<String> bar;
 
-    private Value(@AutoMatter.Field("foo") com.google.common.base.Optional<String> foo,
-                  @AutoMatter.Field("bar") com.google.common.base.Optional<String> bar) {
+    private Value(@AutoMatter.Field("foo") Optional<String> foo,
+                  @AutoMatter.Field("bar") Optional<String> bar) {
       if (foo == null) {
         throw new NullPointerException("foo");
       }
@@ -81,13 +82,13 @@ public final class GuavaOptionalFieldsBuilder {
 
     @AutoMatter.Field
     @Override
-    public com.google.common.base.Optional<String> foo() {
+    public Optional<String> foo() {
       return foo;
     }
 
     @AutoMatter.Field
     @Override
-    public com.google.common.base.Optional<String> bar() {
+    public Optional<String> bar() {
       return bar;
     }
 
