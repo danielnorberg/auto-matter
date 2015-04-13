@@ -2,13 +2,11 @@ package io.norberg.automatter;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.JavaFileObjects;
-
+import io.norberg.automatter.processor.AutoMatterProcessor;
 import org.junit.Assume;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
-
-import io.norberg.automatter.processor.AutoMatterProcessor;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
