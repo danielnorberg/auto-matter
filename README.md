@@ -44,6 +44,7 @@ out.println("foobar: " + foobar);
 </dependency>
 ```
 
+*Note*: Use `<scope>provided</scope>` to avoid pulling in the runtime dependencies of the annotation processor itself. The generated code does not have any runtime dependencies on *auto-matter*.
 
 Why
 ---
