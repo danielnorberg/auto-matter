@@ -2,7 +2,6 @@ package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
@@ -29,9 +28,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -51,8 +48,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static java.util.Collections.reverse;
-import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -105,27 +100,29 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void process(final Element element) throws IOException, AutoMatterProcessorException {
-    final Descriptor d = new Descriptor(element);
+    final Descriptor d = Descriptor.from(element, elements);
 
     TypeSpec builder = builder(d);
-    JavaFile javaFile = JavaFile.builder(d.packageName, builder)
+    JavaFile javaFile = JavaFile.builder(d.packageName(), builder)
         .skipJavaLangImports(true)
         .build();
     javaFile.writeTo(filer);
   }
 
   private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {
-    Modifier[] modifiers = d.isPublic ? new Modifier[]{PUBLIC, FINAL} : new Modifier[]{FINAL};
-
     AnnotationSpec generatedAnnotation = AnnotationSpec.builder(Generated.class)
         .addMember("value", "$S", AutoMatterProcessor.class.getName())
         .build();
 
-    TypeSpec.Builder builder = TypeSpec.classBuilder(d.builderSimpleName)
-        .addModifiers(modifiers)
+    TypeSpec.Builder builder = TypeSpec.classBuilder(d.builderName())
+        .addModifiers(FINAL)
         .addAnnotation(generatedAnnotation);
 
-    for (ExecutableElement field : d.fields) {
+    if (d.isPublic()) {
+      builder.addModifiers(PUBLIC);
+    }
+
+    for (ExecutableElement field : d.fields()) {
       builder.addField(FieldSpec.builder(fieldType(field), fieldName(field), PRIVATE).build());
     }
 
@@ -137,7 +134,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       builder.addMethod(accessor);
     }
 
-    if (d.toBuilder) {
+    if (d.hasToBuilder()) {
       builder.addMethod(toBuilder(d));
     }
 
@@ -154,7 +151,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PUBLIC);
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       if (isOptional(field) && shouldEnforceNonNull(field)) {
         ClassName type = ClassName.bestGuess(optionalType(field));
         constructor.addStatement("this.$N = $T.$L()", fieldName(field), type, optionalEmptyName(field));
@@ -165,13 +162,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
-    ClassName valueClass = ClassName.get(d.packageName, d.targetSimpleName);
-
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
-        .addParameter(valueClass, "v");
+        .addParameter(valueType(d), "v");
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
       TypeName fieldType = fieldType(field);
 
@@ -195,7 +190,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addModifiers(PRIVATE)
         .addParameter(builderClass, "v");
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
 
       if (isCollection(field) || isMap(field)) {
@@ -212,7 +207,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private Set<MethodSpec> accessors(final Descriptor d) throws AutoMatterProcessorException {
     ImmutableSet.Builder<MethodSpec> result = ImmutableSet.builder();
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       result.add(getter(field));
 
       if (isOptional(field)) {
@@ -583,7 +578,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .returns(valueType(d));
 
     final List<String> parameters = Lists.newArrayList();
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       final String fieldName = fieldName(field);
       final TypeName fieldType = fieldType(field);
       final ClassName collections = ClassName.get(Collections.class);
@@ -654,13 +649,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addSuperinterface(valueType(d));
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       value.addField(FieldSpec.builder(fieldType(field), fieldName(field), PRIVATE, FINAL).build());
     }
 
     value.addMethod(valueConstructor(d));
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       value.addMethod(valueGetter(field));
     }
     value.addMethod(valueToBuilder(d));
@@ -675,13 +670,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE);
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
         assertNotNull(constructor, fieldName(field));
       }
     }
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
       AnnotationSpec annotation = AnnotationSpec.builder(AutoMatter.Field.class)
           .addMember("value", "$S", fieldName)
@@ -730,7 +725,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("return new $T(this)", builderType(d));
 
     // Always emit toBuilder, but only annotate it with @Override if the target asked for it.
-    if (d.toBuilder) {
+    if (d.hasToBuilder()) {
       toBuilder.addAnnotation(Override.class);
     }
 
@@ -752,10 +747,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("return false")
         .endControlFlow();
 
-    if (!d.fields.isEmpty()) {
+    if (!d.fields().isEmpty()) {
       equals.addStatement("final $T that = ($T) o", valueType(d), valueType(d));
 
-      for (ExecutableElement field : d.fields) {
+      for (ExecutableElement field : d.fields()) {
         equals.beginControlFlow(fieldNotEqualCondition(field))
             .addStatement("return false")
             .endControlFlow();
@@ -773,7 +768,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("int result = 1")
         .addStatement("long temp");
 
-    for (ExecutableElement field : d.fields) {
+    for (ExecutableElement field : d.fields()) {
       final String name = fieldName(field);
       final TypeMirror type = field.getReturnType();
       switch (type.getKind()) {
@@ -822,7 +817,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)
         .returns(ClassName.get(String.class))
-        .addStatement("return $N", toStringStatement(d.fields, d.targetSimpleName))
+        .addStatement("return $N", toStringStatement(d.fields(), d.valueTypeName()))
         .build();
   }
 
@@ -856,11 +851,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private ClassName builderType(final Descriptor d) {
-    return ClassName.get(d.packageName, d.builderSimpleName);
+    return ClassName.get(d.packageName(), d.builderName());
   }
 
   private ClassName valueType(final Descriptor d) {
-    return ClassName.get(d.packageName, d.targetSimpleName);
+    return ClassName.get(d.packageName(), d.valueTypeName());
   }
 
   private TypeName fieldType(final ExecutableElement field) throws AutoMatterProcessorException {
@@ -1040,86 +1035,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return field.getSimpleName().toString();
   }
 
-  private static String simpleName(String fullyQualifiedName) {
-    int lastDot = fullyQualifiedName.lastIndexOf('.');
-    return fullyQualifiedName.substring(lastDot + 1, fullyQualifiedName.length());
-  }
-
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return ImmutableSet.of(AutoMatter.class.getName());
-  }
-
-  private class Descriptor {
-
-    private final List<ExecutableElement> fields;
-    private final boolean toBuilder;
-    private final String builderFullName;
-    private final String packageName;
-    private final String targetSimpleName;
-    private final String builderSimpleName;
-    private final boolean isPublic;
-
-    private Descriptor(final Element element) throws AutoMatterProcessorException {
-      this.isPublic = element.getModifiers().contains(PUBLIC);
-      this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
-      this.targetSimpleName = nestedName(element);
-      final String targetName = element.getSimpleName().toString();
-      this.builderFullName = fullyQualifedName(packageName, targetName + "Builder");
-      this.builderSimpleName = simpleName(builderFullName);
-
-      if (!element.getKind().isInterface()) {
-        error("@AutoMatter target must be an interface", element);
-      }
-
-      final ImmutableList.Builder<ExecutableElement> fields = ImmutableList.builder();
-      boolean toBuilder = false;
-      for (final Element member : element.getEnclosedElements()) {
-        if (member.getKind().equals(ElementKind.METHOD)) {
-          final ExecutableElement executable = (ExecutableElement) member;
-          if (executable.getModifiers().contains(STATIC)) {
-            continue;
-          }
-          if (executable.getSimpleName().toString().equals("builder")) {
-            final String type = executable.getReturnType().toString();
-            if (!type.equals(builderSimpleName) && !type.equals(builderFullName)) {
-              throw fail("builder() return type must be " + builderSimpleName, element);
-            }
-            toBuilder = true;
-            continue;
-          }
-          fields.add(executable);
-        }
-      }
-      this.fields = fields.build();
-      this.toBuilder = toBuilder;
-    }
-
-    private String nestedName(final Element element) {
-      final List<Element> classes = enclosingClasses(element);
-      final List<String> names = Lists.newArrayList();
-      for (Element cls : classes) {
-        names.add(cls.getSimpleName().toString());
-      }
-      return Joiner.on('.').join(names);
-    }
-
-    private List<Element> enclosingClasses(final Element element) {
-      final List<Element> classes = Lists.newArrayList();
-      Element e = element;
-      while (e.getKind() != PACKAGE) {
-        classes.add(e);
-        e = e.getEnclosingElement();
-      }
-      reverse(classes);
-      return classes;
-    }
-
-    private String fullyQualifedName(final String packageName, final String simpleName) {
-      return packageName.isEmpty()
-          ? simpleName
-          : packageName + "." + simpleName;
-    }
   }
 
   private boolean shouldEnforceNonNull(final ExecutableElement field) {
@@ -1142,10 +1060,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private AutoMatterProcessorException fail(final String msg, final Element element)
       throws AutoMatterProcessorException {
     throw new AutoMatterProcessorException(msg, element);
-  }
-
-  private void error(final String s, final Element element) {
-    messager.printMessage(ERROR, s, element);
   }
 
   private static String capitalizeFirstLetter(String s) {
