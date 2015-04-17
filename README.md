@@ -241,3 +241,16 @@ assert foobar.foo().get().equals("hello");
 assert !foobar.bar().isPresent();
 assert !foobar.baz().isPresent();
 ```
+
+### Known Issues
+
+There's an issue with maven-compiler-plugin 3.x and annotation processors that causes
+recompilation without a preceding `mvn clean` to fail.
+
+https://github.com/danielnorberg/auto-matter/issues/17
+
+Known workarounds:
+
+* Clean when building. E.g. `mvn clean test`
+* Use maven-compiler-plugin 2.x (e.g. 2.5.1)
+* Disable the maven-compiler-plugin `useIncrementalCompilation` configuration option
