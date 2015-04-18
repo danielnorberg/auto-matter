@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -53,6 +54,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
+import static javax.lang.model.type.TypeKind.FLOAT;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
@@ -751,13 +753,48 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       equals.addStatement("final $T that = ($T) o", valueType(d), valueType(d));
 
       for (ExecutableElement field : d.fields()) {
-        equals.beginControlFlow(fieldNotEqualCondition(field))
-            .addStatement("return false")
-            .endControlFlow();
+        equals.addCode(fieldNotEqualCheck(field));
       }
     }
 
     return equals.addStatement("return true").build();
+  }
+
+  private CodeBlock fieldNotEqualCheck(final ExecutableElement field) throws AutoMatterProcessorException {
+    final String name = fieldName(field);
+    final CodeBlock.Builder result = CodeBlock.builder();
+    final TypeMirror returnType = field.getReturnType();
+    switch (returnType.getKind()) {
+      case LONG:
+      case INT:
+      case BOOLEAN:
+      case BYTE:
+      case SHORT:
+      case CHAR:
+        result.beginControlFlow("if ($L != that.$L())", name, name);
+        break;
+      case FLOAT:
+      case DOUBLE:
+        // Boxing is available in javapoet master but not released yet (as of 1.0.0).
+        final TypeName boxed = ClassName.get(returnType.getKind() == FLOAT ? Float.class : Double.class);
+        result.beginControlFlow("if ($T.compare($L, that.$L()) != 0)", boxed, name, name);
+        break;
+      case ARRAY:
+        result.beginControlFlow("if (!$T.equals($L, that.$L()))", ClassName.get(Arrays.class), name, name);
+        break;
+      case DECLARED:
+        result.beginControlFlow(
+            "if ($L != null ? !$L.equals(that.$L()) : that.$L() != null)",
+            name, name, name, name);
+        break;
+      case ERROR:
+        throw fail("Cannot resolve type, might be missing import: " + returnType, field);
+      default:
+        throw fail("Unsupported type: " + returnType, field);
+    }
+
+    result.addStatement("return false").endControlFlow();
+    return result.build();
   }
 
   private MethodSpec valueHashCode(final Descriptor d) throws AutoMatterProcessorException {
@@ -974,33 +1011,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private boolean isPrimitive(final ExecutableElement field) {
     return field.getReturnType().getKind().isPrimitive();
-  }
-
-  private String fieldNotEqualCondition(final ExecutableElement field)
-      throws AutoMatterProcessorException {
-    final String name = field.getSimpleName().toString();
-    final TypeMirror type = field.getReturnType();
-    switch (type.getKind()) {
-      case LONG:
-      case INT:
-      case BOOLEAN:
-      case BYTE:
-      case SHORT:
-      case CHAR:
-        return format("if (%1$s != that.%1$s())", name);
-      case FLOAT:
-        return format("if (Float.compare(that.%1$s(), %1$s) != 0)", name);
-      case DOUBLE:
-        return format("if (Double.compare(that.%1$s(), %1$s) != 0)", name);
-      case ARRAY:
-        return format("if (!Arrays.equals(%1$s, that.%1$s()))", name);
-      case DECLARED:
-        return format("if (%1$s != null ? !%1$s.equals(that.%1$s()) : that.%1$s() != null)", name);
-      case ERROR:
-        throw fail("Cannot resolve type, might be missing import: " + type, field);
-      default:
-        throw fail("Unsupported type: " + type, field);
-    }
   }
 
   private boolean isOptional(final ExecutableElement field) {
