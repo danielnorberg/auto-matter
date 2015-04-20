@@ -850,31 +850,27 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec valueToString(final Descriptor d) {
-    return MethodSpec.methodBuilder("toString")
+    MethodSpec.Builder toString = MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)
-        .returns(ClassName.get(String.class))
-        .addStatement("return $N", toStringStatement(d.fields(), d.valueTypeName()))
-        .build();
-  }
+        .returns(ClassName.get(String.class));
 
-  private String toStringStatement(final List<ExecutableElement> fields,
-                                   final String targetName) {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("\"").append(targetName).append("{\" +\n");
-    boolean first = true;
-    for (ExecutableElement field : fields) {
-      final String comma = first ? "" : ", ";
+    toString.addCode("return \"$L{\" +\n", d.valueTypeName());
+
+    for (int i=0; i<d.fields().size(); i++) {
+      final ExecutableElement field = d.fields().get(i);
+      final String comma = (i == 0) ? "" : ", ";
       final String name = fieldName(field);
+
       if (field.getReturnType().getKind() == ARRAY) {
-        builder.append(format("\"%1$s%2$s=\" + Arrays.toString(%2$s) +\n", comma, name));
+        toString.addCode("\"$L$L=\" + $T.toString($L) +\n", comma, name, ClassName.get(Arrays.class), name);
       } else {
-        builder.append(format("\"%1$s%2$s=\" + %2$s +\n", comma, name));
+        toString.addCode("\"$L$L=\" + $L +\n", comma, name, name);
       }
-      first = false;
     }
-    builder.append("'}'");
-    return builder.toString();
+
+    toString.addStatement("'}'");
+    return toString.build();
   }
 
   private void assertNotNull(MethodSpec.Builder spec, String name) {
