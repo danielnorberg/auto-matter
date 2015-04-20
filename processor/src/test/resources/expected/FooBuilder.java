@@ -307,10 +307,10 @@ public final class FooBuilder {
       if (aChar != that.aChar()) {
         return false;
       }
-      if (Float.compare(that.aFloat(), aFloat) != 0) {
+      if (Float.compare(aFloat, that.aFloat()) != 0) {
         return false;
       }
-      if (Double.compare(that.aDouble(), aDouble) != 0) {
+      if (Double.compare(aDouble, that.aDouble()) != 0) {
         return false;
       }
       if (object != null ? !object.equals(that.object()) : that.object() != null) {
