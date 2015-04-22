@@ -156,7 +156,7 @@ Foobar copy1 = FoobarBuilder.from(original);
     .build();
 
 // Using a FoobarBuilder builder() method optionally defined on the value type
-Foobar copy2 = original.builder();
+Foobar copy2 = original.builder()
     .foo("this is another copy")
     .build();
 ```
