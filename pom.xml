@@ -5,7 +5,7 @@
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.10.1</version>
+  <version>0.10.2-SNAPSHOT</version>
   <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
 
@@ -27,7 +27,7 @@
     <connection>scm:git:https://github.com/danielnorberg/auto-matter.git</connection>
     <developerConnection>scm:git:git@github.com:danielnorberg/auto-matter.git</developerConnection>
     <url>https://github.com/danielnorberg/auto-matter</url>
-    <tag>v0.10.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
