@@ -1,5 +1,7 @@
 package io.norberg.automatter.jackson;
 
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotatedParameter;
@@ -22,5 +24,18 @@ class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {
       return member.getName();
     }
     return null;
+  }
+
+  @Override
+  public boolean hasCreatorAnnotation(final Annotated a) {
+    if (!(a instanceof AnnotatedConstructor)) {
+      return false;
+    }
+    final AnnotatedConstructor ctor = (AnnotatedConstructor) a;
+    if (ctor.getParameterCount() == 0) {
+      return true;
+    }
+    final AutoMatter.Field field = ctor.getParameter(0).getAnnotation(AutoMatter.Field.class);
+    return field != null;
   }
 }
