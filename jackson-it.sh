@@ -5,7 +5,7 @@ for v in $(curl -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterx
                   {p: split("."), v:.} |
                   {major:.p[0] | tonumber, minor: .p[1] | tonumber, v:.v} |
                   select(.major >= 2 and .minor >= 4)] |
-                  sort_by(.v | split(".")) |
+                  sort_by([.major, .minor, .v]) |
                   .[].v' |
            grep -v '2.4.0-rc')
 do
