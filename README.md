@@ -1,7 +1,7 @@
 AutoMatter
 ==========
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter) [![Build Status](https://travis-ci.org/danielnorberg/auto-matter.svg?branch=master)](https://travis-ci.org/danielnorberg/auto-matter) [![docs examples](https://sourcegraph.com/api/repos/github.com/danielnorberg/auto-matter/.badges/docs-examples.svg)](https://sourcegraph.com/github.com/danielnorberg/auto-matter)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter) [![Build Status](https://travis-ci.org/danielnorberg/auto-matter.svg?branch=master)](https://travis-ci.org/danielnorberg/auto-matter) [![Circle CI](https://circleci.com/gh/danielnorberg/auto-matter/tree/master.svg?style=shield)](https://circleci.com/gh/danielnorberg/auto-matter/tree/master) [![docs examples](https://sourcegraph.com/api/repos/github.com/danielnorberg/auto-matter/.badges/docs-examples.svg)](https://sourcegraph.com/github.com/danielnorberg/auto-matter)
 
 A small library for materializing value classes and builders from value types defined as minimal
 interfaces. Inspired by [AutoValue](https://github.com/google/auto/tree/master/value).
