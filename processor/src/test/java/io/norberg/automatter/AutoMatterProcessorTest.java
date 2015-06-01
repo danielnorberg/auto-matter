@@ -2,11 +2,13 @@ package io.norberg.automatter;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.JavaFileObjects;
-import io.norberg.automatter.processor.AutoMatterProcessor;
+
 import org.junit.Assume;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
+
+import io.norberg.automatter.processor.AutoMatterProcessor;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
@@ -164,6 +166,26 @@ public class AutoMatterProcessorTest {
         .compilesWithoutError()
         .and().generatesSources(
         JavaFileObjects.forResource("expected/JUTOptionalFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testDefaultMethods() {
+    Assume.assumeTrue(isJava8());
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/DefaultMethods.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/DefaultMethodsBuilder.java"));
+  }
+
+  private boolean isJava8() {
+    try {
+      Class.forName("java.util.Optional");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   private boolean hasJutOptional() {

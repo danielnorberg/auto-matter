@@ -4,11 +4,14 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import java.util.List;
+import java.util.Set;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.List;
 
 import static java.util.Collections.reverse;
 import static javax.lang.model.element.ElementKind.PACKAGE;
@@ -44,7 +47,7 @@ class Descriptor {
     for (final Element member : element.getEnclosedElements()) {
       if (member.getKind().equals(ElementKind.METHOD)) {
         final ExecutableElement executable = (ExecutableElement) member;
-        if (executable.getModifiers().contains(STATIC)) {
+        if (isStaticOrDefault(member)) {
           continue;
         }
         if (executable.getSimpleName().toString().equals("builder")) {
@@ -62,6 +65,20 @@ class Descriptor {
     final boolean isPublic = element.getModifiers().contains(PUBLIC);
 
     return new Descriptor(packageName, valueTypeName, builderName, fields.build(), isPublic, toBuilder);
+  }
+
+  private static boolean isStaticOrDefault(final Element member) {
+    final Set<Modifier> modifiers = member.getModifiers();
+    for (final Modifier modifier : modifiers) {
+      if (modifier == STATIC) {
+        return true;
+      }
+      // String comparison to avoid requiring JDK 8
+      if (modifier.name().equals("DEFAULT")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private Descriptor(String packageName, String valueTypeName, String builderName, List<ExecutableElement> fields,
