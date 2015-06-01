@@ -8,6 +8,7 @@ dependencies:
   - mvn install -DskipTests
 test:
  override:
+  - mvn clean
   - docker build .
  post:
   - mkdir -p $CIRCLE_TEST_REPORTS/junit/
