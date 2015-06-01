@@ -242,6 +242,38 @@ assert !foobar.bar().isPresent();
 assert !foobar.baz().isPresent();
 ```
 
+### `static` & `default` methods (JDK 8+)
+
+AutoMatter ignores `static` and `default` methods, which can be useful for
+adding behavior to a value type. Note that `static` and `default` methods in
+interfaces require JDK 8+.
+
+```java
+@AutoMatter
+interface Baz {
+
+    String baz();
+
+    static String quux() {
+        return "world";
+    }
+
+    default String bazquux() {
+        return baz() + " " + quux();
+    }
+}
+
+// ...
+
+Baz baz = new BazBuilder()
+        .baz("hello")
+        .build();
+
+assert baz.baz().equals("hello");
+assert Baz.quux().equals("world");
+assert baz.bazquux().equals("hello world");
+```
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes
