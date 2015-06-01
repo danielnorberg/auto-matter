@@ -1,8 +1,5 @@
-/**
- * Copyright (C) 2015 Spotify AB
- */
 
-package io.norberg.automatter.example;
+package io.norberg.automatter.example.jdk8;
 
 import java.io.IOException;
 
@@ -38,3 +35,4 @@ public class StaticAndDefaultExample {
     out.println("bazquux: " + baz.bazquux());
   }
 }
+
