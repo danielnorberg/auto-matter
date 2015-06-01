@@ -170,12 +170,22 @@ public class AutoMatterProcessorTest {
 
   @Test
   public void testDefaultMethods() {
+    Assume.assumeTrue(isJava8());
     assert_().about(javaSource())
         .that(JavaFileObjects.forResource("good/DefaultMethods.java"))
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
         JavaFileObjects.forResource("expected/DefaultMethodsBuilder.java"));
+  }
+
+  private boolean isJava8() {
+    try {
+      Class.forName("java.util.Optional");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   private boolean hasJutOptional() {
