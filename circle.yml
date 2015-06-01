@@ -1,10 +1,14 @@
 machine:
-  java:
-    version: oraclejdk8
+ java:
+  version: oraclejdk8
+ services:
+  - docker
 dependencies:
  override:
   - mvn install -DskipTests
 test:
+ override:
+  - docker build .
  post:
   - mkdir -p $CIRCLE_TEST_REPORTS/junit/
   - find . -type f -regex ".*/target/.*-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
