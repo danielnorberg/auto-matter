@@ -3,7 +3,6 @@ package io.norberg.automatter.jackson;
 import com.fasterxml.jackson.databind.AbstractTypeResolver;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.SimpleType;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -42,7 +41,7 @@ class AutoMatterResolver extends AbstractTypeResolver {
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException("No builder found for @AutoMatter type: " + name, e);
     }
-    final JavaType materialized = SimpleType.construct(cls);
+    final JavaType materialized = config.getTypeFactory().constructType(cls);
 
     // Cache the materialized type before returning
     final JavaType existing = types.putIfAbsent(type, materialized);
