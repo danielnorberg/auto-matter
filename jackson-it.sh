@@ -7,9 +7,7 @@ JACKSON=$(curl -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxm
                   select(.major >= 2 and .minor >= 4)] |
                   sort_by([.major, .minor, .v]) |
                   .[].v' |
-           grep -v '2.4.0-rc' |
-# TODO: https://github.com/danielnorberg/auto-matter/issues/31
-           grep -v '2.7.')
+           grep -v '2.4.0-rc')
 
 for v in ${JACKSON}; do
   echo
