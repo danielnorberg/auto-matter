@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -16,8 +17,20 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import io.norberg.automatter.AutoMatter;
+
 import org.modeshape.common.text.Inflector;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
@@ -35,20 +48,10 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import io.norberg.automatter.AutoMatter;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -64,7 +67,9 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @AutoService(Processor.class)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
-  public static final Set<String> KEYWORDS = ImmutableSet.of(
+  private static final Inflector INFLECTOR = new Inflector();
+
+  private static final Set<String> KEYWORDS = ImmutableSet.of(
       "abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package",
       "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements",
       "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum",
@@ -75,7 +80,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private Filer filer;
   private Elements elements;
   private Messager messager;
-  public static final Inflector INFLECTOR = new Inflector();
+
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -953,27 +958,29 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private String unmodifiableCollection(final ExecutableElement field) {
     final String type = collectionType(field);
-    if (type.equals("List")) {
-      return "unmodifiableList";
-    } else if (type.equals("Set")) {
-      return "unmodifiableSet";
-    } else if (type.endsWith("Map")) {
-      return "unmodifiableMap";
-    } else {
-      throw new AssertionError();
+    switch (type) {
+      case "List":
+        return "unmodifiableList";
+      case "Set":
+        return "unmodifiableSet";
+      case "Map":
+        return "unmodifiableMap";
+      default:
+        throw new AssertionError();
     }
   }
 
   private String emptyCollection(final ExecutableElement field) {
     final String type = collectionType(field);
-    if (type.equals("List")) {
-      return "emptyList";
-    } else if (type.equals("Set")) {
-      return "emptySet";
-    } else if (type.equals("Map")) {
-      return "emptyMap";
-    } else {
-      throw new AssertionError();
+    switch (type) {
+      case "List":
+        return "emptyList";
+      case "Set":
+        return "emptySet";
+      case "Map":
+        return "emptyMap";
+      default:
+        throw new AssertionError();
     }
   }
 

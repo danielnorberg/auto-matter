@@ -117,9 +117,8 @@ public class SetFieldBuilderTest {
     builder.apples((String[]) null);
   }
 
-  private <T> Set<T> set(final T... items) {
-    final HashSet<T> set = new HashSet<T>();
-    set.addAll(asList(items));
-    return set;
+  @SafeVarargs
+  private final <T> Set<T> set(final T... items) {
+    return new HashSet<>(asList(items));
   }
 }

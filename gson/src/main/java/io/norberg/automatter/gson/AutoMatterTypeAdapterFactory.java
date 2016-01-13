@@ -14,8 +14,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
   private static final String VALUE_SUFFIX = "Builder$Value";
 
-  private final ConcurrentMap<TypeToken, TypeAdapter> adapters =
-      new ConcurrentHashMap<TypeToken, TypeAdapter>();
+  private final ConcurrentMap<TypeToken, TypeAdapter> adapters = new ConcurrentHashMap<>();
 
   @SuppressWarnings("unchecked")
   @Override

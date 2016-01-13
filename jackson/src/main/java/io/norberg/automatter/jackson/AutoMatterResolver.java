@@ -13,8 +13,7 @@ class AutoMatterResolver extends AbstractTypeResolver {
 
   private static final String VALUE_SUFFIX = "Builder$Value";
 
-  private final ConcurrentMap<JavaType, JavaType> types =
-      new ConcurrentHashMap<JavaType, JavaType>();
+  private final ConcurrentMap<JavaType, JavaType> types = new ConcurrentHashMap<>();
 
   @Override
   public JavaType resolveAbstractType(final DeserializationConfig config, final JavaType type) {

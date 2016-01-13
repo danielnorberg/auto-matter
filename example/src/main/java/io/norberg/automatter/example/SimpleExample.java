@@ -1,8 +1,6 @@
 package io.norberg.automatter.example;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.System.out;
 
@@ -23,8 +21,5 @@ public class SimpleExample {
         .build();
 
     out.println("modified: " + modified);
-
-    List<String> foo = new ArrayList<String>();
-    List<String> bar = new ArrayList<String>(foo);
   }
 }
