@@ -57,7 +57,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
-import static javax.lang.model.type.TypeKind.FLOAT;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
@@ -780,8 +779,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         break;
       case FLOAT:
       case DOUBLE:
-        // Boxing is available in javapoet master but not released yet (as of 1.0.0).
-        final TypeName boxed = ClassName.get(returnType.getKind() == FLOAT ? Float.class : Double.class);
+        final TypeName boxed = ClassName.get(returnType).box();
         result.beginControlFlow("if ($T.compare($L, that.$L()) != 0)", boxed, name, name);
         break;
       case ARRAY:
