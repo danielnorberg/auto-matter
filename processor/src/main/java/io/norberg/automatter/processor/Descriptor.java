@@ -4,6 +4,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import com.squareup.javapoet.TypeVariableName;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +14,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
 import static java.util.Collections.reverse;
@@ -26,6 +31,8 @@ class Descriptor {
   private final String packageName;
   private final String valueTypeName;
   private final String builderName;
+  private final boolean isGeneric;
+  private final List<? extends TypeMirror> typeArguments;
   private final List<ExecutableElement> fields;
   private final boolean isPublic;
   private final boolean toBuilder;
@@ -35,11 +42,16 @@ class Descriptor {
       throw new AutoMatterProcessorException("@AutoMatter target must be an interface", element);
     }
 
+    final DeclaredType type = (DeclaredType) element.asType();
+    final List<? extends TypeMirror> typeArguments = type.getTypeArguments();
+    final boolean isGeneric = !typeArguments.isEmpty();
+    final String typeParameterization = isGeneric ? "<" + Joiner.on(',').join(typeArguments) + ">" : "";
+
     final String packageName = elements.getPackageOf(element).getQualifiedName().toString();
     final String valueTypeName = nestedName(element);
-
     final String interfaceName = element.getSimpleName().toString();
-    final String builderName = interfaceName + "Builder";
+    final String rawBuilderName = interfaceName + "Builder";
+    final String builderName = rawBuilderName + typeParameterization;
     final String fullyQualifiedName = fullyQualifedName(packageName, builderName);
 
     final ImmutableList.Builder<ExecutableElement> fields = ImmutableList.builder();
@@ -51,8 +63,8 @@ class Descriptor {
           continue;
         }
         if (executable.getSimpleName().toString().equals("builder")) {
-          final String type = executable.getReturnType().toString();
-          if (!type.equals(builderName) && !type.equals(fullyQualifiedName)) {
+          final String fieldType = executable.getReturnType().toString();
+          if (!fieldType.equals(builderName) && !fieldType.equals(fullyQualifiedName)) {
             throw new AutoMatterProcessorException("builder() return type must be " + builderName, element);
           }
           toBuilder = true;
@@ -64,7 +76,8 @@ class Descriptor {
 
     final boolean isPublic = element.getModifiers().contains(PUBLIC);
 
-    return new Descriptor(packageName, valueTypeName, builderName, fields.build(), isPublic, toBuilder);
+    return new Descriptor(packageName, valueTypeName, rawBuilderName, isGeneric, typeArguments, fields.build(),
+                          isPublic, toBuilder);
   }
 
   private static boolean isStaticOrDefault(final Element member) {
@@ -81,11 +94,14 @@ class Descriptor {
     return false;
   }
 
-  private Descriptor(String packageName, String valueTypeName, String builderName, List<ExecutableElement> fields,
+  private Descriptor(String packageName, String valueTypeName, String builderName, final boolean isGeneric,
+                     final List<? extends TypeMirror> typeArguments, List<ExecutableElement> fields,
                      boolean isPublic, boolean toBuilder) {
     this.packageName = packageName;
     this.valueTypeName = valueTypeName;
     this.builderName = builderName;
+    this.isGeneric = isGeneric;
+    this.typeArguments = typeArguments;
     this.fields = fields;
     this.isPublic = isPublic;
     this.toBuilder = toBuilder;
@@ -105,6 +121,18 @@ class Descriptor {
 
   public boolean isPublic() {
     return this.isPublic;
+  }
+
+  public boolean isGeneric() {
+    return this.isGeneric;
+  }
+
+  public List<? extends TypeMirror> typeArguments() {
+    return typeArguments;
+  }
+
+  public String typeParameterization() {
+    return isGeneric ? "<" + Joiner.on(',').join(typeArguments) + ">" : "";
   }
 
   public List<ExecutableElement> fields() {
@@ -139,4 +167,13 @@ class Descriptor {
     return packageName.isEmpty() ? simpleName : packageName + "." + simpleName;
   }
 
+  public List<TypeVariableName> typeVariables() {
+    final List<TypeVariableName> variables = new ArrayList<>();
+    if (isGeneric) {
+      for (final TypeMirror argument : typeArguments) {
+        variables.add(TypeVariableName.get(argument.))
+      }
+    }
+    return null;
+  }
 }

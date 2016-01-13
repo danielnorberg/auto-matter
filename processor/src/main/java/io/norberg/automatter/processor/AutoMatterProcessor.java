@@ -121,6 +121,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
 
     TypeSpec.Builder builder = TypeSpec.classBuilder(d.builderName())
+        .addTypeVariables(d.typeVariables())
         .addModifiers(FINAL)
         .addAnnotation(generatedAnnotation);
 
@@ -785,6 +786,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       case ARRAY:
         result.beginControlFlow("if (!$T.equals($L, that.$L()))", ClassName.get(Arrays.class), name, name);
         break;
+      case TYPEVAR:
       case DECLARED:
         result.beginControlFlow(
             "if ($L != null ? !$L.equals(that.$L()) : that.$L() != null)",
@@ -840,6 +842,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
               "result = 31 * result + ($N != null ? $T.hashCode($N) : 0)",
               name, ClassName.get(Arrays.class), name);
           break;
+        case TYPEVAR:
         case DECLARED:
           hashcode.addStatement("result = 31 * result + ($N != null ? $N.hashCode() : 0)", name, name);
           break;
