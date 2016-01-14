@@ -169,7 +169,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
-    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+    final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
         .addParameter(valueType(d), "v");
 
@@ -191,11 +191,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec copyBuilderConstructor(final Descriptor d) {
-    ClassName builderClass = builderType(d);
-
-    MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+    final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
-        .addParameter(builderClass, "v");
+        .addParameter(builderType(d), "v");
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
@@ -278,7 +276,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
+  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field)
+      throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
     TypeName valueType = genericArgument(field, 0);
     ClassName optionalType = ClassName.bestGuess(optionalType(field));
@@ -417,7 +416,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       assertNotNull(adder, singular);
     }
     lazyCollectionInitialization(adder, field);
-
 
     adder.addStatement("$L.add($L)", fieldName, singular);
     return adder.addStatement("return this").build();
@@ -630,12 +628,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       }
     }
 
-    return build.addStatement("return new Value($N)", Joiner.on(", ").join(parameters)).build();
+    return build.addStatement("return new $T($N)", valueImplType(d), Joiner.on(", ").join(parameters)).build();
   }
 
   private MethodSpec fromValue(final Descriptor d) {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
+        .addTypeVariables(d.typeVariables())
         .addParameter(valueType(d), "v")
         .returns(builderType(d))
         .addStatement("return new $T(v)", builderType(d))
@@ -645,6 +644,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec fromBuilder(final Descriptor d) {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
+        .addTypeVariables(d.typeVariables())
         .addParameter(builderType(d), "v")
         .returns(builderType(d))
         .addStatement("return new $T(v)", builderType(d))
@@ -653,6 +653,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private TypeSpec valueClass(final Descriptor d) throws AutoMatterProcessorException {
     TypeSpec.Builder value = TypeSpec.classBuilder("Value")
+        .addTypeVariables(d.typeVariables())
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addSuperinterface(valueType(d));
 
@@ -750,12 +751,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("return true")
         .endControlFlow();
 
-    equals.beginControlFlow("if (!(o instanceof $T))", valueType(d))
+    equals.beginControlFlow("if (!(o instanceof $T))", rawValueType(d))
         .addStatement("return false")
         .endControlFlow();
 
     if (!d.fields().isEmpty()) {
-      equals.addStatement("final $T that = ($T) o", valueType(d), valueType(d));
+      equals.addStatement("final $T that = ($T) o", unboundedValueType(d), unboundedValueType(d));
 
       for (ExecutableElement field : d.fields()) {
         equals.addCode(fieldNotEqualCheck(field));
@@ -863,7 +864,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     toString.addCode("return \"$L{\" +\n", d.valueTypeName());
 
-    for (int i=0; i<d.fields().size(); i++) {
+    for (int i = 0; i < d.fields().size(); i++) {
       final ExecutableElement field = d.fields().get(i);
       final String comma = (i == 0) ? "" : ", ";
       final String name = fieldName(field);
@@ -889,12 +890,48 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .endControlFlow();
   }
 
-  private ClassName builderType(final Descriptor d) {
+  private TypeName builderType(final Descriptor d) {
+    final ClassName raw = rawBuilderType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+  }
+
+  private ClassName rawBuilderType(final Descriptor d) {
     return ClassName.get(d.packageName(), d.builderName());
   }
 
-  private ClassName valueType(final Descriptor d) {
+  private ClassName rawValueType(final Descriptor d) {
     return ClassName.get(d.packageName(), d.valueTypeName());
+  }
+
+  private TypeName unboundedValueType(final Descriptor d) {
+    final ClassName raw = rawValueType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, WildcardTypeName.subtypeOf(ClassName.get(Object.class)));
+  }
+
+  private TypeName valueType(final Descriptor d) {
+    final ClassName raw = rawValueType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+  }
+
+  private TypeName valueImplType(final Descriptor d) {
+    final ClassName raw = rawValueImplType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+  }
+
+  private ClassName rawValueImplType(final Descriptor d) {
+    return rawBuilderType(d).nestedClass("Value");
   }
 
   private TypeName fieldType(final ExecutableElement field) throws AutoMatterProcessorException {
@@ -954,7 +991,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private boolean isCollection(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.List<") ||
-        returnType.startsWith("java.util.Set<");
+           returnType.startsWith("java.util.Set<");
   }
 
   private String unmodifiableCollection(final ExecutableElement field) {
@@ -1020,7 +1057,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private boolean isOptional(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.Optional<") ||
-        returnType.startsWith("com.google.common.base.Optional<");
+           returnType.startsWith("com.google.common.base.Optional<");
   }
 
   private String singular(final String name) {

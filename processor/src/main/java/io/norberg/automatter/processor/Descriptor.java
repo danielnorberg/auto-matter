@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.Elements;
 
 import static java.util.Collections.reverse;
@@ -171,9 +173,15 @@ class Descriptor {
     final List<TypeVariableName> variables = new ArrayList<>();
     if (isGeneric) {
       for (final TypeMirror argument : typeArguments) {
-        variables.add(TypeVariableName.get(argument.))
+        final TypeVariable typeVariable = (TypeVariable) argument;
+        variables.add(TypeVariableName.get(typeVariable));
       }
     }
-    return null;
+    return variables;
+  }
+
+  public TypeName[] typeArgumentsArray() {
+    final List<TypeVariableName> variables = typeVariables();
+    return variables.toArray(new TypeName[variables.size()]);
   }
 }

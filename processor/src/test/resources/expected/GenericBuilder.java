@@ -1,12 +1,10 @@
 package generic;
 
 import io.norberg.automatter.AutoMatter;
-import java.util.Arrays;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
 public final class GenericBuilder<T> {
-
   private T thing;
 
   public GenericBuilder() {
@@ -24,7 +22,7 @@ public final class GenericBuilder<T> {
     return thing;
   }
 
-  public GenericBuilder thing(T thing) {
+  public GenericBuilder<T> thing(T thing) {
     if (thing == null) {
       throw new NullPointerException("thing");
     }
@@ -32,34 +30,27 @@ public final class GenericBuilder<T> {
     return this;
   }
 
-  public GenericBuilder builder() {
-    return new GenericBuilder(this);
-  }
-
-  public Generic build() {
-    return new Value(
-        thing);
+  public Generic<T> build() {
+    return new Value<T>(thing);
   }
 
   public static <T> GenericBuilder<T> from(Generic<T> v) {
-    return new GenericBuilder<>(v);
+    return new GenericBuilder<T>(v);
   }
 
   public static <T> GenericBuilder<T> from(GenericBuilder<T> v) {
-    return new GenericBuilder<>(v);
+    return new GenericBuilder<T>(v);
   }
 
-  private static final class Value<T>
-      implements Generic<T> {
+  private static final class Value<T> implements Generic<T> {
 
     private final T thing;
 
-    private Value(
-        @AutoMatter.Field("thing") T thing
-    ) {
+    private Value(@AutoMatter.Field("thing") T thing) {
       if (thing == null) {
         throw new NullPointerException("thing");
       }
+      this.thing = thing;
     }
 
     @AutoMatter.Field
@@ -68,9 +59,8 @@ public final class GenericBuilder<T> {
       return thing;
     }
 
-    @Override
-    public GenericBuilder builder() {
-      return new GenericBuilder(this);
+    public GenericBuilder<T> builder() {
+      return new GenericBuilder<T>(this);
     }
 
     @Override
@@ -81,13 +71,10 @@ public final class GenericBuilder<T> {
       if (!(o instanceof Generic)) {
         return false;
       }
-
       final Generic<?> that = (Generic<?>) o;
-
       if (thing != null ? !thing.equals(that.thing()) : that.thing() != null) {
         return false;
       }
-
       return true;
     }
 
@@ -95,7 +82,6 @@ public final class GenericBuilder<T> {
     public int hashCode() {
       int result = 1;
       long temp;
-
       result = 31 * result + (thing != null ? thing.hashCode() : 0);
       return result;
     }
@@ -103,8 +89,8 @@ public final class GenericBuilder<T> {
     @Override
     public String toString() {
       return "Generic{" +
-             "thing=" + thing +
-             '}';
+      "thing=" + thing +
+      '}';
     }
   }
 }
