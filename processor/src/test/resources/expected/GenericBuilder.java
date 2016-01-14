@@ -10,11 +10,11 @@ public final class GenericBuilder<T> {
   public GenericBuilder() {
   }
 
-  private GenericBuilder(Generic<T> v) {
+  private GenericBuilder(Generic<? extends T> v) {
     this.thing = v.thing();
   }
 
-  private GenericBuilder(GenericBuilder<T> v) {
+  private GenericBuilder(GenericBuilder<? extends T> v) {
     this.thing = v.thing;
   }
 
@@ -30,15 +30,19 @@ public final class GenericBuilder<T> {
     return this;
   }
 
+  public GenericBuilder<T> builder() {
+    return new GenericBuilder<T>(this);
+  }
+
   public Generic<T> build() {
     return new Value<T>(thing);
   }
 
-  public static <T> GenericBuilder<T> from(Generic<T> v) {
+  public static <T> GenericBuilder<T> from(Generic<? extends T> v) {
     return new GenericBuilder<T>(v);
   }
 
-  public static <T> GenericBuilder<T> from(GenericBuilder<T> v) {
+  public static <T> GenericBuilder<T> from(GenericBuilder<? extends T> v) {
     return new GenericBuilder<T>(v);
   }
 
@@ -59,6 +63,7 @@ public final class GenericBuilder<T> {
       return thing;
     }
 
+    @Override
     public GenericBuilder<T> builder() {
       return new GenericBuilder<T>(this);
     }

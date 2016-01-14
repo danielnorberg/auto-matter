@@ -16,6 +16,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import org.modeshape.common.text.Inflector;
@@ -171,7 +172,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
     final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
-        .addParameter(valueType(d), "v");
+        .addParameter(upperBoundedValueType(d), "v");
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
@@ -193,7 +194,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec copyBuilderConstructor(final Descriptor d) {
     final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
-        .addParameter(builderType(d), "v");
+        .addParameter(upperBoundedBuilderType(d), "v");
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
@@ -635,7 +636,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
         .addTypeVariables(d.typeVariables())
-        .addParameter(valueType(d), "v")
+        .addParameter(upperBoundedValueType(d), "v")
         .returns(builderType(d))
         .addStatement("return new $T(v)", builderType(d))
         .build();
@@ -645,7 +646,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
         .addTypeVariables(d.typeVariables())
-        .addParameter(builderType(d), "v")
+        .addParameter(upperBoundedBuilderType(d), "v")
         .returns(builderType(d))
         .addStatement("return new $T(v)", builderType(d))
         .build();
@@ -898,6 +899,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
   }
 
+  private TypeName upperBoundedBuilderType(final Descriptor d) {
+    final ClassName raw = rawBuilderType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, upperBounded(d.typeVariables()));
+  }
+
+  private TypeName[] upperBounded(final List<TypeVariableName> typeVariables) {
+    final TypeName[] typeNames = new TypeName[typeVariables.size()];
+    for (int i = 0; i < typeVariables.size(); i++) {
+      typeNames[i] = WildcardTypeName.subtypeOf(typeVariables.get(i));
+    }
+    return typeNames;
+  }
+
   private ClassName rawBuilderType(final Descriptor d) {
     return ClassName.get(d.packageName(), d.builderName());
   }
@@ -911,7 +928,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, WildcardTypeName.subtypeOf(ClassName.get(Object.class)));
+    return ParameterizedTypeName.get(raw, wildcards(d.typeVariables().size()));
+  }
+
+  private TypeName[] wildcards(final int size) {
+    final WildcardTypeName wildcard = WildcardTypeName.subtypeOf(ClassName.get(Object.class));
+    final TypeName[] wildcards = new TypeName[size];
+    for (int i = 0; i < size; i++) {
+      wildcards[i] = wildcard;
+    }
+    return wildcards;
   }
 
   private TypeName valueType(final Descriptor d) {
@@ -920,6 +946,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return raw;
     }
     return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+  }
+
+  private TypeName upperBoundedValueType(final Descriptor d) {
+    final ClassName raw = rawValueType(d);
+    if (!d.isGeneric()) {
+      return raw;
+    }
+    return ParameterizedTypeName.get(raw, upperBounded(d.typeVariables()));
   }
 
   private TypeName valueImplType(final Descriptor d) {

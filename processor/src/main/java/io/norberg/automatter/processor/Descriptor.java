@@ -64,10 +64,14 @@ class Descriptor {
         if (isStaticOrDefault(member)) {
           continue;
         }
+
         if (executable.getSimpleName().toString().equals("builder")) {
-          final String fieldType = executable.getReturnType().toString();
-          if (!fieldType.equals(builderName) && !fieldType.equals(fullyQualifiedName)) {
-            throw new AutoMatterProcessorException("builder() return type must be " + builderName, element);
+          // TODO: javac does not seem to want to provide the name of the return type if it is not yet present and generic
+          if (!isGeneric) {
+            final String returnType = executable.getReturnType().toString();
+            if (!returnType.equals(builderName) && !returnType.equals(fullyQualifiedName)) {
+              throw new AutoMatterProcessorException("builder() return type must be " + builderName, element);
+            }
           }
           toBuilder = true;
           continue;

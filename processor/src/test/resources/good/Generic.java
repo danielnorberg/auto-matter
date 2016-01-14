@@ -6,5 +6,5 @@ import io.norberg.automatter.AutoMatter;
 public interface Generic<T> {
   T thing();
 
-//  GenericBuilder<T> builder();
+  GenericBuilder<T> builder();
 }
