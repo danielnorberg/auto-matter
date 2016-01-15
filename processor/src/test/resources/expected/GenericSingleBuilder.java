@@ -1,20 +1,20 @@
-package generic;
+package generic_single;
 
 import io.norberg.automatter.AutoMatter;
 import javax.annotation.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
-public final class GenericBuilder<T> {
+public final class GenericSingleBuilder<T> {
   private T thing;
 
-  public GenericBuilder() {
+  public GenericSingleBuilder() {
   }
 
-  private GenericBuilder(Generic<? extends T> v) {
+  private GenericSingleBuilder(GenericSingle<? extends T> v) {
     this.thing = v.thing();
   }
 
-  private GenericBuilder(GenericBuilder<? extends T> v) {
+  private GenericSingleBuilder(GenericSingleBuilder<? extends T> v) {
     this.thing = v.thing;
   }
 
@@ -22,7 +22,7 @@ public final class GenericBuilder<T> {
     return thing;
   }
 
-  public GenericBuilder<T> thing(T thing) {
+  public GenericSingleBuilder<T> thing(T thing) {
     if (thing == null) {
       throw new NullPointerException("thing");
     }
@@ -30,23 +30,23 @@ public final class GenericBuilder<T> {
     return this;
   }
 
-  public GenericBuilder<T> builder() {
-    return new GenericBuilder<T>(this);
+  public GenericSingleBuilder<T> builder() {
+    return new GenericSingleBuilder<T>(this);
   }
 
-  public Generic<T> build() {
+  public GenericSingle<T> build() {
     return new Value<T>(thing);
   }
 
-  public static <T> GenericBuilder<T> from(Generic<? extends T> v) {
-    return new GenericBuilder<T>(v);
+  public static <T> GenericSingleBuilder<T> from(GenericSingle<? extends T> v) {
+    return new GenericSingleBuilder<T>(v);
   }
 
-  public static <T> GenericBuilder<T> from(GenericBuilder<? extends T> v) {
-    return new GenericBuilder<T>(v);
+  public static <T> GenericSingleBuilder<T> from(GenericSingleBuilder<? extends T> v) {
+    return new GenericSingleBuilder<T>(v);
   }
 
-  private static final class Value<T> implements Generic<T> {
+  private static final class Value<T> implements GenericSingle<T> {
 
     private final T thing;
 
@@ -64,8 +64,8 @@ public final class GenericBuilder<T> {
     }
 
     @Override
-    public GenericBuilder<T> builder() {
-      return new GenericBuilder<T>(this);
+    public GenericSingleBuilder<T> builder() {
+      return new GenericSingleBuilder<T>(this);
     }
 
     @Override
@@ -73,10 +73,10 @@ public final class GenericBuilder<T> {
       if (this == o) {
         return true;
       }
-      if (!(o instanceof Generic)) {
+      if (!(o instanceof GenericSingle)) {
         return false;
       }
-      final Generic<?> that = (Generic<?>) o;
+      final GenericSingle<?> that = (GenericSingle<?>) o;
       if (thing != null ? !thing.equals(that.thing()) : that.thing() != null) {
         return false;
       }
@@ -93,7 +93,7 @@ public final class GenericBuilder<T> {
 
     @Override
     public String toString() {
-      return "Generic{" +
+      return "GenericSingle{" +
       "thing=" + thing +
       '}';
     }

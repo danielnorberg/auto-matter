@@ -180,15 +180,24 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
-  public void testGeneric() {
-    final JavaFileObject source = JavaFileObjects.forResource("good/Generic.java");
+  public void testGenericSingle() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericSingle.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericBuilder.java"));
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericSingleBuilder.java"));
   }
 
+  @Test
+  public void testGenericMultiple() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericMultiple.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericMultipleBuilder.java"));
+  }
 
   private boolean isJava8() {
     try {
