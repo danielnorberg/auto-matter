@@ -896,7 +896,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+    return ParameterizedTypeName.get(raw, d.typeArguments());
   }
 
   private TypeName upperBoundedBuilderType(final Descriptor d) {
@@ -945,7 +945,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+    return ParameterizedTypeName.get(raw, d.typeArguments());
   }
 
   private TypeName upperBoundedValueType(final Descriptor d) {
@@ -961,7 +961,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, d.typeArgumentsArray());
+    return ParameterizedTypeName.get(raw, d.typeArguments());
   }
 
   private ClassName rawValueImplType(final Descriptor d) {

@@ -176,7 +176,7 @@ class Descriptor {
     return variables;
   }
 
-  public TypeName[] typeArgumentsArray() {
+  public TypeName[] typeArguments() {
     final List<TypeVariableName> variables = typeVariables();
     return variables.toArray(new TypeName[variables.size()]);
   }
