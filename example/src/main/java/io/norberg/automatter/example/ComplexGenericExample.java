@@ -20,7 +20,7 @@ public class ComplexGenericExample {
     System.out.println(foobar);
 
     final ComplexGenericFoobarBuilder<CharSequence, Number, List<Integer>, ComparableList<Integer>> builder =
-        ComplexGenericFoobarBuilder.from(foobar);
+        ComplexGenericFoobarBuilder.<CharSequence, Number, List<Integer>, ComparableList<Integer>>from(foobar);
 
     final ComplexGenericFoobar<CharSequence, Number, List<Integer>, ComparableList<Integer>> foobar2 = builder.build();
 
