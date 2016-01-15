@@ -202,12 +202,18 @@ interface Foobar {
 // ...
 
 Foobar foobar = new FoobarBuilder()
-    .addOx("moo!")
-    .addOx("mooo!!")
-    .addCow("moooo!!!")
+    // .oxen() returns a ListBuilder<V>
+    // .oxen().add(V...) and .oxen().clear() returns FoobarBuilder
+    .oxen().add("these", "guys", "are", "going", "away")
+    .oxen().clear()
+    .oxen().add("moo!")
+    .oxen().add("mooo!!")
+    .cows().add("moooo!!!")
     .foo(17, 18)
-    .putAge("cassie", 5)
-    .putAge("henrietta", 7)
+    // .ages() returns a MapBuilder<K, V>
+    // .ages().put(K, V) returns FoobarBuilder
+    .ages().put("cassie", 5)
+    .ages().put("henrietta", 7)
     .build();
 
 assert foobar.oxen().equals(asList("moo!", "mooo!!"));
