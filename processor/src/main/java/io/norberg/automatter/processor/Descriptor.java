@@ -133,14 +133,6 @@ class Descriptor {
     return this.isGeneric;
   }
 
-  public List<? extends TypeMirror> typeArguments() {
-    return typeArguments;
-  }
-
-  public String typeParameterization() {
-    return isGeneric ? "<" + Joiner.on(',').join(typeArguments) + ">" : "";
-  }
-
   public List<ExecutableElement> fields() {
     return this.fields;
   }
