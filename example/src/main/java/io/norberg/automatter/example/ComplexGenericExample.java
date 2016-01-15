@@ -1,29 +1,11 @@
 package io.norberg.automatter.example;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
-
-import io.norberg.automatter.AutoMatter;
 
 import static java.util.Arrays.asList;
 
 public class ComplexGenericExample {
-
-  @AutoMatter
-  interface ComplexGenericFoobar<
-      FOO,
-      BAR extends Number,
-      BAZ extends Collection<? extends BAR>,
-      QUUX extends Iterable<? extends BAR> & Comparable<QUUX>> {
-
-    FOO foo();
-    BAR bar();
-    BAZ baz();
-    QUUX quux();
-
-    String name();
-  }
 
   public static void main(final String... args) throws IOException {
     final ComplexGenericFoobar<String, Integer, List<Integer>, ComparableList<Integer>> foobar =
