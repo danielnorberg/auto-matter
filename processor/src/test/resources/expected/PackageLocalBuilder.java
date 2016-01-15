@@ -26,6 +26,13 @@ final class PackageLocalBuilder {
     return new PackageLocalBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public PackageLocalBuilder merge(PackageLocalBuilder other) {
+    return this;
+  }
+
   private static final class Value
       implements PackageLocal {
 

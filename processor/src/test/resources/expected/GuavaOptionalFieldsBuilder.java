@@ -65,6 +65,19 @@ public final class GuavaOptionalFieldsBuilder {
     return new GuavaOptionalFieldsBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public GuavaOptionalFieldsBuilder merge(GuavaOptionalFieldsBuilder other) {
+    if (other.foo() != null) {
+      this.foo(other.foo());
+    }
+    if (other.bar() != null) {
+      this.bar(other.bar());
+    }
+    return this;
+  }
+
   private static final class Value
       implements GuavaOptionalFields {
 

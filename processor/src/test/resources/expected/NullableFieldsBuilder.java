@@ -83,6 +83,22 @@ public final class NullableFieldsBuilder {
     return new NullableFieldsBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public NullableFieldsBuilder merge(NullableFieldsBuilder other) {
+    if (other.nullableFoo() != null) {
+      this.nullableFoo(other.nullableFoo());
+    }
+    if (other.customNullableBar() != null) {
+      this.customNullableBar(other.customNullableBar());
+    }
+    if (other.nonNullQuux() != null) {
+      this.nonNullQuux(other.nonNullQuux());
+    }
+    return this;
+  }
+
   private static final class Value
       implements NullableFields {
 

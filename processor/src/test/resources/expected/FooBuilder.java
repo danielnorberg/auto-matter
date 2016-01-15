@@ -169,6 +169,19 @@ public final class FooBuilder {
     return new FooBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public FooBuilder merge(FooBuilder other) {
+    if (other.object() != null) {
+      this.object(other.object());
+    }
+    if (other.array() != null) {
+      this.array(other.array());
+    }
+    return this;
+  }
+
   private static final class Value
       implements Foo {
 
