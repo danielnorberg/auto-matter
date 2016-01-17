@@ -211,6 +211,7 @@ public class AutoMatterProcessorTest {
 
   @Test
   public void testGenericJUTOptionalFields() {
+    Assume.assumeTrue(hasJutOptional());
     final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalFields.java");
     assert_().about(javaSource())
         .that(source)
