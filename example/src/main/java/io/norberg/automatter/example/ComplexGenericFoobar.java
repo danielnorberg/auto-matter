@@ -1,9 +1,10 @@
 package io.norberg.automatter.example;
 
+import com.google.common.base.Optional;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.norberg.automatter.AutoMatter;
 

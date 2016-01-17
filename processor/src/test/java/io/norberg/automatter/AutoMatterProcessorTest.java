@@ -222,12 +222,12 @@ public class AutoMatterProcessorTest {
 
   @Test
   public void testGenericGuavaOptionalFields() {
-    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalFields.java");
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericGuavaOptionalFields.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericJUTOptionalFieldsBuilder.java"));
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericGuavaOptionalFieldsBuilder.java"));
   }
 
   private boolean isJava8() {

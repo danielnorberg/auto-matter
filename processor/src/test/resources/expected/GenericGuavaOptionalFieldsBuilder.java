@@ -1,7 +1,7 @@
 package foo;
 
-import io.norberg.automatter.AutoMatter;
 import com.google.common.base.Optional;
+import io.norberg.automatter.AutoMatter;
 
 import javax.annotation.Generated;
 
@@ -13,7 +13,7 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
   private Optional<T> bar;
 
   public GenericGuavaOptionalFieldsBuilder() {
-    this.foo = Optional.empty();
+    this.foo = Optional.absent();
   }
 
   private GenericGuavaOptionalFieldsBuilder(GenericGuavaOptionalFields<? extends T> v) {
@@ -31,7 +31,7 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
   }
 
   public GenericGuavaOptionalFieldsBuilder<T> foo(T foo) {
-    return foo(Optional.ofNullable(foo));
+    return foo(Optional.fromNullable(foo));
   }
 
   public GenericGuavaOptionalFieldsBuilder<T> foo(Optional<? extends T> foo) {
@@ -47,7 +47,7 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
   }
 
   public GenericGuavaOptionalFieldsBuilder<T> bar(T bar) {
-    return bar(Optional.ofNullable(bar));
+    return bar(Optional.fromNullable(bar));
   }
 
   public GenericGuavaOptionalFieldsBuilder<T> bar(Optional<? extends T> bar) {
