@@ -199,6 +199,36 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(JavaFileObjects.forResource("expected/GenericMultipleBuilder.java"));
   }
 
+  @Test
+  public void testGenericCollection() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericCollection.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericCollectionBuilder.java"));
+  }
+
+  @Test
+  public void testGenericJUTOptionalFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalFields.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericJUTOptionalFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testGenericGuavaOptionalFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalFields.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericJUTOptionalFieldsBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");

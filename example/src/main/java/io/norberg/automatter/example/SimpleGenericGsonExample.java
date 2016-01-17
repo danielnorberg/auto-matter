@@ -18,18 +18,18 @@ public class SimpleGenericGsonExample {
         .registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory())
         .create();
 
-    GenericFoobar<String> foobar = new GenericFoobarBuilder<String>()
-        .foo("hello world")
-        .bar(17)
+    GenericFoobar<Integer> foobar = new GenericFoobarBuilder<Integer>()
+        .foo(17)
+        .bar(1, 2, 3)
+        .putBaz("hello world", 4711)
         .build();
 
     String json = gson.toJson(foobar);
     out.println("json: " + json);
 
-    GenericFoobar<String> parsed = gson.fromJson(json, new TypeToken<GenericFoobar<String>>() {}.getType());
+    GenericFoobar<Integer> parsed = gson.fromJson(json, new TypeToken<GenericFoobar<Integer>>() {}.getType());
     out.println("parsed: " + parsed);
 
     out.println("equals: " + foobar.equals(parsed));
-
   }
 }

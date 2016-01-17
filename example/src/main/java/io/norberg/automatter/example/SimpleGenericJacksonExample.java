@@ -16,15 +16,16 @@ public class SimpleGenericJacksonExample {
     ObjectMapper mapper = new ObjectMapper()
         .registerModule(new AutoMatterModule());
 
-    GenericFoobar<String> foobar = new GenericFoobarBuilder<String>()
-        .bar(17)
-        .foo("hello world")
+    GenericFoobar<Integer> foobar = new GenericFoobarBuilder<Integer>()
+        .foo(17)
+        .bar(1, 2, 3)
+        .putBaz("hello world", 4711)
         .build();
 
     String json = mapper.writeValueAsString(foobar);
     out.println("json: " + json);
 
-    GenericFoobar<String> parsed = mapper.readValue(json, new TypeReference<GenericFoobar<String>>() {});
+    GenericFoobar<Integer> parsed = mapper.readValue(json, new TypeReference<GenericFoobar<String>>() {});
     out.println("parsed: " + parsed);
 
     out.println("equals: " + foobar.equals(parsed));

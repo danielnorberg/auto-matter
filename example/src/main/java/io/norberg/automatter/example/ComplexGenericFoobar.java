@@ -1,6 +1,9 @@
 package io.norberg.automatter.example;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import io.norberg.automatter.AutoMatter;
 
@@ -15,6 +18,10 @@ interface ComplexGenericFoobar<
   BAR bar();
   BAZ baz();
   QUUX quux();
+
+  Optional<FOO> maybeFoo();
+  List<BAR> someBars();
+  Map<FOO, BAR> foobars();
 
   String name();
 }
