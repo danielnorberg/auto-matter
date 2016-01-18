@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
+    <version>0.12.0</version>
   </parent>
 
   <artifactId>auto-matter-example</artifactId>
@@ -61,18 +61,18 @@
     <dependency>
       <groupId>io.norberg</groupId>
       <artifactId>auto-matter</artifactId>
-      <version>0.11.2-SNAPSHOT</version>
+      <version>0.12.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.norberg</groupId>
       <artifactId>auto-matter-jackson</artifactId>
-      <version>0.11.2-SNAPSHOT</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>io.norberg</groupId>
       <artifactId>auto-matter-gson</artifactId>
-      <version>0.11.2-SNAPSHOT</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
