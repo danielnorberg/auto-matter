@@ -230,6 +230,32 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(JavaFileObjects.forResource("expected/GenericGuavaOptionalFieldsBuilder.java"));
   }
 
+  @Test
+  public void testInheritance() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/inheritance/Foo.java"),
+            JavaFileObjects.forResource("good/inheritance/Bar.java"),
+            JavaFileObjects.forResource("good/inheritance/Foobar.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/inheritance/FoobarBuilder.java"));
+  }
+
+  @Test
+  public void testGenericInheritance() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/inheritance/Foo.java"),
+            JavaFileObjects.forResource("good/inheritance/Bar.java"),
+            JavaFileObjects.forResource("good/inheritance/GenericFoobar.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/inheritance/GenericFoobarBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
