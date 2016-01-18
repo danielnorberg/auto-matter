@@ -179,6 +179,57 @@ public class AutoMatterProcessorTest {
         JavaFileObjects.forResource("expected/DefaultMethodsBuilder.java"));
   }
 
+  @Test
+  public void testGenericSingle() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericSingle.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericSingleBuilder.java"));
+  }
+
+  @Test
+  public void testGenericMultiple() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericMultiple.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericMultipleBuilder.java"));
+  }
+
+  @Test
+  public void testGenericCollection() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericCollection.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericCollectionBuilder.java"));
+  }
+
+  @Test
+  public void testGenericJUTOptionalFields() {
+    Assume.assumeTrue(hasJutOptional());
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalFields.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericJUTOptionalFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testGenericGuavaOptionalFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericGuavaOptionalFields.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/GenericGuavaOptionalFieldsBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");

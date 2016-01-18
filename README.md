@@ -187,7 +187,7 @@ The `@Nullable` annotation can be e.g. `javax.annotation.Nullable` from [jsr305]
 
 ### Collections
 
-AutoMatter emits convenient adders for List, Set and Map fields.
+AutoMatter emits convenient setters and adders for List, Set and Map fields.
 
 ```java
 @AutoMatter
@@ -202,18 +202,23 @@ interface Foobar {
 // ...
 
 Foobar foobar = new FoobarBuilder()
+    .oxen("mooie", "looie")
     .addOx("moo!")
     .addOx("mooo!!")
     .addCow("moooo!!!")
     .foo(17, 18)
+    .ages("junior", 1
+          "spotty", 3),
     .putAge("cassie", 5)
     .putAge("henrietta", 7)
     .build();
 
-assert foobar.oxen().equals(asList("moo!", "mooo!!"));
+assert foobar.oxen().equals(asList("mooie", "looie", "moo!", "mooo!!"));
 assert foobar.cows().equals(asList("moooo!!!"));
 assert foobar.foo().equals(asList(17, 18));
-assert foobar.ages().equals(ImmutableMap.of("cassie", 5,
+assert foobar.ages().equals(ImmutableMap.of("junior", 1,
+                                            "spotty", 3
+                                            "cassie", 5,
                                             "henrietta", 7);
 ```
 
@@ -272,6 +277,29 @@ Baz baz = new BazBuilder()
 assert baz.baz().equals("hello");
 assert Baz.quux().equals("world");
 assert baz.bazquux().equals("hello world");
+```
+
+### Generics
+
+AutoMatter value types can be generic.
+
+```java
+@AutoMatter
+interface Foobar<T> {
+    T foo();
+    List<T> moreFoos();
+    Map<String, T> mappedFoos();
+    Optional<T> maybeFoo();
+}
+
+// ...
+
+Foobar<String> foobar = new FoobarBuilder<String>()
+    .foo("hello")
+    .moreFoos("foo", "bar")
+    .putMappedFoo("the", "baz")
+    .maybeFoo("quux")
+    .build();
 ```
 
 ### Known Issues

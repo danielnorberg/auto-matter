@@ -24,11 +24,11 @@ public final class CollectionFieldsBuilder {
   }
 
   private CollectionFieldsBuilder(CollectionFields v) {
-    List<String> _strings = v.strings();
+    List<? extends String> _strings = v.strings();
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
-    Map<String,Integer> _integers = v.integers();
+    Map<? extends String,? extends Integer> _integers = v.integers();
     this.integers = (_integers == null) ? null : new HashMap<String,Integer>(_integers);
-    Set<Long> _numbers = v.numbers();
+    Set<? extends Long> _numbers = v.numbers();
     this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
   }
 
