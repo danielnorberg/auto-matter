@@ -302,6 +302,33 @@ Foobar<String> foobar = new FoobarBuilder<String>()
     .build();
 ```
 
+### Inheritance
+
+AutoMatter value types can inherit fields from interfaces.
+
+```java
+interface Foo {
+    String foo();
+}
+
+interface Bar<T> {
+    T bar();
+}
+
+@AutoMatter
+interface Baz extends Foo, Bar<Integer> {
+    int baz();
+}
+
+// ...
+
+Baz baz = new BazBuilder()
+    .foo("hello")
+    .bar(17)
+    .baz(4711)
+    .build();
+```
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes
