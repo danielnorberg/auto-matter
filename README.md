@@ -207,19 +207,19 @@ Foobar foobar = new FoobarBuilder()
     .addOx("mooo!!")
     .addCow("moooo!!!")
     .foo(17, 18)
-    .ages("junior", 1
-          "spotty", 3),
+    .ages("junior", 1,
+          "spotty", 3)
     .putAge("cassie", 5)
     .putAge("henrietta", 7)
     .build();
 
-assert foobar.oxen().equals(asList("mooie", "looie", "moo!", "mooo!!"));
-assert foobar.cows().equals(asList("moooo!!!"));
-assert foobar.foo().equals(asList(17, 18));
+assert foobar.oxen().equals(Arrays.asList("mooie", "looie", "moo!", "mooo!!"));
+assert foobar.cows().equals(Arrays.asList("moooo!!!"));
+assert foobar.foo().equals(Arrays.asList(17, 18));
 assert foobar.ages().equals(ImmutableMap.of("junior", 1,
-                                            "spotty", 3
+                                            "spotty", 3,
                                             "cassie", 5,
-                                            "henrietta", 7);
+                                            "henrietta", 7));
 ```
 
 ### Optional
