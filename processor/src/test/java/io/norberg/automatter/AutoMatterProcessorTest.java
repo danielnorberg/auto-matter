@@ -256,6 +256,16 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(JavaFileObjects.forResource("expected/inheritance/GenericFoobarBuilder.java"));
   }
 
+  @Test
+  public void testAnnotationsPassedOn() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/AnnotatedField.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(JavaFileObjects.forResource("expected/AnnotatedFieldBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
