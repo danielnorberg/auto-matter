@@ -1,5 +1,6 @@
 package io.norberg.automatter.gson;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -18,6 +19,13 @@ public class AutoMatterTypeAdapterFactoryTest {
       .b("foobar")
       .build();
 
+
+  static final Bar BAR = new BarBuilder()
+      .a(17)
+      .b("foobar")
+      .isPrivate(true)
+      .build();
+
   Gson gson;
 
   @Before
@@ -34,4 +42,23 @@ public class AutoMatterTypeAdapterFactoryTest {
     assertThat(parsed, is(FOO));
   }
 
+  @Test
+  public void testSerializedName() throws IOException {
+    final String json = gson.toJson(BAR); // isPrivate -> private
+    assertThat(json, is("{\"a\":17,\"b\":\"foobar\",\"private\":true}"));
+  }
+
+  @Test
+  public void testSerializedNameWithUnderscorePolicy() throws IOException {
+    gson = new GsonBuilder()
+        .registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory())
+        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        .create();
+    final String json = gson.toJson(BAR); //isPrivate -> private
+    final Bar parsed = gson.fromJson(json, Bar.class); //private -> isPrivate
+    assertThat(parsed, is(BAR));
+    //Make sure that tranlation of under_scored fields still work.
+    final String underscoredIsPrivate = "{\"a\":17,\"b\":\"foobar\",\"is_private\":true}";
+    assertThat(gson.fromJson(underscoredIsPrivate, Bar.class), is(BAR)); //is_private -> isPrivate
+  }
 }
