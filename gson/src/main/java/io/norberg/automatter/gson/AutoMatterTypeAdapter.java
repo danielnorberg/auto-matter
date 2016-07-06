@@ -18,7 +18,6 @@ public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
 
   private final TypeAdapter<JsonElement> elementAdapter;
   private final ImmutableMap<String, List<String>> serializedNameMethods;
-  private final Gson gson;
   private final TypeAdapter<T> delegate;
 
 
@@ -44,16 +43,11 @@ public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
   private AutoMatterTypeAdapter(final Gson gson,
                                 final TypeAdapter<T> delegate,
                                 final ImmutableMap<String, List<String>> serializedNameMethods) {
-    this.gson = gson;
     this.delegate = delegate;
     this.serializedNameMethods = serializedNameMethods;
     elementAdapter = gson.getAdapter(JsonElement.class);
   }
 
-  private String translateField(final String fieldName) {
-    return StringFieldNamingPolicy.valueOf(gson.fieldNamingStrategy().toString())
-        .translateName(fieldName);
-  }
 
   /**
    * {@inheritDoc}
@@ -63,7 +57,7 @@ public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
     final JsonElement tree = delegate.toJsonTree(value);
     if (tree.isJsonObject()) {
       for (Map.Entry<String, List<String>> entry : serializedNameMethods.entrySet()) {
-        final String fieldName = translateField(entry.getKey());
+        final String fieldName = entry.getKey();
         final List<String> alternatives = entry.getValue();
         final JsonObject asJsonObject = tree.getAsJsonObject();
         final JsonElement element = asJsonObject.get(fieldName);
@@ -84,7 +78,7 @@ public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
     final JsonElement tree = elementAdapter.read(in);
     if (tree.isJsonObject()) {
       for (Map.Entry<String, List<String>> entry : serializedNameMethods.entrySet()) {
-        final String fieldName = translateField(entry.getKey());
+        final String fieldName = entry.getKey();
         final List<String> alternatives = entry.getValue();
         final JsonObject asJsonObject = tree.getAsJsonObject();
         for (String alternative : alternatives) {

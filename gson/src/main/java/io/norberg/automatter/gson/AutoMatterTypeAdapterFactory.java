@@ -25,9 +25,10 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
   private final ConcurrentMap<TypeToken, TypeAdapter> adapters = new ConcurrentHashMap<>();
 
+
   @SuppressWarnings("unchecked")
   @Override
-  public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+  public <T> TypeAdapter<T> create(final Gson gson, final TypeToken<T> type) {
     final TypeAdapter<T> materialized;
     final AutoMatter annotation = type.getRawType().getAnnotation(AutoMatter.class);
 
@@ -52,7 +53,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
       // Find those magic remapping-of-name-annotations (SerializedName)
       final ImmutableMap<String, List<String>>
-          serializedNameMethods = getSerializedNameMethods(type.getRawType());
+          serializedNameMethods = getSerializedNameMethods(gson, type.getRawType());
 
       // If the interface passed to us didn't have any SerializedName annotations, go the fast path
       // and just pass it on the type adapter chain,
@@ -72,7 +73,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
       // AutoMatter annotations.
       for (Class<?> itf : type.getRawType().getInterfaces()) {
         if (itf.getAnnotation(AutoMatter.class) != null) {
-          serializedNameMethodsbuilder.putAll(getSerializedNameMethods(itf));
+          serializedNameMethodsbuilder.putAll(getSerializedNameMethods(gson, itf));
         }
       }
 
@@ -94,23 +95,31 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
     return (existing != null) ? existing : materialized;
   }
 
-  private <T> ImmutableMap<String, List<String>> getSerializedNameMethods(Class<T> c) {
+  private <T> ImmutableMap<String, List<String>> getSerializedNameMethods(final Gson gson,
+                                                                          final Class<T> c) {
     final ImmutableMap.Builder<String, List<String>>
         methodToAnnotation = ImmutableMap.builder();
 
     for (Method method : c.getMethods()) {
       if (method.isAnnotationPresent(SerializedName.class)) {
         final SerializedName serializedName = method.getAnnotation(SerializedName.class);
-        methodToAnnotation.put(method.getName(),
-                               ImmutableList.<String>builder()
-                                   .add(serializedName.value())
-                                   .addAll(asList(serializedName.alternate()))
-                                   .build());
+        methodToAnnotation.put(
+            translateField(gson, method.getName()),
+            ImmutableList.<String>builder()
+                .add(serializedName.value())
+                .addAll(asList(serializedName.alternate()))
+                .build()
+        );
       }
 
     }
 
     return methodToAnnotation.build();
+  }
+
+  private String translateField(final Gson gson, final String fieldName) {
+    return StringFieldNamingPolicy.valueOf(gson.fieldNamingStrategy().toString())
+        .translateName(fieldName);
   }
 
 }
