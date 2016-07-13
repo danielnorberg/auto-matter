@@ -43,8 +43,20 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
       // Look up and instantiate the value class
       final String name = type.getRawType().getName();
-      final String valueName = name + VALUE_SUFFIX;
+      final int lastDollar = name.lastIndexOf("$");
+
+      final String valueName;
+      if (lastDollar > -1) {
+        final int lastDot = name.lastIndexOf(".");
+        valueName =
+            name.substring(0, lastDot + 1).concat(name.substring(lastDollar + 1)) + VALUE_SUFFIX;
+
+      } else {
+        valueName = name + VALUE_SUFFIX;
+      }
+
       final Class<T> cls;
+
       try {
         cls = (Class<T>) Class.forName(valueName);
       } catch (ClassNotFoundException e) {

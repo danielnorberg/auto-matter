@@ -26,6 +26,8 @@ public class AutoMatterTypeAdapterFactoryTest {
       .isPrivate(true)
       .build();
 
+  private NestedGson nestedGson;
+
   Gson gson;
 
   @Before
@@ -33,6 +35,7 @@ public class AutoMatterTypeAdapterFactoryTest {
     gson = new GsonBuilder()
         .registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory())
         .create();
+    nestedGson = new NestedGsonBuilder().cutee(new NesteeBuilder().floof("foobar").build()).build();
   }
 
   @Test
@@ -60,5 +63,11 @@ public class AutoMatterTypeAdapterFactoryTest {
     //Make sure that tranlation of under_scored fields still work.
     final String underscoredIsPrivate = "{\"a\":17,\"b\":\"foobar\",\"is_private\":true}";
     assertThat(gson.fromJson(underscoredIsPrivate, Bar.class), is(BAR)); //is_private -> isPrivate
+  }
+
+  @Test
+  public void testNesting() throws IOException {
+    final String json = gson.toJson(nestedGson);
+    assertThat(gson.fromJson(json, NestedGson.class), is(nestedGson));
   }
 }
