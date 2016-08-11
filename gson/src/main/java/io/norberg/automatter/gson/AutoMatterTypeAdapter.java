@@ -14,14 +14,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
+class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
 
   private final TypeAdapter<JsonElement> elementAdapter;
   private final ImmutableMap<String, List<String>> serializedNameMethods;
   private final TypeAdapter<T> delegate;
 
 
-  public static <T> AutoMatterTypeAdapter<T> createForInterface(
+  static <T> AutoMatterTypeAdapter<T> createForInterface(
       final Gson gson,
       final Class<T> cls,
       final ImmutableMap<String, List<String>> serializedNameMethods
@@ -29,7 +29,7 @@ public class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
     return new AutoMatterTypeAdapter<>(gson, gson.getAdapter(cls), serializedNameMethods);
   }
 
-  public static <T> AutoMatterTypeAdapter<T> createForValue(
+  static <T> AutoMatterTypeAdapter<T> createForValue(
       final Gson gson,
       final TypeAdapterFactory skipFactory,
       final TypeToken<T> type,
