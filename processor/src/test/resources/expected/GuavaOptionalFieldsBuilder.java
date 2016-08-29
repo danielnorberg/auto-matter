@@ -32,6 +32,7 @@ public final class GuavaOptionalFieldsBuilder {
     return foo(Optional.fromNullable(foo));
   }
 
+  @SuppressWarnings("unchecked")
   public GuavaOptionalFieldsBuilder foo(Optional<? extends String> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
@@ -48,6 +49,7 @@ public final class GuavaOptionalFieldsBuilder {
     return bar(Optional.fromNullable(bar));
   }
 
+  @SuppressWarnings("unchecked")
   public GuavaOptionalFieldsBuilder bar(Optional<? extends String> bar) {
     this.bar = (Optional<String>) bar;
     return this;

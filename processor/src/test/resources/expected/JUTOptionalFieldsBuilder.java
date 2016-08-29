@@ -32,6 +32,7 @@ public final class JUTOptionalFieldsBuilder {
     return foo(Optional.ofNullable(foo));
   }
 
+  @SuppressWarnings("unchecked")
   public JUTOptionalFieldsBuilder foo(Optional<? extends String> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
@@ -48,6 +49,7 @@ public final class JUTOptionalFieldsBuilder {
     return bar(Optional.ofNullable(bar));
   }
 
+  @SuppressWarnings("unchecked")
   public JUTOptionalFieldsBuilder bar(Optional<? extends String> bar) {
     this.bar = (Optional<String>) bar;
     return this;

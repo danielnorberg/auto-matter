@@ -183,16 +183,19 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
-      TypeName fieldType = upperBoundedFieldType(field);
 
       if (isCollection(field) || isMap(field)) {
+        TypeName fieldType = upperBoundedFieldType(field);
         constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isFieldTypeParameterized(field)) {
-          constructor.addStatement("this.$N = ($T) v.$N()", fieldName, fieldType(d, field), fieldName);
+          TypeName fieldType = fieldType(d, field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
+                                   fieldType, fieldName, fieldType, fieldName);
+          constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
         }
@@ -230,7 +233,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isFieldTypeParameterized(field)) {
-          constructor.addStatement("this.$N = ($T) v.$N", fieldName, fieldType(d, field), fieldName);
+          TypeName fieldType = fieldType(d, field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
+                                   fieldType, fieldName, fieldType, fieldName);
+          constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
         }
@@ -313,7 +319,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     ClassName optionalType = ClassName.bestGuess(optionalType(field));
     TypeName parameterType = ParameterizedTypeName.get(optionalType, subtypeOf(valueType));
 
+    AnnotationSpec suppressUncheckedAnnotation = AnnotationSpec.builder(SuppressWarnings.class)
+        .addMember("value", "$S", "unchecked")
+        .build();
+
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
+        .addAnnotation(suppressUncheckedAnnotation)
         .addModifiers(PUBLIC)
         .addParameter(parameterType, fieldName)
         .returns(builderType(d));
