@@ -180,6 +180,17 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testOverriddenDefaultMethods() {
+    Assume.assumeTrue(isJava8());
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/OverriddenBaseMethods.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        JavaFileObjects.forResource("expected/OverriddenMethodsBuilder.java"));
+  }
+
+  @Test
   public void testGenericSingle() {
     final JavaFileObject source = JavaFileObjects.forResource("good/GenericSingle.java");
     assert_().about(javaSource())
