@@ -15,6 +15,7 @@ public class ComparableList<T> extends ArrayList<T> implements Comparable<Compar
     return new ComparableList<>(values);
   }
 
+  @SafeVarargs
   public static <T> ComparableList<T> of(final T... values) {
     return new ComparableList<>(asList(values));
   }

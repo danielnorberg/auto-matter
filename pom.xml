@@ -62,6 +62,9 @@
           <useIncrementalCompilation>false</useIncrementalCompilation>
           <source>1.7</source>
           <target>1.7</target>
+          <compilerArgs>
+            <compilerArg>-Xlint:all</compilerArg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
