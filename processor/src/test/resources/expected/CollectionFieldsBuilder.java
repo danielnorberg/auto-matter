@@ -88,7 +88,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder strings(String... strings) {
+  @SafeVarargs
+  public final CollectionFieldsBuilder strings(String... strings) {
     if (strings == null) {
       throw new NullPointerException("strings");
     }
@@ -262,7 +263,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder numbers(Long... numbers) {
+  @SafeVarargs
+  public final CollectionFieldsBuilder numbers(Long... numbers) {
     if (numbers == null) {
       throw new NullPointerException("numbers");
     }

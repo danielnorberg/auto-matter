@@ -433,10 +433,21 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .varargs()
         .returns(builderType(d));
 
+    ensureSafeVarargs(setter);
+
     collectionNullGuard(setter, field);
 
     setter.addStatement("return $N($T.asList($N))", fieldName, ClassName.get(Arrays.class), fieldName);
     return setter.build();
+  }
+
+  private void ensureSafeVarargs(MethodSpec.Builder setter) {
+    // TODO: Add SafeVarargs annotation only for non-reifiable types.
+    AnnotationSpec safeVarargsAnnotation = AnnotationSpec.builder(SafeVarargs.class).build();
+
+    setter
+        .addAnnotation(safeVarargsAnnotation)
+        .addModifiers(FINAL); // Only because SafeVarargs can be applied to final methods.
   }
 
   private MethodSpec collectionAdder(final Descriptor d, final ExecutableElement field) {
