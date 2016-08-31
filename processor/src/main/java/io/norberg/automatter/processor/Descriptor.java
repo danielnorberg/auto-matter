@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeVariableName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,22 +105,21 @@ class Descriptor {
   }
 
   private List<ExecutableElement> methods(final TypeElement element) {
-    final List<ExecutableElement> methods = new ArrayList<>();
-    enumerateMethods(element, methods);
-    return methods;
+    final Map<String, ExecutableElement> methodMap = new LinkedHashMap<>();
+    enumerateMethods(element, methodMap);
+    return new ArrayList<>(methodMap.values());
   }
 
-  private void enumerateMethods(final TypeElement element, final List<ExecutableElement> methods) {
+  private void enumerateMethods(final TypeElement element, final Map<String, ExecutableElement> methods) {
     for (final TypeMirror interfaceType : element.getInterfaces()) {
       final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
       enumerateMethods(interfaceElement, methods);
     }
     for (final Element member : element.getEnclosedElements()) {
-      if (member.getKind() != ElementKind.METHOD ||
-          isStaticOrDefault(member)) {
+      if (member.getKind() != ElementKind.METHOD) {
         continue;
       }
-      methods.add((ExecutableElement) member);
+      methods.put(member.getSimpleName().toString(), (ExecutableElement) member);
     }
   }
 
