@@ -17,13 +17,17 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
   }
 
   private GenericJUTOptionalFieldsBuilder(GenericJUTOptionalFields<? extends T> v) {
-    this.foo = (Optional<T>) v.foo();
-    this.bar = (Optional<T>) v.bar();
+    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) v.foo();
+    this.foo = _foo;
+    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) v.bar();
+    this.bar = _bar;
   }
 
   private GenericJUTOptionalFieldsBuilder(GenericJUTOptionalFieldsBuilder<? extends T> v) {
-    this.foo = (Optional<T>) v.foo;
-    this.bar = (Optional<T>) v.bar;
+    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) v.foo();
+    this.foo = _foo;
+    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) v.bar();
+    this.bar = _bar;
   }
 
   public Optional<T> foo() {
@@ -34,6 +38,7 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
     return foo(Optional.ofNullable(foo));
   }
 
+  @SuppressWarnings("unchecked")
   public GenericJUTOptionalFieldsBuilder<T> foo(Optional<? extends T> foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
@@ -50,6 +55,7 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
     return bar(Optional.ofNullable(bar));
   }
 
+  @SuppressWarnings("unchecked")
   public GenericJUTOptionalFieldsBuilder<T> bar(Optional<? extends T> bar) {
     this.bar = (Optional<T>) bar;
     return this;

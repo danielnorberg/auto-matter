@@ -81,7 +81,8 @@ public final class GenericCollectionBuilder<T, K, V> {
     return this;
   }
 
-  public GenericCollectionBuilder<T, K, V> foos(T... foos) {
+  @SafeVarargs
+  public final GenericCollectionBuilder<T, K, V> foos(T... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
