@@ -87,7 +87,7 @@ public final class GenericSingleBuilder<T> {
     public int hashCode() {
       int result = 1;
       long temp;
-      result = 31 * result + (thing != null ? thing.hashCode() : 0);
+      result = 31 * result + (this.thing != null ? this.thing.hashCode() : 0);
       return result;
     }
 

@@ -328,17 +328,17 @@ public final class FooBuilder {
       int result = 1;
       long temp;
 
-      result = 31 * result + (aBoolean ? 1231 : 1237);
-      result = 31 * result + (int) aByte;
-      result = 31 * result + (int) aShort;
-      result = 31 * result + aInt;
-      result = 31 * result + (int) (aLong ^ (aLong >>> 32));
-      result = 31 * result + (int) aChar;
-      result = 31 * result + (aFloat != +0.0f ? Float.floatToIntBits(aFloat) : 0);
-      temp = Double.doubleToLongBits(aDouble);
+      result = 31 * result + (this.aBoolean ? 1231 : 1237);
+      result = 31 * result + (int) this.aByte;
+      result = 31 * result + (int) this.aShort;
+      result = 31 * result + this.aInt;
+      result = 31 * result + (int) (this.aLong ^ (this.aLong >>> 32));
+      result = 31 * result + (int) this.aChar;
+      result = 31 * result + (this.aFloat != +0.0f ? Float.floatToIntBits(this.aFloat) : 0);
+      temp = Double.doubleToLongBits(this.aDouble);
       result = 31 * result + (int) (temp ^ (temp >>> 32));
-      result = 31 * result + (object != null ? object.hashCode() : 0);
-      result = 31 * result + (array != null ? Arrays.hashCode(array) : 0);
+      result = 31 * result + (this.object != null ? this.object.hashCode() : 0);
+      result = 31 * result + (this.array != null ? Arrays.hashCode(this.array) : 0);
       return result;
     }
 

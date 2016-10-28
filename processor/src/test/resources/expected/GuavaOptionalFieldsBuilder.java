@@ -123,8 +123,8 @@ public final class GuavaOptionalFieldsBuilder {
     public int hashCode() {
       int result = 1;
       long temp;
-      result = 31 * result + (foo != null ? foo.hashCode() : 0);
-      result = 31 * result + (bar != null ? bar.hashCode() : 0);
+      result = 31 * result + (this.foo != null ? this.foo.hashCode() : 0);
+      result = 31 * result + (this.bar != null ? this.bar.hashCode() : 0);
       return result;
     }
 

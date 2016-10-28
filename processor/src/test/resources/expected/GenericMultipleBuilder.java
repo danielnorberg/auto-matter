@@ -211,11 +211,11 @@ public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Coll
     public int hashCode() {
       int result = 1;
       long temp;
-      result = 31 * result + (field1 != null ? field1.hashCode() : 0);
-      result = 31 * result + (field2 != null ? field2.hashCode() : 0);
-      result = 31 * result + (field3 != null ? field3.hashCode() : 0);
-      result = 31 * result + (field4 != null ? field4.hashCode() : 0);
-      result = 31 * result + (plain != null ? plain.hashCode() : 0);
+      result = 31 * result + (this.field1 != null ? this.field1.hashCode() : 0);
+      result = 31 * result + (this.field2 != null ? this.field2.hashCode() : 0);
+      result = 31 * result + (this.field3 != null ? this.field3.hashCode() : 0);
+      result = 31 * result + (this.field4 != null ? this.field4.hashCode() : 0);
+      result = 31 * result + (this.plain != null ? this.plain.hashCode() : 0);
       return result;
     }
 

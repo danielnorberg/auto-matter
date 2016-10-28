@@ -264,8 +264,8 @@ public final class GenericCollectionBuilder<T, K, V> {
     public int hashCode() {
       int result = 1;
       long temp;
-      result = 31 * result + (foos != null ? foos.hashCode() : 0);
-      result = 31 * result + (bars != null ? bars.hashCode() : 0);
+      result = 31 * result + (this.foos != null ? this.foos.hashCode() : 0);
+      result = 31 * result + (this.bars != null ? this.bars.hashCode() : 0);
       return result;
     }
 

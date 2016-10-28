@@ -864,7 +864,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addStatement("long temp");
 
     for (ExecutableElement field : d.fields()) {
-      final String name = fieldName(field);
+      final String name = "this." + fieldName(field);
       final TypeMirror type = field.getReturnType();
       switch (type.getKind()) {
         case LONG:
