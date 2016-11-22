@@ -166,10 +166,10 @@ public final class NullableFieldsBuilder {
       int result = 1;
       long temp;
 
-      result = 31 * result + (nullableFoo != null ? nullableFoo.hashCode() : 0);
-      result = 31 * result + (customNullableBar != null ? customNullableBar.hashCode() : 0);
-      result = 31 * result + (nonNullQuux != null ? nonNullQuux.hashCode() : 0);
-      result = 31 * result + nonNullPrimitive;
+      result = 31 * result + (this.nullableFoo != null ? this.nullableFoo.hashCode() : 0);
+      result = 31 * result + (this.customNullableBar != null ? this.customNullableBar.hashCode() : 0);
+      result = 31 * result + (this.nonNullQuux != null ? this.nonNullQuux.hashCode() : 0);
+      result = 31 * result + this.nonNullPrimitive;
       return result;
     }
 

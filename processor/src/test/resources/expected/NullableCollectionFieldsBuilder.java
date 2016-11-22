@@ -295,9 +295,9 @@ public final class NullableCollectionFieldsBuilder {
     public int hashCode() {
       int result = 1;
       long temp;
-      result = 31 * result + (strings != null ? strings.hashCode() : 0);
-      result = 31 * result + (integers != null ? integers.hashCode() : 0);
-      result = 31 * result + (numbers != null ? numbers.hashCode() : 0);
+      result = 31 * result + (this.strings != null ? this.strings.hashCode() : 0);
+      result = 31 * result + (this.integers != null ? this.integers.hashCode() : 0);
+      result = 31 * result + (this.numbers != null ? this.numbers.hashCode() : 0);
       return result;
     }
 
