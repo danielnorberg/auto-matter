@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -608,9 +609,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec setter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
     String fieldName = fieldName(field);
 
+    ParameterSpec.Builder parameterSpecBuilder =
+            ParameterSpec.builder(fieldType(d, field), fieldName);
+    if (shouldAddNullableToParameter(field)) {
+      parameterSpecBuilder.addAnnotation(Nullable.class);
+    }
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
-        .addParameter(fieldType(d, field), fieldName)
+        .addParameter(parameterSpecBuilder.build())
         .returns(builderType(d));
 
     if (shouldEnforceNonNull(field)) {
@@ -1217,6 +1223,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private boolean shouldEnforceNonNull(final ExecutableElement field) {
     return !isPrimitive(field) && !isNullableAnnotated(field);
+  }
+
+  private boolean shouldAddNullableToParameter(final ExecutableElement field) {
+    return isNullableAnnotated(field) && !isPrimitive(field);
   }
 
   private boolean isNullableAnnotated(final ExecutableElement field) {
