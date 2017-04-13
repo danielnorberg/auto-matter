@@ -1,6 +1,5 @@
 package io.norberg.automatter.gson;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,14 +16,14 @@ import java.util.Map;
 class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
 
   private final TypeAdapter<JsonElement> elementAdapter;
-  private final ImmutableMap<String, List<String>> serializedNameMethods;
+  private final Map<String, List<String>> serializedNameMethods;
   private final TypeAdapter<T> delegate;
 
 
   static <T> AutoMatterTypeAdapter<T> createForInterface(
       final Gson gson,
       final Class<T> cls,
-      final ImmutableMap<String, List<String>> serializedNameMethods
+      final Map<String, List<String>> serializedNameMethods
   ) {
     return new AutoMatterTypeAdapter<>(gson, gson.getAdapter(cls), serializedNameMethods);
   }
@@ -33,7 +32,7 @@ class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
       final Gson gson,
       final TypeAdapterFactory skipFactory,
       final TypeToken<T> type,
-      final ImmutableMap<String, List<String>> serializedNameMethods
+      final Map<String, List<String>> serializedNameMethods
   ) {
     return new AutoMatterTypeAdapter<>(gson,
                                        gson.getDelegateAdapter(skipFactory, type),
@@ -42,7 +41,7 @@ class AutoMatterTypeAdapter<T> extends TypeAdapter<T> {
 
   private AutoMatterTypeAdapter(final Gson gson,
                                 final TypeAdapter<T> delegate,
-                                final ImmutableMap<String, List<String>> serializedNameMethods) {
+                                final Map<String, List<String>> serializedNameMethods) {
     this.delegate = delegate;
     this.serializedNameMethods = serializedNameMethods;
     elementAdapter = gson.getAdapter(JsonElement.class);
