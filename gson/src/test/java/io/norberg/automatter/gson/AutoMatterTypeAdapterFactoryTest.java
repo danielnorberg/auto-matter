@@ -17,6 +17,7 @@ public class AutoMatterTypeAdapterFactoryTest {
   static final Foo FOO = new FooBuilder()
       .a(17)
       .b("foobar")
+      .isPrivate(true)
       .build();
 
 

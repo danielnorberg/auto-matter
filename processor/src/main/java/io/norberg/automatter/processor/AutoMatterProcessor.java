@@ -718,7 +718,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addSuperinterface(valueType(d));
 
     for (ExecutableElement field : d.fields()) {
-      value.addField(FieldSpec.builder(fieldType(d, field), fieldName(field), PRIVATE, FINAL).build());
+      final FieldSpec.Builder
+          fieldBuilder = FieldSpec.builder(fieldType(d, field), fieldName(field), PRIVATE, FINAL);
+      fieldBuilder.addAnnotations(annotationsFor(field));
+      value.addField(fieldBuilder.build());
     }
 
     value.addMethod(valueConstructor(d));
@@ -732,6 +735,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     value.addMethod(valueToString(d));
 
     return value.build();
+  }
+
+  private List<AnnotationSpec> annotationsFor(final ExecutableElement field) {
+    final ArrayList<AnnotationSpec> annotationsSpecs = Lists.newArrayList();
+    for (AnnotationMirror am : field.getAnnotationMirrors()) {
+      //The Nullable annotation gets special treatment as the processor changes behaviour based on
+      if (!am.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
+        annotationsSpecs.add(AnnotationSpec.get(am));
+      }
+    }
+    return annotationsSpecs;
   }
 
   private MethodSpec valueConstructor(final Descriptor d) throws AutoMatterProcessorException {
