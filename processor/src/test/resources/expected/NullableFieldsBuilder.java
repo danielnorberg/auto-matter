@@ -1,8 +1,8 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
+import java.util.Date;
 import javax.annotation.Generated;
-import javax.annotation.Nullable;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
 public final class NullableFieldsBuilder {
@@ -33,7 +33,7 @@ public final class NullableFieldsBuilder {
     return nullableFoo;
   }
 
-  public NullableFieldsBuilder nullableFoo(@Nullable String nullableFoo) {
+  public NullableFieldsBuilder nullableFoo(@javax.annotation.Nullable String nullableFoo) {
     this.nullableFoo = nullableFoo;
     return this;
   }
@@ -42,7 +42,7 @@ public final class NullableFieldsBuilder {
     return customNullableBar;
   }
 
-  public NullableFieldsBuilder customNullableBar(@Nullable String customNullableBar) {
+  public NullableFieldsBuilder customNullableBar(@Nullable(simple = "foo", complex = Date.class) String customNullableBar) {
     this.customNullableBar = customNullableBar;
     return this;
   }
