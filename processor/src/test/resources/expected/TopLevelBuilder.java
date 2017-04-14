@@ -24,6 +24,13 @@ public final class TopLevelBuilder {
     return new TopLevelBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public TopLevelBuilder merge(TopLevelBuilder other) {
+    return this;
+  }
+
   private static final class Value
       implements TopLevel {
 

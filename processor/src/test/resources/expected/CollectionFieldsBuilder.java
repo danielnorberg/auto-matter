@@ -297,6 +297,22 @@ public final class CollectionFieldsBuilder {
     return new CollectionFieldsBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public CollectionFieldsBuilder merge(CollectionFieldsBuilder other) {
+    if (other.strings() != null) {
+      this.strings(other.strings());
+    }
+    if (other.integers() != null) {
+      this.integers(other.integers());
+    }
+    if (other.numbers() != null) {
+      this.numbers(other.numbers());
+    }
+    return this;
+  }
+
   private static final class Value
       implements CollectionFields {
 

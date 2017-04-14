@@ -26,6 +26,13 @@ final class NestedPackageLocalFoobarBuilder {
     return new NestedPackageLocalFoobarBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public NestedPackageLocalFoobarBuilder merge(NestedPackageLocalFoobarBuilder other) {
+    return this;
+  }
+
   private static final class Value
       implements NestedPackageLocal.NestedPackageLocalFoobar {
 

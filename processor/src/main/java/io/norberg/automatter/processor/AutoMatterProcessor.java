@@ -157,6 +157,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     builder.addMethod(fromValue(d));
     builder.addMethod(fromBuilder(d));
 
+    builder.addMethod(mergeBuilder(d));
+
     builder.addType(valueClass(d));
 
     return builder.build();
@@ -709,6 +711,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .returns(builderType(d))
         .addStatement("return new $T(v)", builderType(d))
         .build();
+  }
+
+  private MethodSpec mergeBuilder(final Descriptor d) {
+    final MethodSpec.Builder builder = MethodSpec.methodBuilder("merge")
+        .addModifiers(PUBLIC)
+        .addJavadoc("This only works with non primitive types as we don't know if it was set intentionally "
+                    + "or by default.\n")
+        .addParameter(builderType(d), "other")
+        .returns(builderType(d));
+    for (ExecutableElement element: d.fields()) {
+      if (!element.getReturnType().getKind().isPrimitive()) {
+        builder.beginControlFlow("if (other.$L() != null)", element.getSimpleName());
+        builder.addStatement("this.$L(other.$L())", element.getSimpleName(), element.getSimpleName());
+        builder.endControlFlow();
+      }
+    }
+    builder.addStatement("return this");
+    return builder.build();
   }
 
   private TypeSpec valueClass(final Descriptor d) throws AutoMatterProcessorException {

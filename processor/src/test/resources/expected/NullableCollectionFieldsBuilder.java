@@ -230,6 +230,22 @@ public final class NullableCollectionFieldsBuilder {
     return new NullableCollectionFieldsBuilder(v);
   }
 
+  /**
+   * This only works with non primitive types as we don't know if it was set intentionally or by default.
+   */
+  public NullableCollectionFieldsBuilder merge(NullableCollectionFieldsBuilder other) {
+    if (other.strings() != null) {
+      this.strings(other.strings());
+    }
+    if (other.integers() != null) {
+      this.integers(other.integers());
+    }
+    if (other.numbers() != null) {
+      this.numbers(other.numbers());
+    }
+    return this;
+  }
+
   private static final class Value
       implements NullableCollectionFields {
 
