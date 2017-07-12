@@ -14,14 +14,19 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static io.norberg.automatter.processor.AutoMatterProcessor.builderType;
+import static io.norberg.automatter.processor.Common.assertNotNull;
+import static io.norberg.automatter.processor.Common.builderType;
+import static io.norberg.automatter.processor.Fields.fieldName;
+import static io.norberg.automatter.processor.Fields.fieldType;
+import static io.norberg.automatter.processor.Fields.isPrimitive;
+import static io.norberg.automatter.processor.Fields.shouldEnforceNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 
-public class DefaultProcessor implements FieldProcessor {
+class DefaultProcessor implements FieldProcessor {
   @Override
   public FieldSpec builderField(Descriptor d, ExecutableElement field) throws AutoMatterProcessorException {
     return FieldSpec.builder(fieldType(d, field), fieldName(field), PRIVATE).build();
@@ -109,7 +114,7 @@ public class DefaultProcessor implements FieldProcessor {
     ParameterSpec.Builder parameterSpecBuilder =
             ParameterSpec.builder(fieldType(d, field), fieldName);
     if (!isPrimitive(field)) {
-      AnnotationMirror nullableAnnotation = nullableAnnotation(field);
+      AnnotationMirror nullableAnnotation = Fields.nullableAnnotation(field);
       if (nullableAnnotation != null) {
         parameterSpecBuilder.addAnnotation(AnnotationSpec.get(nullableAnnotation));
       }

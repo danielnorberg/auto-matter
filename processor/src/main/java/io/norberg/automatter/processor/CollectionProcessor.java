@@ -18,6 +18,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,17 +33,23 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
-import static io.norberg.automatter.processor.AutoMatterProcessor.builderType;
+import static io.norberg.automatter.processor.Common.assertNotNull;
+import static io.norberg.automatter.processor.Common.builderType;
+import static io.norberg.automatter.processor.Common.fail;
+import static io.norberg.automatter.processor.Fields.fieldName;
+import static io.norberg.automatter.processor.Fields.fieldType;
+import static io.norberg.automatter.processor.Fields.genericArgument;
+import static io.norberg.automatter.processor.Fields.shouldEnforceNonNull;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.type.TypeKind.DECLARED;
 
-public class CollectionProcessor implements FieldProcessor {
-  private final AutoMatterProcessor processor;
+class CollectionProcessor implements FieldProcessor {
+  private final Elements elements;
 
-  public CollectionProcessor(AutoMatterProcessor processor) {
-    this.processor = processor;
+  CollectionProcessor(Elements elements) {
+    this.elements = elements;
   }
 
   @Override
@@ -291,7 +298,7 @@ public class CollectionProcessor implements FieldProcessor {
 
   private MethodSpec collectionAdder(final Descriptor d, final ExecutableElement field) {
     final String fieldName = fieldName(field);
-    final String singular = processor.singular(fieldName);
+    final String singular = Common.singular(elements, fieldName);
     if (singular == null || singular.isEmpty()) {
       return null;
     }
@@ -523,7 +530,7 @@ public class CollectionProcessor implements FieldProcessor {
 
   private MethodSpec mapPutter(final Descriptor d, final ExecutableElement field) {
     final String fieldName = fieldName(field);
-    final String singular = processor.singular(fieldName);
+    final String singular = Common.singular(elements, fieldName);
     if (singular == null) {
       return null;
     }

@@ -1,10 +1,10 @@
 package io.norberg.automatter.processor;
 
-public class BuildStatements {
-  Iterable<Statement> statements;
-  String parameter;
+class BuildStatements {
+  final Iterable<Statement> statements;
+  final String parameter;
 
-  public BuildStatements(Iterable<Statement> statements, String parameter) {
+  BuildStatements(Iterable<Statement> statements, String parameter) {
     this.statements = statements;
     this.parameter = parameter;
   }

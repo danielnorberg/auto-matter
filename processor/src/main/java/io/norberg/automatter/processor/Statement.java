@@ -1,10 +1,10 @@
 package io.norberg.automatter.processor;
 
-public class Statement {
-  String statement;
-  Object[] args;
+class Statement {
+  final String statement;
+  final Object[] args;
 
-  public Statement(String statement, Object... args) {
+  Statement(String statement, Object... args) {
     this.statement = statement;
     this.args = args;
   }

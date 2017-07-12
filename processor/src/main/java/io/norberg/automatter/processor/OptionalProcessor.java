@@ -13,10 +13,15 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
-import static io.norberg.automatter.processor.AutoMatterProcessor.builderType;
+import static io.norberg.automatter.processor.Common.assertNotNull;
+import static io.norberg.automatter.processor.Common.builderType;
+import static io.norberg.automatter.processor.Fields.fieldName;
+import static io.norberg.automatter.processor.Fields.fieldType;
+import static io.norberg.automatter.processor.Fields.genericArgument;
+import static io.norberg.automatter.processor.Fields.shouldEnforceNonNull;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-public class OptionalProcessor extends DefaultProcessor {
+class OptionalProcessor extends DefaultProcessor {
   @Override
   public Iterable<MethodSpec> accessors(Descriptor d, ExecutableElement field) throws AutoMatterProcessorException {
     List<MethodSpec> methods = Lists.newArrayList();

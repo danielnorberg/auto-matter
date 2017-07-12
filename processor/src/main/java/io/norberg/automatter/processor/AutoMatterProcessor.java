@@ -2,6 +2,7 @@ package io.norberg.automatter.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -17,8 +18,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
-
-import org.modeshape.common.text.Inflector;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,6 +45,8 @@ import javax.lang.model.util.Types;
 import io.norberg.automatter.AutoMatter;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static io.norberg.automatter.processor.Common.builderType;
+import static io.norberg.automatter.processor.Common.rawBuilderType;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -60,22 +61,14 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 @AutoService(Processor.class)
 public final class AutoMatterProcessor extends AbstractProcessor {
 
-  private static final Inflector INFLECTOR = new Inflector();
-
-  private static final Set<String> KEYWORDS = ImmutableSet.of(
-      "abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package",
-      "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements",
-      "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum",
-      "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char",
-      "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
-      "const", "float", "native", "super", "while");
+  private static final Splitter FIELD_SPLITTER = Splitter.on("<");
 
   private Filer filer;
   private Elements elements;
   private Messager messager;
   private Types types;
   private Map<String, FieldProcessor> processors;
-  private DefaultProcessor defaultProcessor = new DefaultProcessor();
+  private final DefaultProcessor defaultProcessor = new DefaultProcessor();
 
 
   @Override
@@ -86,7 +79,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     types = processingEnv.getTypeUtils();
     messager = processingEnv.getMessager();
 
-    CollectionProcessor collectionProcessor = new CollectionProcessor(this);
+    CollectionProcessor collectionProcessor = new CollectionProcessor(elements);
     OptionalProcessor optionalProcessor = new OptionalProcessor();
 
     processors = ImmutableMap.of(
@@ -125,7 +118,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private FieldProcessor processorForField(Descriptor d, ExecutableElement field) throws AutoMatterProcessorException {
-    String prefix = fieldType(d, field).toString().split("<")[0];
+    String prefix = FIELD_SPLITTER.split(fieldType(d, field).toString()).iterator().next();
     return processors.getOrDefault(prefix, defaultProcessor);
   }
 
@@ -173,7 +166,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addModifiers(PUBLIC);
 
     for (ExecutableElement field : d.fields()) {
-      for (Statement s: processorForField(d, field).defaultConstructor(d, field)) {
+      for (Statement s : processorForField(d, field).defaultConstructor(d, field)) {
         constructor.addStatement(s.statement, s.args);
       }
     }
@@ -187,7 +180,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addParameter(upperBoundedValueType(d), "v");
 
     for (ExecutableElement field : d.fields()) {
-      for (Statement s: processorForField(d, field).copyValueConstructor(d, field)) {
+      for (Statement s : processorForField(d, field).copyValueConstructor(d, field)) {
         constructor.addStatement(s.statement, s.args);
       }
     }
@@ -201,7 +194,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addParameter(upperBoundedBuilderType(d), "v");
 
     for (ExecutableElement field : d.fields()) {
-      for (Statement s: processorForField(d, field).copyBuilderConstructor(d, field)) {
+      for (Statement s : processorForField(d, field).copyBuilderConstructor(d, field)) {
         constructor.addStatement(s.statement, s.args);
       }
     }
@@ -235,7 +228,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final List<String> parameters = Lists.newArrayList();
     for (ExecutableElement field : d.fields()) {
       BuildStatements buildStatements = processorForField(d, field).build(d, field);
-      for (Statement s: buildStatements.statements) {
+      for (Statement s : buildStatements.statements) {
         build.addStatement(s.statement, s.args);
       }
       parameters.add(buildStatements.parameter);
@@ -307,7 +300,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           .build();
       constructor.addParameter(parameter);
 
-      for (Statement s: processorForField(d, field).valueConstructor(d, field)) {
+      for (Statement s : processorForField(d, field).valueConstructor(d, field)) {
         constructor.addStatement(s.statement, s.args);
       }
     }
@@ -491,14 +484,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .endControlFlow();
   }
 
-  public static TypeName builderType(final Descriptor d) {
-    final ClassName raw = rawBuilderType(d);
-    if (!d.isGeneric()) {
-      return raw;
-    }
-    return ParameterizedTypeName.get(raw, d.typeArguments());
-  }
-
   private TypeName upperBoundedBuilderType(final Descriptor d) {
     final ClassName raw = rawBuilderType(d);
     if (!d.isGeneric()) {
@@ -515,9 +500,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return typeNames;
   }
 
-  private static ClassName rawBuilderType(final Descriptor d) {
-    return ClassName.get(d.packageName(), d.builderName());
-  }
 
   private ClassName rawValueType(final Descriptor d) {
     return ClassName.get(d.packageName(), d.valueTypeName());
@@ -592,16 +574,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return field.getReturnType().getKind().isPrimitive();
   }
 
-  public String singular(final String name) {
-    final String singular = INFLECTOR.singularize(name);
-    if (KEYWORDS.contains(singular)) {
-      return null;
-    }
-    if (elements.getTypeElement("java.lang." + singular) != null) {
-      return null;
-    }
-    return name.equals(singular) ? null : singular;
-  }
+
 
   private String fieldName(final ExecutableElement field) {
     return field.getSimpleName().toString();
