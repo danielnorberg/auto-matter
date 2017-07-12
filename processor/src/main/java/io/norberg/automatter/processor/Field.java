@@ -7,7 +7,7 @@ class Field {
   final ExecutableElement method;
   final TypeMirror type;
 
-  public Field(final ExecutableElement method, final TypeMirror type) {
+  Field(final ExecutableElement method, final TypeMirror type) {
     this.method = method;
     this.type = type;
   }
