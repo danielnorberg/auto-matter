@@ -22,7 +22,7 @@ JACKSON_JODA=$(curl -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fas
                   .[].v' |
            grep -v '2.4.0-rc')
 
-JACKSON=$(comm -12 <(echo $JACKSON) <(echo $JACKSON_JODA))
+JACKSON=$(comm -12 <(echo JACKSON_DATABIND) <(echo $JACKSON_JODA))
 
 for v in ${JACKSON}; do
   echo
