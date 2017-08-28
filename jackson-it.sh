@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -euxo pipefail
+
 mvn install -DskipTests=true
 
 JACKSON_DATABIND=$(curl -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=100&wt=json' |
