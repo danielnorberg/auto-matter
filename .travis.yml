@@ -10,5 +10,5 @@ addons:
     packages:
       - oracle-java9-installer
 script:
-  - mvn test
+  - ./mvnw test
   - "./jackson-it.sh"
