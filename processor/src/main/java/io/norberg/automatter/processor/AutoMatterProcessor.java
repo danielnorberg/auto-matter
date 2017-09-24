@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -82,6 +81,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
       "const", "float", "native", "super", "while");
 
+  private static final ClassName GENERATED = ClassName.get("javax.annotation", "Generated");
+
   private Filer filer;
   private Elements elements;
   private Messager messager;
@@ -124,7 +125,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {
-    AnnotationSpec generatedAnnotation = AnnotationSpec.builder(Generated.class)
+    AnnotationSpec generatedAnnotation = AnnotationSpec.builder(GENERATED)
         .addMember("value", "$S", AutoMatterProcessor.class.getName())
         .build();
 
