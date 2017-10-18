@@ -1,6 +1,6 @@
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class NestedFoobarBuilder {
 
   public NestedFoobarBuilder() {

@@ -1,9 +1,9 @@
 package foo;
 
 import io.norberg.automatter.AutoMatter;
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class OverriddenBaseMethodsBuilder {
 
   private String baz;

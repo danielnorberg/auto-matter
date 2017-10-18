@@ -1,20 +1,69 @@
 package io.norberg.automatter;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.testing.compile.JavaFileObjects;
-
-import org.junit.Assume;
-import org.junit.Test;
-
-import javax.tools.JavaFileObject;
-
-import io.norberg.automatter.processor.AutoMatterProcessor;
-
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
+import com.google.testing.compile.JavaFileObjects;
+import io.norberg.automatter.processor.AutoMatterProcessor;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import javax.tools.JavaFileObject;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+
 public class AutoMatterProcessorTest {
+
+  private Class generatedAnnotationClass;
+
+  @Before
+  public void setUp() throws Exception {
+    generatedAnnotationClass = generatedAnnotationType();
+  }
+
+  private static Class generatedAnnotationType() {
+    try {
+      return Class.forName("javax.annotation.processing.Generated");
+    } catch (ClassNotFoundException ignore) {
+    }
+
+    try {
+      return Class.forName("javax.annotation.Generated");
+    } catch (ClassNotFoundException ignore) {
+    }
+
+    return null;
+  }
+
+  private JavaFileObject expectedSource(String resourceName) {
+    final String rawSource;
+    try {
+      rawSource = Resources.toString(Resources.getResource(resourceName), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    final String generatedAnnotation;
+    final String generatedAnnotationImport;
+
+    if (generatedAnnotationClass != null) {
+      generatedAnnotationImport = "import " + generatedAnnotationClass.getCanonicalName() + ";";
+      generatedAnnotation = "@" + generatedAnnotationClass.getSimpleName() +
+          "(\"" + AutoMatterProcessor.class.getCanonicalName() + "\")";
+    } else {
+      generatedAnnotationImport = "";
+      generatedAnnotation = "";
+    }
+
+    final String source = rawSource
+        .replace("${GENERATED_IMPORT}", generatedAnnotationImport)
+        .replace("${GENERATED_ANNOTATION}", generatedAnnotation);
+
+    return JavaFileObjects.forSourceString(resourceName, source);
+  }
 
   @Test
   public void testFoo() {
@@ -23,7 +72,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/FooBuilder.java"));
+        .and().generatesSources(expectedSource("expected/FooBuilder.java"));
   }
 
   @Test
@@ -33,7 +82,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/TopLevelBuilder.java"));
+        .and().generatesSources(expectedSource("expected/TopLevelBuilder.java"));
   }
 
   @Test
@@ -43,7 +92,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/NestedFoobarBuilder.java"));
+        .and().generatesSources(expectedSource("expected/NestedFoobarBuilder.java"));
   }
 
   @Test
@@ -54,7 +103,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/PackageLocalBuilder.java"));
+        expectedSource("expected/PackageLocalBuilder.java"));
   }
 
   @Test
@@ -65,7 +114,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/NestedPackageLocalFoobarBuilder.java"));
+        expectedSource("expected/NestedPackageLocalFoobarBuilder.java"));
   }
 
   @Test
@@ -108,7 +157,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/NullableFieldsBuilder.java"));
+        expectedSource("expected/NullableFieldsBuilder.java"));
   }
 
   @Test
@@ -118,7 +167,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/CollectionFieldsBuilder.java"));
+        expectedSource("expected/CollectionFieldsBuilder.java"));
   }
 
   @Test
@@ -128,7 +177,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/NullableCollectionFieldsBuilder.java"));
+        expectedSource("expected/NullableCollectionFieldsBuilder.java"));
   }
 
   @Test
@@ -154,7 +203,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/GuavaOptionalFieldsBuilder.java"));
+        expectedSource("expected/GuavaOptionalFieldsBuilder.java"));
   }
 
   @Test
@@ -165,7 +214,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/JUTOptionalFieldsBuilder.java"));
+        expectedSource("expected/JUTOptionalFieldsBuilder.java"));
   }
 
   @Test
@@ -176,7 +225,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/DefaultMethodsBuilder.java"));
+        expectedSource("expected/DefaultMethodsBuilder.java"));
   }
 
   @Test
@@ -187,7 +236,7 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(
-        JavaFileObjects.forResource("expected/OverriddenMethodsBuilder.java"));
+        expectedSource("expected/OverriddenMethodsBuilder.java"));
   }
 
   @Test
@@ -197,7 +246,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericSingleBuilder.java"));
+        .and().generatesSources(expectedSource("expected/GenericSingleBuilder.java"));
   }
 
   @Test
@@ -207,7 +256,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericMultipleBuilder.java"));
+        .and().generatesSources(expectedSource("expected/GenericMultipleBuilder.java"));
   }
 
   @Test
@@ -217,7 +266,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericCollectionBuilder.java"));
+        .and().generatesSources(expectedSource("expected/GenericCollectionBuilder.java"));
   }
 
   @Test
@@ -228,7 +277,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericJUTOptionalFieldsBuilder.java"));
+        .and().generatesSources(expectedSource("expected/GenericJUTOptionalFieldsBuilder.java"));
   }
 
   @Test
@@ -238,7 +287,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/GenericGuavaOptionalFieldsBuilder.java"));
+        .and().generatesSources(expectedSource("expected/GenericGuavaOptionalFieldsBuilder.java"));
   }
 
   @Test
@@ -251,7 +300,7 @@ public class AutoMatterProcessorTest {
         ))
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/inheritance/FoobarBuilder.java"));
+        .and().generatesSources(expectedSource("expected/inheritance/FoobarBuilder.java"));
   }
 
   @Test
@@ -264,7 +313,7 @@ public class AutoMatterProcessorTest {
         ))
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(JavaFileObjects.forResource("expected/inheritance/GenericFoobarBuilder.java"));
+        .and().generatesSources(expectedSource("expected/inheritance/GenericFoobarBuilder.java"));
   }
 
   private boolean isJava8() {

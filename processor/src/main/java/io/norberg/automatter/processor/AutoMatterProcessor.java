@@ -1,10 +1,20 @@
 package io.norberg.automatter.processor;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.type.TypeKind.ARRAY;
+import static javax.lang.model.type.TypeKind.DECLARED;
+import static javax.lang.model.type.TypeKind.TYPEVAR;
+import static javax.tools.Diagnostic.Kind.ERROR;
+
 import com.google.auto.service.AutoService;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -18,9 +28,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
-
-import org.modeshape.common.text.Inflector;
-
+import io.norberg.automatter.AutoMatter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +40,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -50,19 +57,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-
-import io.norberg.automatter.AutoMatter;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
-import static javax.lang.model.type.TypeKind.ARRAY;
-import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
-import static javax.tools.Diagnostic.Kind.ERROR;
+import org.modeshape.common.text.Inflector;
 
 /**
  * An annotation processor that takes a value type defined as an interface with getter methods and
@@ -81,7 +76,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
       "const", "float", "native", "super", "while");
 
-  private static final ClassName GENERATED = ClassName.get("javax.annotation", "Generated");
+  private static final String GENERATED_LEGACY = "javax.annotation.Generated";
+  private static final String GENERATED = "javax.annotation.processing.Generated";
 
   private Filer filer;
   private Elements elements;
@@ -125,14 +121,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {
-    AnnotationSpec generatedAnnotation = AnnotationSpec.builder(GENERATED)
-        .addMember("value", "$S", AutoMatterProcessor.class.getName())
-        .build();
-
     TypeSpec.Builder builder = TypeSpec.classBuilder(d.builderName())
         .addTypeVariables(d.typeVariables())
-        .addModifiers(FINAL)
-        .addAnnotation(generatedAnnotation);
+        .addModifiers(FINAL);
+
+    TypeElement generatedAnnotationType = generatedAnnotationType();
+    if (generatedAnnotationType != null) {
+      AnnotationSpec generatedAnnotation = AnnotationSpec.builder(ClassName.get(generatedAnnotationType))
+          .addMember("value", "$S", AutoMatterProcessor.class.getName())
+          .build();
+      builder.addAnnotation(generatedAnnotation);
+    }
 
     if (d.isPublic()) {
       builder.addModifiers(PUBLIC);
@@ -161,6 +160,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     builder.addType(valueClass(d));
 
     return builder.build();
+  }
+
+  private TypeElement generatedAnnotationType() {
+    TypeElement generated = elements.getTypeElement(GENERATED);
+    if (generated != null) {
+      return generated;
+    }
+    return elements.getTypeElement(GENERATED_LEGACY);
   }
 
   private MethodSpec defaultConstructor(final Descriptor d) {

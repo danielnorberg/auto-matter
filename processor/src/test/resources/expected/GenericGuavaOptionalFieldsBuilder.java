@@ -3,10 +3,10 @@ package foo;
 import com.google.common.base.Optional;
 import io.norberg.automatter.AutoMatter;
 
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class GenericGuavaOptionalFieldsBuilder<T> {
 
   private Optional<T> foo;
