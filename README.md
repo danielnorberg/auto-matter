@@ -39,7 +39,7 @@ out.println("foobar: " + foobar);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.13.3</version>
+  <version>0.14.1</version>
   <scope>provided</scope>
 </dependency>
 ```
@@ -86,7 +86,7 @@ Features
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-jackson</artifactId>
-  <version>0.13.3</version>
+  <version>0.14.1</version>
 </dependency>
 ```
 
@@ -110,7 +110,7 @@ Foobar parsed = mapper.readValue(json, Foobar.class);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-gson</artifactId>
-  <version>0.13.3</version>
+  <version>0.14.1</version>
 </dependency>
 ```
 
