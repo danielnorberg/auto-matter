@@ -3,6 +3,9 @@ jdk:
   - oraclejdk9
   - oraclejdk8
   - openjdk7
+install: mvn install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V
 script:
   - mvn test
   - "./jackson-it.sh"
+  - mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+  - mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
