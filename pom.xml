@@ -8,6 +8,9 @@
   <version>0.14.1-SNAPSHOT</version>
   <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
+  <description>
+    A small library for generating value classes and builders from value types defined as minimal interfaces.
+  </description>
 
   <licenses>
     <license>
