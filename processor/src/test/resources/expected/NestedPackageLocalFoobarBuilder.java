@@ -1,8 +1,8 @@
 package foo;
 
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 final class NestedPackageLocalFoobarBuilder {
 
   public NestedPackageLocalFoobarBuilder() {

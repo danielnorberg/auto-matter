@@ -1,9 +1,9 @@
 package inheritance;
 
 import io.norberg.automatter.AutoMatter;
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 final class GenericFoobarBuilder<T> {
 
   private String foo;

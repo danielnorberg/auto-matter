@@ -2,9 +2,9 @@ package generic_multiple;
 
 import io.norberg.automatter.AutoMatter;
 import java.util.Collection;
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Collection<T2>, T4 extends Iterable<T2> & Comparable<T4>> {
   private T1 field1;
 

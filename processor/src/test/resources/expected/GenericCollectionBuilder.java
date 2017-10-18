@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class GenericCollectionBuilder<T, K, V> {
   private List<T> foos;
 

@@ -3,10 +3,10 @@ package foo;
 import io.norberg.automatter.AutoMatter;
 import java.util.Optional;
 
-import javax.annotation.Generated;
+${GENERATED_IMPORT}
 
 
-@Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+${GENERATED_ANNOTATION}
 public final class GenericJUTOptionalFieldsBuilder<T> {
 
   private Optional<T> foo;
