@@ -316,6 +316,20 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(expectedSource("expected/inheritance/GenericFoobarBuilder.java"));
   }
 
+  @Test
+  public void testConcreteCollectionInheritingFromGenericCollection() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/inheritance/GenericCollectionParent.java"),
+            JavaFileObjects.forResource("good/inheritance/ConcreteExtensionOfGenericParent.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/inheritance/GenericCollectionParentBuilder.java"),
+                                expectedSource("expected/inheritance/ConcreteExtensionOfGenericParentBuilder.java"));
+  }
+
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
