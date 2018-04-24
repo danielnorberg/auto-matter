@@ -262,8 +262,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       if (isOptional(field)) {
         result.add(optionalRawSetter(d, field));
         result.add(optionalSetter(d, field));
-      } else if (isCollection(field)) {
-        result.add(collectionSetter(d, field));
+
+      }
+      else if (isCollection(field)) {
+        if(!isCollectionInterface(field)) {
+          result.add(collectionSetter(d, field));
+        }
         result.add(collectionCollectionSetter(d, field));
         result.add(collectionIterableSetter(d, field));
         result.add(collectionIteratorSetter(d, field));
@@ -1102,6 +1106,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return ParameterizedTypeName.get(
             ClassName.get(HashMap.class),
             genericArgument(field, 0), genericArgument(field, 1));
+      case "Collection":
+        return ParameterizedTypeName.get(
+            ClassName.get(ArrayList.class),
+            genericArgument(field, 0));
       default:
         throw new IllegalStateException("invalid collection type " + field);
     }
@@ -1131,7 +1139,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private boolean isCollection(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.List<") ||
+           returnType.startsWith("java.util.Collection<") ||
            returnType.startsWith("java.util.Set<");
+  }
+
+  private boolean isCollectionInterface(final ExecutableElement field) {
+    final String returnType = field.getReturnType().toString();
+    return returnType.startsWith("java.util.Collection<");
   }
 
   private String unmodifiableCollection(final ExecutableElement field) {
@@ -1143,6 +1157,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return "unmodifiableSet";
       case "Map":
         return "unmodifiableMap";
+      case "Collection":
+        return "unmodifiableList";
       default:
         throw new AssertionError();
     }
@@ -1157,6 +1173,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return "emptySet";
       case "Map":
         return "emptyMap";
+      case "Collection":
+        return "emptyList";
       default:
         throw new AssertionError();
     }
@@ -1170,6 +1188,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return "Set";
     } else if (returnType.startsWith("java.util.Map<")) {
       return "Map";
+    } else if (returnType.startsWith("java.util.Collection<")) {
+      return "Collection";
     } else {
       throw new AssertionError();
     }

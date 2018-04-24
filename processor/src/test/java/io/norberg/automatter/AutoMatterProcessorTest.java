@@ -171,6 +171,16 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testCollectionInterfaceField() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/CollectionInterfaceField.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        expectedSource("expected/CollectionInterfaceFieldBuilder.java"));
+  }
+
+  @Test
   public void testNullableCollectionFields() {
     assert_().about(javaSource())
         .that(JavaFileObjects.forResource("good/NullableCollectionFields.java"))
@@ -328,7 +338,6 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(expectedSource("expected/inheritance/GenericCollectionParentBuilder.java"),
                                 expectedSource("expected/inheritance/ConcreteExtensionOfGenericParentBuilder.java"));
   }
-
 
   private boolean isJava8() {
     try {
