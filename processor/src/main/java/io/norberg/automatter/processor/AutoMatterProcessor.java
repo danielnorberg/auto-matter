@@ -8,7 +8,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -194,15 +193,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
       if (isCollection(field) || isMap(field)) {
         TypeName fieldType = upperBoundedFieldType(field);
-        constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
+        TypeName rawFieldType = rawFieldType(field);
+        constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()", fieldType, fieldName, rawFieldType, fieldName);
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isFieldTypeParameterized(field)) {
           TypeName fieldType = fieldType(d, field);
+          TypeName rawFieldType = rawFieldType(field);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-                                   fieldType, fieldName, fieldType, fieldName);
+                                   fieldType, fieldName, rawFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
@@ -213,15 +214,29 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return constructor.build();
   }
 
+  private TypeName rawFieldType(ExecutableElement field) {
+    final DeclaredType declaredType = (DeclaredType) field.getReturnType();
+    return ClassName.get((TypeElement) declaredType.asElement());
+  }
+
   private boolean isFieldTypeParameterized(final ExecutableElement field) {
     final TypeMirror returnType = field.getReturnType();
-    if (returnType.getKind() != DECLARED) {
+    return isTypeParameterized(returnType);
+  }
+
+  private boolean isTypeParameterized(TypeMirror type) {
+    if (type.getKind() != DECLARED) {
       return false;
     }
-    final DeclaredType declaredType = (DeclaredType) returnType;
+    final DeclaredType declaredType = (DeclaredType) type;
     for (final TypeMirror typeArgument : declaredType.getTypeArguments()) {
-      if (typeArgument.getKind() == TYPEVAR) {
-        return true;
+      switch (typeArgument.getKind()) {
+        case TYPEVAR:
+          return true;
+        case DECLARED:
+          if (isTypeParameterized(typeArgument)) {
+            return true;
+          }
       }
     }
     return false;
@@ -236,14 +251,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       String fieldName = fieldName(field);
 
       if (isCollection(field) || isMap(field)) {
+        TypeName fieldType = upperBoundedFieldType(field);
+        TypeName rawFieldType = rawFieldType(field);
+        constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N", fieldType, fieldName, rawFieldType, fieldName);
         constructor.addStatement(
-            "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+            "this.$N = (_$N == null) ? null : new $T(_$N)",
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isFieldTypeParameterized(field)) {
           TypeName fieldType = fieldType(d, field);
+          TypeName rawFieldType = rawFieldType(field);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-                                   fieldType, fieldName, fieldType, fieldName);
+                                   fieldType, fieldName, rawFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
@@ -1040,18 +1059,26 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private TypeName fieldType(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
     final TypeMirror returnType = field.getReturnType();
-    if (returnType.getKind() == TypeKind.ERROR) {
-      throw fail("Cannot resolve type, might be missing import: " + returnType, field);
-    }
+    verifyResolved(returnType, field);
     final TypeMirror fieldType = d.fieldTypes().get(field);
     return TypeName.get(fieldType);
   }
 
+  private void verifyResolved(TypeMirror type, ExecutableElement field) throws AutoMatterProcessorException {
+    if (type.getKind() == TypeKind.ERROR) {
+      throw fail("Cannot resolve type, might be missing import: " + field.getReturnType(), field);
+    }
+    if (type.getKind() == DECLARED) {
+      final DeclaredType declaredType = (DeclaredType) type;
+      for (final TypeMirror typeArgument : declaredType.getTypeArguments()) {
+        verifyResolved(typeArgument, field);
+      }
+    }
+  }
+
   private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
     TypeMirror type = field.getReturnType();
-    if (type.getKind() == TypeKind.ERROR) {
-      throw fail("Cannot resolve type, might be missing import: " + type, field);
-    }
+    verifyResolved(type, field);
     if (type.getKind() != DECLARED) {
       return TypeName.get(type);
     }
