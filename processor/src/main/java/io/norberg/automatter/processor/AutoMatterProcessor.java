@@ -262,7 +262,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       if (isOptional(field)) {
         result.add(optionalRawSetter(d, field));
         result.add(optionalSetter(d, field));
-
       }
       else if (isCollection(field)) {
         if(!isCollectionInterface(field)) {
