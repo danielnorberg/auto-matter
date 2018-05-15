@@ -24,9 +24,9 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
   }
 
   private GenericJUTOptionalFieldsBuilder(GenericJUTOptionalFieldsBuilder<? extends T> v) {
-    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional) v.foo();
+    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional) v.foo;
     this.foo = _foo;
-    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional) v.bar();
+    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional) v.bar;
     this.bar = _bar;
   }
 

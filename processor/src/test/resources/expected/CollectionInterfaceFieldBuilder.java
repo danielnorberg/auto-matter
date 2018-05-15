@@ -16,12 +16,12 @@ public final class CollectionInterfaceFieldBuilder {
   }
 
   private CollectionInterfaceFieldBuilder(CollectionInterfaceField v) {
-    @SuppressWarnings("unchecked") Collection<? extends String> _strings = (Collection) v.strings();
+    Collection<String> _strings = v.strings();
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
   }
 
   private CollectionInterfaceFieldBuilder(CollectionInterfaceFieldBuilder v) {
-    @SuppressWarnings("unchecked") Collection<? extends String> _strings = (Collection) v.strings;
+    Collection<String> _strings = v.strings;
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
   }
 

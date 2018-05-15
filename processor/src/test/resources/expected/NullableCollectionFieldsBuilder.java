@@ -24,20 +24,20 @@ public final class NullableCollectionFieldsBuilder {
   }
 
   private NullableCollectionFieldsBuilder(NullableCollectionFields v) {
-    @SuppressWarnings("unchecked") List<? extends String> _strings = (List) v.strings();
+    List<String> _strings = v.strings();
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
-    @SuppressWarnings("unchecked") Map<? extends String, ? extends Integer> _integers = (Map) v.integers();
+    Map<String, Integer> _integers = v.integers();
     this.integers = (_integers == null) ? null : new HashMap<String, Integer>(_integers);
-    @SuppressWarnings("unchecked") Set<? extends Long> _numbers = (Set) v.numbers();
+    Set<Long> _numbers = v.numbers();
     this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
   }
 
   private NullableCollectionFieldsBuilder(NullableCollectionFieldsBuilder v) {
-    @SuppressWarnings("unchecked") List<? extends String> _strings = (List) v.strings;
+    List<String> _strings = v.strings;
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
-    @SuppressWarnings("unchecked") Map<? extends String, ? extends Integer> _integers = (Map) v.integers;
+    Map<String, Integer> _integers = v.integers;
     this.integers = (_integers == null) ? null : new HashMap<String, Integer>(_integers);
-    @SuppressWarnings("unchecked") Set<? extends Long> _numbers = (Set) v.numbers;
+    Set<Long> _numbers = v.numbers;
     this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
   }
 

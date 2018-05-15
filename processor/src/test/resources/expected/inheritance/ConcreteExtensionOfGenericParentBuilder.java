@@ -17,12 +17,12 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   private ConcreteExtensionOfGenericParentBuilder(ConcreteExtensionOfGenericParent v) {
-    @SuppressWarnings("unchecked") List<? extends Integer> _foos = (List) v.foos();
+    List<Integer> _foos = v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
   }
 
   private ConcreteExtensionOfGenericParentBuilder(ConcreteExtensionOfGenericParentBuilder v) {
-    @SuppressWarnings("unchecked") List<? extends Integer> _foos = (List) v.foos;
+    List<Integer> _foos = v.foos;
     this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
   }
 

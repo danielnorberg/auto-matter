@@ -191,19 +191,26 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
 
+      final boolean isParameterized = isFieldTypeParameterized(field);
+
       if (isCollection(field) || isMap(field)) {
-        TypeName fieldType = upperBoundedFieldType(field);
-        TypeName rawFieldType = rawFieldType(field);
-        constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()", fieldType, fieldName, rawFieldType, fieldName);
+        TypeName fieldType = fieldType(d, field);
+        if (isParameterized) {
+          TypeName rawFieldType = rawFieldType(field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
+              fieldType, fieldName, rawFieldType, fieldName);
+        } else {
+          constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
+        }
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
-        if (isFieldTypeParameterized(field)) {
+        if (isParameterized) {
           TypeName fieldType = fieldType(d, field);
           TypeName rawFieldType = rawFieldType(field);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-                                   fieldType, fieldName, rawFieldType, fieldName);
+              fieldType, fieldName, rawFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
@@ -250,19 +257,26 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
 
+      final boolean isParameterized = isFieldTypeParameterized(field);
+
       if (isCollection(field) || isMap(field)) {
-        TypeName fieldType = upperBoundedFieldType(field);
-        TypeName rawFieldType = rawFieldType(field);
-        constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N", fieldType, fieldName, rawFieldType, fieldName);
+        TypeName fieldType = fieldType(d, field);
+        if (isParameterized) {
+          TypeName rawFieldType = rawFieldType(field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N",
+              fieldType, fieldName, rawFieldType, fieldName);
+        } else {
+          constructor.addStatement("$T _$N = v.$N", fieldType, fieldName, fieldName);
+        }
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
-        if (isFieldTypeParameterized(field)) {
+        if (isParameterized) {
           TypeName fieldType = fieldType(d, field);
           TypeName rawFieldType = rawFieldType(field);
-          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-                                   fieldType, fieldName, rawFieldType, fieldName);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N",
+              fieldType, fieldName, rawFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
