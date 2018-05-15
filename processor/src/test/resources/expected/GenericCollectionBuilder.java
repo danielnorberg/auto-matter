@@ -21,17 +21,15 @@ public final class GenericCollectionBuilder<T, K, V> {
   }
 
   private GenericCollectionBuilder(GenericCollection<? extends T, ? extends K, ? extends V> v) {
-    @SuppressWarnings("unchecked") List<T> _foos = (List) v.foos();
+    List<? extends T> _foos = v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
-    @SuppressWarnings("unchecked") Map<K, V> _bars = (Map) v.bars();
+    Map<? extends K, ? extends V> _bars = v.bars();
     this.bars = (_bars == null) ? null : new HashMap<K, V>(_bars);
   }
 
   private GenericCollectionBuilder(GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
-    @SuppressWarnings("unchecked") List<T> _foos = (List) v.foos;
-    this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
-    @SuppressWarnings("unchecked") Map<K, V> _bars = (Map) v.bars;
-    this.bars = (_bars == null) ? null : new HashMap<K, V>(_bars);
+    this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
+    this.bars = (v.bars == null) ? null : new HashMap<K, V>(v.bars);
   }
 
   public List<T> foos() {

@@ -8,6 +8,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
+import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -184,9 +185,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
+    final TypeName valueType = upperBoundedValueType(d);
     final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
-        .addParameter(upperBoundedValueType(d), "v");
+        .addParameter(valueType, "v");
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
@@ -194,12 +196,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       final boolean isParameterized = isFieldTypeParameterized(field);
 
       if (isCollection(field) || isMap(field)) {
-        TypeName fieldType = fieldType(d, field);
         if (isParameterized) {
-          TypeName rawFieldType = rawFieldType(field);
-          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-              fieldType, fieldName, rawFieldType, fieldName);
+          final TypeName ctorArgumentType = upperBoundedFieldType(field, 1);
+          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          if (upperBoundedFieldType.equals(ctorArgumentType)) {
+            constructor.addStatement("$T _$N = v.$N()", ctorArgumentType, fieldName, fieldName);
+          } else {
+            constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
+                ctorArgumentType, fieldName, ctorArgumentType, upperBoundedFieldType, fieldName);
+          }
         } else {
+          final TypeName fieldType = fieldType(d, field);
           constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         }
         constructor.addStatement(
@@ -207,10 +214,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isParameterized) {
-          TypeName fieldType = fieldType(d, field);
-          TypeName rawFieldType = rawFieldType(field);
-          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N()",
-              fieldType, fieldName, rawFieldType, fieldName);
+          final TypeName fieldType = fieldType(d, field);
+          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
+              fieldType, fieldName, fieldType, upperBoundedFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
@@ -219,11 +226,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     return constructor.build();
-  }
-
-  private TypeName rawFieldType(ExecutableElement field) {
-    final DeclaredType declaredType = (DeclaredType) field.getReturnType();
-    return ClassName.get((TypeElement) declaredType.asElement());
   }
 
   private boolean isFieldTypeParameterized(final ExecutableElement field) {
@@ -260,14 +262,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       final boolean isParameterized = isFieldTypeParameterized(field);
 
       if (isCollection(field) || isMap(field)) {
-        TypeName fieldType = fieldType(d, field);
         if (isParameterized) {
-          TypeName rawFieldType = rawFieldType(field);
-          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N",
-              fieldType, fieldName, rawFieldType, fieldName);
-          constructor.addStatement(
-              "this.$N = (_$N == null) ? null : new $T(_$N)",
-              fieldName, fieldName, collectionImplType(field), fieldName);
+          final TypeName ctorArgumentType = upperBoundedFieldType(field, 1);
+          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          if (upperBoundedFieldType.equals(ctorArgumentType)) {
+            constructor.addStatement(
+                "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+                fieldName, fieldName, collectionImplType(field), fieldName);
+          } else {
+            constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
+                ctorArgumentType, fieldName, ctorArgumentType, upperBoundedFieldType, fieldName);
+            constructor.addStatement(
+                "this.$N = (_$N == null) ? null : new $T(_$N)",
+                fieldName, fieldName, collectionImplType(field), fieldName);
+          }
         } else {
           constructor.addStatement(
               "this.$N = (v.$N == null) ? null : new $T(v.$N)",
@@ -275,10 +283,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         }
       } else {
         if (isParameterized) {
-          TypeName fieldType = fieldType(d, field);
-          TypeName rawFieldType = rawFieldType(field);
-          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N",
-              fieldType, fieldName, rawFieldType, fieldName);
+          final TypeName fieldType = fieldType(d, field);
+          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
+              fieldType, fieldName, fieldType, upperBoundedFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
           constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
@@ -1093,25 +1101,40 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
+    return upperBoundedFieldType(field, Integer.MAX_VALUE);
+  }
+
+  private TypeName upperBoundedFieldType(final ExecutableElement field, int limit) throws AutoMatterProcessorException {
     TypeMirror type = field.getReturnType();
     verifyResolved(type, field);
+    return upperBoundedType(type, limit);
+  }
+
+  private TypeName upperBoundedType(TypeMirror type, int limit) {
     if (type.getKind() != DECLARED) {
+      return TypeName.get(type);
+    }
+    if (limit == 0) {
       return TypeName.get(type);
     }
     final DeclaredType declaredType = (DeclaredType) type;
     if (declaredType.getTypeArguments().isEmpty()) {
       return TypeName.get(type);
     }
-    final ClassName raw = rawClassName(declaredType);
-    if (isOptional(field) || isCollection(field)) {
-      final TypeName elementType = TypeName.get(declaredType.getTypeArguments().get(0));
-      return ParameterizedTypeName.get(raw, subtypeOf(elementType));
-    } else if (isMap(field)) {
-      final TypeName keyTypeArgument = TypeName.get(declaredType.getTypeArguments().get(0));
-      final TypeName valueTypeArgument = TypeName.get(declaredType.getTypeArguments().get(1));
-      return ParameterizedTypeName.get(raw, subtypeOf(keyTypeArgument), subtypeOf(valueTypeArgument));
+
+    final ClassName raw = ClassName.get((TypeElement) declaredType.asElement());
+    final int n = declaredType.getTypeArguments().size();
+    final TypeName[] typeNames = new TypeName[n];
+    for (int i = 0; i < n; i++) {
+      final TypeMirror typeArgument = declaredType.getTypeArguments().get(i);
+      if (typeArgument.getKind() == TYPEVAR || isTypeParameterized(typeArgument)) {
+        final TypeName upperBoundedTypeArgument = upperBoundedType(typeArgument, limit - 1);
+        typeNames[i] = subtypeOf(upperBoundedTypeArgument);
+      } else {
+        typeNames[i] = TypeName.get(typeArgument);
+      }
     }
-    return TypeName.get(type);
+    return ParameterizedTypeName.get(raw, typeNames);
   }
 
   private ClassName rawClassName(final DeclaredType declaredType) {
