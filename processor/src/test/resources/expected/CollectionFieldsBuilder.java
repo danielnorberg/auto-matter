@@ -24,18 +24,21 @@ public final class CollectionFieldsBuilder {
   }
 
   private CollectionFieldsBuilder(CollectionFields v) {
-    List<? extends String> _strings = v.strings();
+    @SuppressWarnings("unchecked") List<? extends String> _strings = (List) v.strings();
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
-    Map<? extends String,? extends Integer> _integers = v.integers();
-    this.integers = (_integers == null) ? null : new HashMap<String,Integer>(_integers);
-    Set<? extends Long> _numbers = v.numbers();
+    @SuppressWarnings("unchecked") Map<? extends String, ? extends Integer> _integers = (Map) v.integers();
+    this.integers = (_integers == null) ? null : new HashMap<String, Integer>(_integers);
+    @SuppressWarnings("unchecked") Set<? extends Long> _numbers = (Set) v.numbers();
     this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
   }
 
   private CollectionFieldsBuilder(CollectionFieldsBuilder v) {
-    this.strings = (v.strings == null) ? null : new ArrayList<String>(v.strings);
-    this.integers = (v.integers == null) ? null : new HashMap<String,Integer>(v.integers);
-    this.numbers = (v.numbers == null) ? null : new HashSet<Long>(v.numbers);
+    @SuppressWarnings("unchecked") List<? extends String> _strings = (List) v.strings;
+    this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
+    @SuppressWarnings("unchecked") Map<? extends String, ? extends Integer> _integers = (Map) v.integers;
+    this.integers = (_integers == null) ? null : new HashMap<String, Integer>(_integers);
+    @SuppressWarnings("unchecked") Set<? extends Long> _numbers = (Set) v.numbers;
+    this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
   }
 
   public List<String> strings() {

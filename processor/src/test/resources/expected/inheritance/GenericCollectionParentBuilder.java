@@ -17,12 +17,13 @@ public final class GenericCollectionParentBuilder<T> {
   }
 
   private GenericCollectionParentBuilder(GenericCollectionParent<? extends T> v) {
-    List<? extends T> _foos = v.foos();
+    @SuppressWarnings("unchecked") List<? extends T> _foos = (List) v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
   }
 
   private GenericCollectionParentBuilder(GenericCollectionParentBuilder<? extends T> v) {
-    this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
+    @SuppressWarnings("unchecked") List<? extends T> _foos = (List) v.foos;
+    this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
   }
 
   public List<T> foos() {
