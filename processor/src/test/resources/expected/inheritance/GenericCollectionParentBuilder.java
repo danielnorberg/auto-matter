@@ -24,6 +24,7 @@ public final class GenericCollectionParentBuilder<T> {
   private GenericCollectionParentBuilder(GenericCollectionParentBuilder<? extends T> v) {
     this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
   }
+
   public List<T> foos() {
     if (this.foos == null) {
       this.foos = new ArrayList<T>();
