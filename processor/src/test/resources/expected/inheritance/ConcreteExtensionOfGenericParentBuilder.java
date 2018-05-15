@@ -17,7 +17,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   private ConcreteExtensionOfGenericParentBuilder(ConcreteExtensionOfGenericParent v) {
-    List<? extends Integer> _foos = v.foos();
+    List<Integer> _foos = v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
   }
 

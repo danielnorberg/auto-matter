@@ -291,6 +291,28 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testGenericJUTOptionalNested() {
+    Assume.assumeTrue(hasJutOptional());
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalNested.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/GenericJUTOptionalNestedBuilder.java"));
+  }
+
+  @Test
+  public void testGenericNested() {
+    Assume.assumeTrue(hasJutOptional());
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericNested.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/GenericNestedBuilder.java"));
+  }
+
+  @Test
   public void testGenericGuavaOptionalFields() {
     final JavaFileObject source = JavaFileObjects.forResource("good/GenericGuavaOptionalFields.java");
     assert_().about(javaSource())
