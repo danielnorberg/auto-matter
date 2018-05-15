@@ -20,9 +20,15 @@ interface ComplexGenericFoobar<
   BAZ baz();
   QUUX quux();
 
-  Optional<FOO> maybeFoo();
+  Optional<List<FOO>> maybeFoos();
   List<BAR> someBars();
-  Map<FOO, BAR> foobars();
+  Map<FOO, Fizz<BAR, BAZ>> foobars();
 
   String name();
+
+  @AutoMatter
+  interface Fizz<K, V> {
+    K k();
+    V v();
+  }
 }
