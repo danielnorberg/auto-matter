@@ -21,8 +21,7 @@ public final class CollectionInterfaceFieldBuilder {
   }
 
   private CollectionInterfaceFieldBuilder(CollectionInterfaceFieldBuilder v) {
-    Collection<String> _strings = v.strings;
-    this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
+    this.strings = (v.strings == null) ? null : new ArrayList<String>(v.strings);
   }
 
   public Collection<String> strings() {

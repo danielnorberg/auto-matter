@@ -265,12 +265,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           TypeName rawFieldType = rawFieldType(field);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) v.$N",
               fieldType, fieldName, rawFieldType, fieldName);
+          constructor.addStatement(
+              "this.$N = (_$N == null) ? null : new $T(_$N)",
+              fieldName, fieldName, collectionImplType(field), fieldName);
         } else {
-          constructor.addStatement("$T _$N = v.$N", fieldType, fieldName, fieldName);
+          constructor.addStatement(
+              "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+              fieldName, fieldName, collectionImplType(field), fieldName);
         }
-        constructor.addStatement(
-            "this.$N = (_$N == null) ? null : new $T(_$N)",
-            fieldName, fieldName, collectionImplType(field), fieldName);
       } else {
         if (isParameterized) {
           TypeName fieldType = fieldType(d, field);
