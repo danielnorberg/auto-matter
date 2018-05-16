@@ -17,16 +17,16 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
   }
 
   private GenericGuavaOptionalFieldsBuilder(GenericGuavaOptionalFields<? extends T> v) {
-    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) v.foo();
+    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) (Optional<? extends T>) v.foo();
     this.foo = _foo;
-    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) v.bar();
+    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) (Optional<? extends T>) v.bar();
     this.bar = _bar;
   }
 
   private GenericGuavaOptionalFieldsBuilder(GenericGuavaOptionalFieldsBuilder<? extends T> v) {
-    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) v.foo();
+    @SuppressWarnings("unchecked") Optional<T> _foo = (Optional<T>) (Optional<? extends T>) v.foo;
     this.foo = _foo;
-    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) v.bar();
+    @SuppressWarnings("unchecked") Optional<T> _bar = (Optional<T>) (Optional<? extends T>) v.bar;
     this.bar = _bar;
   }
 

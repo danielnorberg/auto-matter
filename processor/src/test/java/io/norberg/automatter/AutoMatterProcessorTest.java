@@ -171,6 +171,16 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testCollectionInterfaceField() {
+    assert_().about(javaSource())
+        .that(JavaFileObjects.forResource("good/CollectionInterfaceField.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(
+        expectedSource("expected/CollectionInterfaceFieldBuilder.java"));
+  }
+
+  @Test
   public void testNullableCollectionFields() {
     assert_().about(javaSource())
         .that(JavaFileObjects.forResource("good/NullableCollectionFields.java"))
@@ -281,6 +291,28 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testGenericJUTOptionalNested() {
+    Assume.assumeTrue(hasJutOptional());
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericJUTOptionalNested.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/GenericJUTOptionalNestedBuilder.java"));
+  }
+
+  @Test
+  public void testGenericNested() {
+    Assume.assumeTrue(hasJutOptional());
+    final JavaFileObject source = JavaFileObjects.forResource("good/GenericNested.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/GenericNestedBuilder.java"));
+  }
+
+  @Test
   public void testGenericGuavaOptionalFields() {
     final JavaFileObject source = JavaFileObjects.forResource("good/GenericGuavaOptionalFields.java");
     assert_().about(javaSource())
@@ -314,6 +346,19 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and().generatesSources(expectedSource("expected/inheritance/GenericFoobarBuilder.java"));
+  }
+
+  @Test
+  public void testConcreteCollectionInheritingFromGenericCollection() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/inheritance/GenericCollectionParent.java"),
+            JavaFileObjects.forResource("good/inheritance/ConcreteExtensionOfGenericParent.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/inheritance/GenericCollectionParentBuilder.java"),
+                                expectedSource("expected/inheritance/ConcreteExtensionOfGenericParentBuilder.java"));
   }
 
   private boolean isJava8() {

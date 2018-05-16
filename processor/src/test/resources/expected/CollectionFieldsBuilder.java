@@ -39,19 +39,19 @@ public final class CollectionFieldsBuilder {
   }
 
   private CollectionFieldsBuilder(CollectionFields v) {
-    List<? extends String> _strings = v.strings();
+    List<String> _strings = v.strings();
     this.strings = (_strings == null) ? null : new ArrayList<String>(_strings);
-    Map<? extends String, ? extends Integer> _integers = v.integers();
+    Map<String, Integer> _integers = v.integers();
     this.integers = (_integers == null) ? null : new HashMap<String, Integer>(_integers);
-    SortedMap<? extends String, ? extends Integer> _sortedIntegers = v.sortedIntegers();
+    SortedMap<String, Integer> _sortedIntegers = v.sortedIntegers();
     this.sortedIntegers = (_sortedIntegers == null) ? null : new TreeMap<String, Integer>(_sortedIntegers);
-    NavigableMap<? extends String, ? extends Integer> _navigableIntegers = v.navigableIntegers();
+    NavigableMap<String, Integer> _navigableIntegers = v.navigableIntegers();
     this.navigableIntegers = (_navigableIntegers == null) ? null : new TreeMap<String, Integer>(_navigableIntegers);
-    Set<? extends Long> _numbers = v.numbers();
+    Set<Long> _numbers = v.numbers();
     this.numbers = (_numbers == null) ? null : new HashSet<Long>(_numbers);
-    SortedSet<? extends Long> _sortedNumbers = v.sortedNumbers();
+    SortedSet<Long> _sortedNumbers = v.sortedNumbers();
     this.sortedNumbers = (_sortedNumbers == null) ? null : new TreeSet<Long>(_sortedNumbers);
-    NavigableSet<? extends Long> _navigableNumbers = v.navigableNumbers();
+    NavigableSet<Long> _navigableNumbers = v.navigableNumbers();
     this.navigableNumbers = (_navigableNumbers == null) ? null : new TreeSet<Long>(_navigableNumbers);
   }
 

@@ -5,7 +5,7 @@
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.14.2-SNAPSHOT</version>
+  <version>0.15.1-SNAPSHOT</version>
   <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
   <description>
@@ -64,8 +64,8 @@
         <version>3.7.0</version>
         <configuration>
           <useIncrementalCompilation>false</useIncrementalCompilation>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
           </compilerArgs>
@@ -147,10 +147,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0-M1</version>
-        <configuration>
-          <excludePackageNames>*.example</excludePackageNames>
-        </configuration>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
