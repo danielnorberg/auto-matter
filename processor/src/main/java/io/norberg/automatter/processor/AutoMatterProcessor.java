@@ -40,6 +40,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -725,15 +727,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
         if (shouldEnforceNonNull(field)) {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T($N)) : $T.<$T, $T>emptyMap()",
+              "$T _$L = ($L != null) ? $T.$L(new $T($N)) : $T.<$T, $T>$L()",
               fieldType, fieldName, fieldName,
-              collections, collectionImplType(field), fieldName,
-              collections, keyType, valueType);
+              collections, unmodifiableCollection(field), collectionImplType(field), fieldName,
+              collections, keyType, valueType, emptyCollection(field));
         } else {
           build.addStatement(
-              "$T _$L = ($L != null) ? $T.unmodifiableMap(new $T($N)) : null",
+              "$T _$L = ($L != null) ? $T.$L(new $T($N)) : null",
               fieldType, fieldName, fieldName,
-              collections, collectionImplType(field), fieldName);
+              collections, unmodifiableCollection(field), collectionImplType(field), fieldName);
         }
 
         parameters.add("_" + fieldName);
@@ -818,8 +820,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         final TypeName keyType = genericArgument(field, 0);
         final TypeName valueType = genericArgument(field, 1);
         constructor.addStatement(
-            "this.$N = ($N != null) ? $N : $T.<$T, $T>emptyMap()",
-            fieldName, fieldName, fieldName, collectionsType, keyType, valueType);
+            "this.$N = ($N != null) ? $N : $T.<$T, $T>$L()",
+            fieldName, fieldName, fieldName, collectionsType, keyType, valueType, emptyCollection(field));
       } else {
         constructor.addStatement("this.$N = $N", fieldName, fieldName);
       }
@@ -1167,9 +1169,19 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return ParameterizedTypeName.get(
             ClassName.get(HashSet.class),
             genericArgument(field, 0));
+      case "SortedSet":
+      case "NavigableSet":
+        return ParameterizedTypeName.get(
+            ClassName.get(TreeSet.class),
+            genericArgument(field, 0));
       case "Map":
         return ParameterizedTypeName.get(
             ClassName.get(HashMap.class),
+            genericArgument(field, 0), genericArgument(field, 1));
+      case "SortedMap":
+      case "NavigableMap":
+        return ParameterizedTypeName.get(
+            ClassName.get(TreeMap.class),
             genericArgument(field, 0), genericArgument(field, 1));
       case "Collection":
         return ParameterizedTypeName.get(
@@ -1205,7 +1217,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final String returnType = field.getReturnType().toString();
     return returnType.startsWith("java.util.List<") ||
            returnType.startsWith("java.util.Collection<") ||
-           returnType.startsWith("java.util.Set<");
+           returnType.startsWith("java.util.Set<") ||
+           returnType.startsWith("java.util.SortedSet<") ||
+           returnType.startsWith("java.util.NavigableSet<");
   }
 
   private boolean isCollectionInterface(final ExecutableElement field) {
@@ -1220,8 +1234,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return "unmodifiableList";
       case "Set":
         return "unmodifiableSet";
+      case "SortedSet":
+        return "unmodifiableSortedSet";
+      case "NavigableSet":
+        return "unmodifiableNavigableSet";
       case "Map":
         return "unmodifiableMap";
+      case "SortedMap":
+        return "unmodifiableSortedMap";
+      case "NavigableMap":
+        return "unmodifiableNavigableMap";
       case "Collection":
         return "unmodifiableList";
       default:
@@ -1236,8 +1258,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         return "emptyList";
       case "Set":
         return "emptySet";
+      case "SortedSet":
+        return "emptySortedSet";
+      case "NavigableSet":
+        return "emptyNavigableSet";
       case "Map":
         return "emptyMap";
+      case "SortedMap":
+        return "emptySortedMap";
+      case "NavigableMap":
+        return "emptyNavigableMap";
       case "Collection":
         return "emptyList";
       default:
@@ -1251,8 +1281,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return "List";
     } else if (returnType.startsWith("java.util.Set<")) {
       return "Set";
+    } else if (returnType.startsWith("java.util.SortedSet<")) {
+      return "SortedSet";
+    } else if (returnType.startsWith("java.util.NavigableSet<")) {
+      return "NavigableSet";
     } else if (returnType.startsWith("java.util.Map<")) {
       return "Map";
+    } else if (returnType.startsWith("java.util.SortedMap<")) {
+      return "SortedMap";
+    } else if (returnType.startsWith("java.util.NavigableMap<")) {
+      return "NavigableMap";
     } else if (returnType.startsWith("java.util.Collection<")) {
       return "Collection";
     } else {
@@ -1272,7 +1310,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private boolean isMap(final ExecutableElement field) {
     final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.Map<");
+    return returnType.startsWith("java.util.Map<") ||
+           returnType.startsWith("java.util.SortedMap<") ||
+           returnType.startsWith("java.util.NavigableMap<");
   }
 
   private boolean isPrimitive(final ExecutableElement field) {
