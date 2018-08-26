@@ -10,9 +10,7 @@ jobs:
   include:
 
   - stage: ☕ jdk.java.net - OpenJDK - GPL
-    env: JDK=7
-    jdk: openjdk7
-  - env: JDK=8
+    env: JDK=8
     jdk: openjdk8
   - env: JDK=9
     before_install:
