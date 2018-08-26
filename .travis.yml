@@ -67,9 +67,10 @@ jobs:
       - *_fetch_install_jdk
       - source install-jdk.sh --url  https://builds.shipilev.net/openjdk-shenandoah-jdk8/openjdk-shenandoah-jdk8-latest-x86_64-release.tar.xz
 
-install: mvn install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V
+install:
+  - mvn -B -V install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true
 script:
-  - mvn test
+  - mvn -B test
   - "./jackson-it.sh"
   - mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
   - mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
