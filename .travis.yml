@@ -3,7 +3,7 @@ dist: trusty
 language: java
 
 _fetch_install_jdk: &_fetch_install_jdk
-  unset -v _JAVA_OPTIONS; wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 
 # https://github.com/sormuras/sormuras.github.io/blob/master/.travis.yml
 jobs:
