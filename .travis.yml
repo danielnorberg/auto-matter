@@ -2,8 +2,10 @@ sudo: false
 dist: trusty
 language: java
 
-_fetch_install_jdk: &_fetch_install_jdk
-  wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+before_install:
+- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+- jdk_switcher use oraclejdk8
+- mvn -B clean package -DskipTests
 
 # https://github.com/sormuras/sormuras.github.io/blob/master/.travis.yml
 jobs:
@@ -13,21 +15,13 @@ jobs:
     env: JDK=8
     jdk: openjdk8
   - env: JDK=9
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 9
+    install: source install-jdk.sh -F 9
   - env: JDK=10
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 10
+    install: source install-jdk.sh -F 10
   - env: JDK=11
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 11
+    install: source install-jdk.sh -F 11
   - env: JDK=12
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 12
+    install: source install-jdk.sh -F 12
 
   - stage: 🍰 jdk.java.net/oracle.com - Oracle JDK - BCL
     env: JDK=8
@@ -35,42 +29,32 @@ jobs:
     after_success:
       - mvn -pl rut clean cobertura:cobertura coveralls:report -Dcoveralls.token=${COVERALLS_TOKEN}
   - env: JDK=10
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 10 -L BCL
+    install: source install-jdk.sh -F 10 -L BCL
   - env: JDK=11
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh -F 11 -L BCL
+    install: source install-jdk.sh -F 11 -L BCL
 
   - stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=10 + Hotspot
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh --url $(curl --silent https://api.adoptopenjdk.net/openjdk10/nightly/x64_linux/ | grep 'binary_link' | grep -Eo '(http|https)://[^"]+' | head -1)
+    install: source install-jdk.sh --url $(curl --silent https://api.adoptopenjdk.net/openjdk10/nightly/x64_linux/ | grep 'binary_link' | grep -Eo '(http|https)://[^"]+' | head -1)
   - env: JDK=10 + OpenJ9
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh --url $(curl --silent https://api.adoptopenjdk.net/openjdk10-openj9/nightly/x64_linux/ | grep 'binary_link' | grep -Eo '(http|https)://[^"]+' | head -1)
+    install: source install-jdk.sh --url $(curl --silent https://api.adoptopenjdk.net/openjdk10-openj9/nightly/x64_linux/ | grep 'binary_link' | grep -Eo '(http|https)://[^"]+' | head -1)
 
   - stage: 🚀 Graal, Zulu, ...
     env: JDK=graalvm-ce-1.0.0-rc5
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh --url https://github.com/oracle/graal/releases/download/vm-1.0.0-rc5/graalvm-ce-1.0.0-rc5-linux-amd64.tar.gz
+    install: source install-jdk.sh --url https://github.com/oracle/graal/releases/download/vm-1.0.0-rc5/graalvm-ce-1.0.0-rc5-linux-amd64.tar.gz
   - env: JDK=zulu10.3+5-jdk10.0.2
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu10.3+5-jdk10.0.2-linux_x64.tar.gz
+    install: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu10.3+5-jdk10.0.2-linux_x64.tar.gz
   - env: JDK=openjdk-shenandoah-jdk8-latest
-    before_install:
-      - *_fetch_install_jdk
-      - source install-jdk.sh --url  https://builds.shipilev.net/openjdk-shenandoah-jdk8/openjdk-shenandoah-jdk8-latest-x86_64-release.tar.xz
+    install: source install-jdk.sh --url  https://builds.shipilev.net/openjdk-shenandoah-jdk8/openjdk-shenandoah-jdk8-latest-x86_64-release.tar.xz
 
-install:
-  - mvn -B -V install -DskipTests=true -Dgpg.skip=true -Dmaven.javadoc.skip=true
+install: false
+
 script:
-  - mvn -B test
+  # Run tests on oraclejdk8 built binary
+  - mvn -B surefire:test
+  - "./jackson-it.sh"
+  # Rebuild and run tests using current JDK
+  - mvn -B clean verify
   - "./jackson-it.sh"
   - mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
   - mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
