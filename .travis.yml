@@ -54,7 +54,7 @@ script:
   - mvn -B surefire:test
   - "./jackson-it.sh"
   # Rebuild and run tests using current JDK
-  - mvn -B clean verify
+  - mvn -B clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true
   - "./jackson-it.sh"
   - mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
   - mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
