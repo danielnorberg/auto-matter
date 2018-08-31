@@ -5,7 +5,7 @@ language: java
 before_install:
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 - jdk_switcher use oraclejdk8
-- mvn -B -V clean package -DskipTests
+- mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
 
 # https://github.com/sormuras/sormuras.github.io/blob/master/.travis.yml
 jobs:
