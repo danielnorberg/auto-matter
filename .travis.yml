@@ -13,7 +13,7 @@ jobs:
 
   - stage: ☕ jdk.java.net - OpenJDK - GPL
     env: JDK=8
-    jdk: openjdk8
+    install: jdk_switcher use openjdk8
   - env: JDK=9
     install: source install-jdk.sh -F 9
   - env: JDK=10
@@ -25,7 +25,7 @@ jobs:
 
   - stage: 🍰 jdk.java.net/oracle.com - Oracle JDK - BCL
     env: JDK=8
-    jdk: oraclejdk8
+    install: jdk_switcher use oraclejdk8
     after_success:
       - mvn -pl rut clean cobertura:cobertura coveralls:report -Dcoveralls.token=${COVERALLS_TOKEN}
   - env: JDK=10
