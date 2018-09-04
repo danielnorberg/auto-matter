@@ -13,7 +13,7 @@ for v in ${JACKSON}; do
   echo "Testing Jackson $v"
   echo "========================================================================"
   set -x
-  mvn -Djackson.version=$v -pl jackson test
+  mvn -nsu -B -Djackson.version=$v -pl jackson surefire:test
   set +x
 done
 
