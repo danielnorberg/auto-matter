@@ -24,20 +24,6 @@ function lookup_jackson_versions() {
   exit 1
 }
 
-function fetch_dependencies() {
-  logfile=$(mktemp)
-  jackson_version=$1
-  for i in {1..30}; do
-    if mvn -B -Djackson.version="$jackson_version" dependency:go-offline &>"$logfile"; then
-      return 0
-    fi
-    sleep 1
-  done
-  >&2 echo "Failed to fetch dependencies: "
-  >&2 cat "$logfile"
-  exit 1
-}
-
 jackson_versions=$(lookup_jackson_versions)
 
 echo "Found Jackson versions: "
@@ -47,9 +33,8 @@ for v in ${jackson_versions}; do
   echo
   echo "Testing Jackson $v"
   echo "========================================================================"
-  fetch_dependencies "$v"
   set -x
-  mvn -o -B -Djackson.version="$v" -pl jackson surefire:test
+  mvn -nsu -B -Djackson.version="$v" -pl jackson surefire:test
   set +x
 done
 
