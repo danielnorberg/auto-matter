@@ -24,7 +24,12 @@ function lookup_jackson_versions() {
   exit 1
 }
 
-for v in $(lookup_jackson_versions); do
+jackson_versions=$(lookup_jackson_versions)
+
+echo "Found Jackson versions: "
+echo "${jackson_versions}"
+
+for v in jackson_versions; do
   echo
   echo "Testing Jackson $v"
   echo "========================================================================"
