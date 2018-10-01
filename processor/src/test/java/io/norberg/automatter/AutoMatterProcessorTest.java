@@ -358,24 +358,19 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
-  public void testUndefinedTypeField() {
-    final Compilation compilation = javac()
-        .withProcessors(new AutoMatterProcessor())
-        .compile(JavaFileObjects.forResource("good/UndefinedTypeField.java"));
-
-    assertThat(compilation).failed();
-
-    final Set<? extends JavaFileObject> generatedSourceFiles = compilation.diagnostics()
-        .stream()
-        .map(Diagnostic::getSource)
-        .filter(s -> s.getName().contains("/SOURCE_OUTPUT/"))
-        .collect(Collectors.toSet());
-
-    assert_().about(javaSources()).that(generatedSourceFiles)
-        .parsesAs(expectedSource("expected/UndefinedTypeFieldBuilder.java"));
+  public void testDeferredProcessing() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/deferred-processing/Foo.java"),
+            JavaFileObjects.forResource("good/deferred-processing/Bar.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(
+            expectedSource("expected/deferred-processing/FooBuilder.java"),
+            expectedSource("expected/deferred-processing/BarBuilder.java"));
   }
-
-
 
   private boolean isJava8() {
     try {

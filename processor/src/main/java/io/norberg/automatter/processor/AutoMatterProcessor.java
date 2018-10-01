@@ -1,6 +1,7 @@
 package io.norberg.automatter.processor;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -9,7 +10,6 @@ import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static javax.tools.Diagnostic.Kind.WARNING;
 
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.AnnotationSpec;
@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -70,23 +69,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private static final Inflector INFLECTOR = new Inflector();
 
-  private static final Set<String> KEYWORDS = Stream.of(
+  private static final Set<String> KEYWORDS = Collections.unmodifiableSet(Stream.of(
       "abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package",
       "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements",
       "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum",
       "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char",
       "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
       "const", "float", "native", "super", "while")
-      .collect(Collectors.toSet());
+      .collect(toSet()));
 
   private static final String GENERATED_LEGACY = "javax.annotation.Generated";
   private static final String GENERATED = "javax.annotation.processing.Generated";
+
+  private final List<String> deferredTypes = new ArrayList<>();
 
   private Filer filer;
   private Elements elements;
   private Messager messager;
   private Types types;
-
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -100,10 +100,33 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   @Override
   public boolean process(final Set<? extends TypeElement> annotations,
                          final RoundEnvironment env) {
-    final Set<? extends Element> elements = env.getElementsAnnotatedWith(AutoMatter.class);
-    for (Element element : elements) {
+    final Set<TypeElement> elements = new LinkedHashSet<>();
+
+    // Enqueue new elements for processing
+    env.getElementsAnnotatedWith(AutoMatter.class).stream()
+        .filter(e -> e instanceof TypeElement)
+        .forEach(e -> elements.add((TypeElement) e));
+
+    // Enqueue deferred elements for processing
+    final List<String> previousDeferredTypes = new ArrayList<>(deferredTypes);
+    deferredTypes.clear();
+    for (String deferredType : previousDeferredTypes) {
+      final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
+      if (deferredTypeElement == null) {
+        deferredTypes.add(deferredType);
+      } else {
+        elements.add(deferredTypeElement);
+      }
+    }
+
+    // Process elements and generate files
+    for (TypeElement element : elements) {
       try {
         process(element);
+      } catch (UnresolvedTypeException e) {
+        // Encountered an unresolved type while processing this type, defer it for a
+        // later processing in hope that the type can be resolved in a later round.
+        deferredTypes.add(element.getQualifiedName().toString());
       } catch (AutoMatterProcessorException e) {
         e.print(messager);
       } catch (Exception e) {
@@ -114,19 +137,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void process(final Element element) throws IOException, AutoMatterProcessorException {
-    final Descriptor d = new Descriptor(element, elements, types, new SourceProvider(processingEnv));
+    final Descriptor d = new Descriptor(element, elements, types);
 
     TypeSpec builder = builder(d);
     JavaFile javaFile = JavaFile.builder(d.packageName(), builder)
         .skipJavaLangImports(true)
         .build();
     javaFile.writeTo(filer);
-
-    if (d.needsStarImports()) {
-      // TODO: emit star imports if needed
-      messager.printMessage(WARNING,
-          "Detected potential need for star imports, but star imports are not yet supported by auto-matter");
-    }
   }
 
   private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {
@@ -1327,7 +1344,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String variableName(final String name, final String... scope) {
-    return variableName(name, Stream.of(scope).collect(Collectors.toSet()));
+    return variableName(name, Stream.of(scope).collect(toSet()));
   }
 
   private String variableName(final String name, final Set<String> scope) {
