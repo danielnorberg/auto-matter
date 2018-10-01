@@ -4,7 +4,7 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
-class AutoMatterProcessorException extends Exception {
+class AutoMatterProcessorException extends RuntimeException {
 
   private final Element element;
 

@@ -1,15 +1,21 @@
 package io.norberg.automatter;
 
 import static com.google.common.truth.Truth.assert_;
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static com.google.testing.compile.Compiler.javac;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import io.norberg.automatter.processor.AutoMatterProcessor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import org.junit.Assume;
 import org.junit.Before;
@@ -125,16 +131,6 @@ public class AutoMatterProcessorTest {
         .processedWith(new AutoMatterProcessor())
         .failsToCompile()
         .withErrorContaining("@AutoMatter target must be an interface");
-  }
-
-  @Test
-  public void verifyMissingImportFails() {
-    final JavaFileObject source = JavaFileObjects.forResource("bad/MissingImport.java");
-    assert_().about(javaSource())
-        .that(source)
-        .processedWith(new AutoMatterProcessor())
-        .failsToCompile()
-        .withErrorContaining("Cannot resolve type, might be missing import: Dependency");
   }
 
   @Test
@@ -360,6 +356,26 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(expectedSource("expected/inheritance/GenericCollectionParentBuilder.java"),
                                 expectedSource("expected/inheritance/ConcreteExtensionOfGenericParentBuilder.java"));
   }
+
+  @Test
+  public void testUndefinedTypeField() {
+    final Compilation compilation = javac()
+        .withProcessors(new AutoMatterProcessor())
+        .compile(JavaFileObjects.forResource("good/UndefinedTypeField.java"));
+
+    assertThat(compilation).failed();
+
+    final Set<? extends JavaFileObject> generatedSourceFiles = compilation.diagnostics()
+        .stream()
+        .map(Diagnostic::getSource)
+        .filter(s -> s.getName().contains("/SOURCE_OUTPUT/"))
+        .collect(Collectors.toSet());
+
+    assert_().about(javaSources()).that(generatedSourceFiles)
+        .parsesAs(expectedSource("expected/UndefinedTypeFieldBuilder.java"));
+  }
+
+
 
   private boolean isJava8() {
     try {
