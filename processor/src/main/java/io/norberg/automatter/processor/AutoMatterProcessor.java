@@ -133,6 +133,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         messager.printMessage(ERROR, e.getMessage());
       }
     }
+
+    if (env.processingOver()) {
+      // This was the last round, complain if some types failed due to unresolved types
+      for (String deferredType : deferredTypes) {
+        final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
+        messager.printMessage(ERROR, "Failed to generate @AutoMatter builder for " + deferredType
+            + " because some fields have unresolved types", deferredTypeElement);
+      }
+    }
+
     return false;
   }
 

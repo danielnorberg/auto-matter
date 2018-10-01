@@ -134,6 +134,17 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void verifyUnkownFieldTypeFails() {
+    final JavaFileObject source = JavaFileObjects.forResource("bad/UnknownFieldType.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .failsToCompile()
+        .withErrorContaining("Failed to generate @AutoMatter builder for UnknownFieldType "
+            + "because some fields have unresolved types");
+  }
+
+  @Test
   public void verifyBadBuilderReturnTypeFails() {
     final JavaFileObject source = JavaFileObjects.forResource("bad/BadBuilderReturnType.java");
     assert_().about(javaSource())
