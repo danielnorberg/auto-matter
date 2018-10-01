@@ -4,8 +4,6 @@ import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
@@ -18,11 +16,17 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.UnionType;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.TypeKindVisitor8;
 import javax.lang.model.util.Types;
 
 /**
@@ -97,38 +101,18 @@ class Descriptor {
         continue;
       }
 
+      verifyResolved(method.getReturnType());
+
       fields.add(method);
 
       // Resolve inherited members
       final ExecutableType methodType = (ExecutableType) types.asMemberOf(valueType, member);
       final TypeMirror fieldType = methodType.getReturnType();
 
+
       // Resolve types
-      fieldTypes.put(method, resolveType(fieldType, types));
+      fieldTypes.put(method, TypeName.get(fieldType));
     }
-  }
-
-
-  private TypeName resolveType(TypeMirror type, Types types) {
-    switch (type.getKind()) {
-      case ERROR:
-        throw new UnresolvedTypeException(type.toString());
-      case DECLARED:
-        return resolveDeclaredType((DeclaredType) type, types);
-      default:
-        return TypeName.get(type);
-    }
-  }
-
-  private TypeName resolveDeclaredType(DeclaredType type, Types types) {
-    if (type.getTypeArguments().size() == 0) {
-      return TypeName.get(type);
-    }
-    final ClassName rawType = ClassName.get((TypeElement) type.asElement());
-    final TypeName[] typeArguments = type.getTypeArguments().stream()
-        .map(a -> resolveType(a, types))
-        .toArray(TypeName[]::new);
-    return ParameterizedTypeName.get(rawType, typeArguments);
   }
 
   private List<ExecutableElement> methods(final TypeElement element) {
@@ -164,35 +148,35 @@ class Descriptor {
     return false;
   }
 
-  public String packageName() {
+  String packageName() {
     return this.packageName;
   }
 
-  public String builderName() {
+  String builderName() {
     return this.builderName;
   }
 
-  public String valueTypeName() {
+  String valueTypeName() {
     return this.valueTypeName;
   }
 
-  public boolean isPublic() {
+  boolean isPublic() {
     return this.isPublic;
   }
 
-  public boolean isGeneric() {
+  boolean isGeneric() {
     return this.isGeneric;
   }
 
-  public List<ExecutableElement> fields() {
+  List<ExecutableElement> fields() {
     return fields;
   }
 
-  public Map<ExecutableElement, TypeName> fieldTypes() {
+  Map<ExecutableElement, TypeName> fieldTypes() {
     return fieldTypes;
   }
 
-  public boolean hasToBuilder() {
+  boolean hasToBuilder() {
     return this.toBuilder;
   }
 
@@ -200,7 +184,7 @@ class Descriptor {
     return packageName.isEmpty() ? simpleName : packageName + "." + simpleName;
   }
 
-  public List<TypeVariableName> typeVariables() {
+  List<TypeVariableName> typeVariables() {
     final List<TypeVariableName> variables = new ArrayList<>();
     if (isGeneric) {
       for (final TypeMirror argument : valueTypeArguments) {
@@ -211,8 +195,55 @@ class Descriptor {
     return variables;
   }
 
-  public TypeName[] typeArguments() {
+  TypeName[] typeArguments() {
     final List<TypeVariableName> variables = typeVariables();
-    return variables.toArray(new TypeName[variables.size()]);
+    return variables.toArray(new TypeName[0]);
+  }
+
+  private static void verifyResolved(TypeMirror type) {
+    type.accept(new TypeKindVisitor8<Void, Void>() {
+      @Override
+      public Void visitIntersection(IntersectionType t, Void aVoid) {
+        t.getBounds().forEach(Descriptor::verifyResolved);
+        return null;
+      }
+
+      @Override
+      public Void visitUnion(UnionType t, Void aVoid) {
+        t.getAlternatives().forEach(Descriptor::verifyResolved);
+        return null;
+      }
+
+      @Override
+      public Void visitArray(ArrayType t, Void aVoid) {
+        verifyResolved(t.getComponentType());
+        return null;
+      }
+
+      @Override
+      public Void visitError(ErrorType t, Void aVoid) {
+        throw new UnresolvedTypeException(t.toString());
+      }
+
+      @Override
+      public Void visitTypeVariable(TypeVariable t, Void aVoid) {
+        verifyResolved(t.getLowerBound());
+        verifyResolved(t.getUpperBound());
+        return null;
+      }
+
+      @Override
+      public Void visitWildcard(WildcardType t, Void aVoid) {
+        final TypeMirror extendsBound = t.getExtendsBound();
+        if (extendsBound != null) {
+          verifyResolved(extendsBound);
+        }
+        final TypeMirror superBound = t.getSuperBound();
+        if (superBound != null) {
+          verifyResolved(superBound);
+        }
+        return null;
+      }
+    }, null);
   }
 }
