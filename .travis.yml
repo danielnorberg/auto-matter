@@ -20,7 +20,9 @@ jobs:
     install: source install-jdk.sh -F 10
   - env: JDK=11
     install: source install-jdk.sh -F 11
-  - env: JDK=12
+  - env:
+      - JDK=12
+      - SKIP_RELEASE_TEST=true
     install: source install-jdk.sh -F 12
 
   - stage: 🍰 jdk.java.net/oracle.com - Oracle JDK - BCL
@@ -56,5 +58,5 @@ script:
   # Rebuild and run tests using current JDK
   - mvn -B clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true
   - "./jackson-it.sh"
-  - mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-  - mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+  - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"; fi
+  - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"; fi
