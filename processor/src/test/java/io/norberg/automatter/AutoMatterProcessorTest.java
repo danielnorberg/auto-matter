@@ -1,15 +1,21 @@
 package io.norberg.automatter;
 
 import static com.google.common.truth.Truth.assert_;
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static com.google.testing.compile.Compiler.javac;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import io.norberg.automatter.processor.AutoMatterProcessor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import org.junit.Assume;
 import org.junit.Before;
@@ -128,13 +134,14 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
-  public void verifyMissingImportFails() {
-    final JavaFileObject source = JavaFileObjects.forResource("bad/MissingImport.java");
+  public void verifyUnkownFieldTypeFails() {
+    final JavaFileObject source = JavaFileObjects.forResource("bad/UnknownFieldType.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .failsToCompile()
-        .withErrorContaining("Cannot resolve type, might be missing import: Dependency");
+        .withErrorContaining("Failed to generate @AutoMatter builder for UnknownFieldType "
+            + "because some fields have unresolved types");
   }
 
   @Test
@@ -359,6 +366,21 @@ public class AutoMatterProcessorTest {
         .compilesWithoutError()
         .and().generatesSources(expectedSource("expected/inheritance/GenericCollectionParentBuilder.java"),
                                 expectedSource("expected/inheritance/ConcreteExtensionOfGenericParentBuilder.java"));
+  }
+
+  @Test
+  public void testDeferredProcessing() {
+    assert_().about(javaSources())
+        .that(ImmutableSet.of(
+            JavaFileObjects.forResource("good/deferred-processing/Foo.java"),
+            JavaFileObjects.forResource("good/deferred-processing/Bar.java")
+        ))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(
+            expectedSource("expected/deferred-processing/FooBuilder.java"),
+            expectedSource("expected/deferred-processing/BarBuilder.java"));
   }
 
   private boolean isJava8() {

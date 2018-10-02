@@ -1,31 +1,33 @@
 package io.norberg.automatter.processor;
 
-import com.google.common.base.Joiner;
+import static java.util.stream.Collectors.joining;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.UnionType;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.TypeKindVisitor8;
 import javax.lang.model.util.Types;
-
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
 
 /**
  * Holds information about an automatter annotated interface and the entities it generates.
@@ -39,14 +41,14 @@ class Descriptor {
   private final String valueTypeName;
   private final String builderName;
   private final List<ExecutableElement> fields;
-  private final Map<ExecutableElement, TypeMirror> fieldTypes;
+  private final Map<ExecutableElement, TypeName> fieldTypes;
   private final boolean isPublic;
   private final String concreteBuilderName;
   private final String fullyQualifiedBuilderName;
   private boolean isGeneric;
   private boolean toBuilder;
 
-  public Descriptor(final Element element, final Elements elements, final Types types)
+  Descriptor(final Element element, final Elements elements, final Types types)
       throws AutoMatterProcessorException {
     if (!element.getKind().isInterface()) {
       throw new AutoMatterProcessorException("@AutoMatter target must be an interface", element);
@@ -58,11 +60,13 @@ class Descriptor {
     this.isGeneric = !valueTypeArguments.isEmpty();
     this.packageName = elements.getPackageOf(element).getQualifiedName().toString();
     this.builderName = element.getSimpleName().toString() + "Builder";
-    final String typeParameterization = isGeneric ? "<" + Joiner.on(',').join(valueTypeArguments) + ">" : "";
+    final String typeParameterization = isGeneric ?
+        "<" + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(",")) + ">"
+        : "";
     this.concreteBuilderName = builderName + typeParameterization;
     this.fullyQualifiedBuilderName = fullyQualifedName(packageName, concreteBuilderName);
     this.fields = new ArrayList<>();
-    this.fieldTypes = new HashMap<>();
+    this.fieldTypes = new LinkedHashMap<>();
     this.isPublic = element.getModifiers().contains(PUBLIC);
     enumerateFields(types);
   }
@@ -76,8 +80,7 @@ class Descriptor {
     return qualifiedName.substring(packageName.length() + 1);
   }
 
-  private void enumerateFields(final Types types)
-      throws AutoMatterProcessorException {
+  private void enumerateFields(final Types types) {
     final List<ExecutableElement> methods = methods(valueTypeElement);
     for (final Element member : methods) {
       if (member.getKind() != ElementKind.METHOD ||
@@ -97,10 +100,18 @@ class Descriptor {
         toBuilder = true;
         continue;
       }
+
+      verifyResolved(method.getReturnType());
+
       fields.add(method);
+
+      // Resolve inherited members
       final ExecutableType methodType = (ExecutableType) types.asMemberOf(valueType, member);
       final TypeMirror fieldType = methodType.getReturnType();
-      fieldTypes.put(method, fieldType);
+
+
+      // Resolve types
+      fieldTypes.put(method, TypeName.get(fieldType));
     }
   }
 
@@ -137,35 +148,35 @@ class Descriptor {
     return false;
   }
 
-  public String packageName() {
+  String packageName() {
     return this.packageName;
   }
 
-  public String builderName() {
+  String builderName() {
     return this.builderName;
   }
 
-  public String valueTypeName() {
+  String valueTypeName() {
     return this.valueTypeName;
   }
 
-  public boolean isPublic() {
+  boolean isPublic() {
     return this.isPublic;
   }
 
-  public boolean isGeneric() {
+  boolean isGeneric() {
     return this.isGeneric;
   }
 
-  public List<ExecutableElement> fields() {
+  List<ExecutableElement> fields() {
     return fields;
   }
 
-  public Map<ExecutableElement, TypeMirror> fieldTypes() {
+  Map<ExecutableElement, TypeName> fieldTypes() {
     return fieldTypes;
   }
 
-  public boolean hasToBuilder() {
+  boolean hasToBuilder() {
     return this.toBuilder;
   }
 
@@ -173,7 +184,7 @@ class Descriptor {
     return packageName.isEmpty() ? simpleName : packageName + "." + simpleName;
   }
 
-  public List<TypeVariableName> typeVariables() {
+  List<TypeVariableName> typeVariables() {
     final List<TypeVariableName> variables = new ArrayList<>();
     if (isGeneric) {
       for (final TypeMirror argument : valueTypeArguments) {
@@ -184,8 +195,55 @@ class Descriptor {
     return variables;
   }
 
-  public TypeName[] typeArguments() {
+  TypeName[] typeArguments() {
     final List<TypeVariableName> variables = typeVariables();
-    return variables.toArray(new TypeName[variables.size()]);
+    return variables.toArray(new TypeName[0]);
+  }
+
+  private static void verifyResolved(TypeMirror type) {
+    type.accept(new TypeKindVisitor8<Void, Void>() {
+      @Override
+      public Void visitIntersection(IntersectionType t, Void aVoid) {
+        t.getBounds().forEach(Descriptor::verifyResolved);
+        return null;
+      }
+
+      @Override
+      public Void visitUnion(UnionType t, Void aVoid) {
+        t.getAlternatives().forEach(Descriptor::verifyResolved);
+        return null;
+      }
+
+      @Override
+      public Void visitArray(ArrayType t, Void aVoid) {
+        verifyResolved(t.getComponentType());
+        return null;
+      }
+
+      @Override
+      public Void visitError(ErrorType t, Void aVoid) {
+        throw new UnresolvedTypeException(t.toString());
+      }
+
+      @Override
+      public Void visitTypeVariable(TypeVariable t, Void aVoid) {
+        verifyResolved(t.getLowerBound());
+        verifyResolved(t.getUpperBound());
+        return null;
+      }
+
+      @Override
+      public Void visitWildcard(WildcardType t, Void aVoid) {
+        final TypeMirror extendsBound = t.getExtendsBound();
+        if (extendsBound != null) {
+          verifyResolved(extendsBound);
+        }
+        final TypeMirror superBound = t.getSuperBound();
+        if (superBound != null) {
+          verifyResolved(superBound);
+        }
+        return null;
+      }
+    }, null);
   }
 }

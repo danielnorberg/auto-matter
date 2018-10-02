@@ -10,49 +10,6 @@
   <artifactId>auto-matter</artifactId>
   <packaging>jar</packaging>
 
-  <profiles>
-    <profile>
-      <id>post-jdk9</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.google.testing.compile</groupId>
-          <artifactId>compile-testing</artifactId>
-          <version>0.9</version>
-          <scope>test</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>com.sun</groupId>
-              <artifactId>tools</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>javax.annotation</groupId>
-          <artifactId>javax.annotation-api</artifactId>
-          <version>1.3.1</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>pre-jdk9</id>
-      <activation>
-        <jdk>(,1.9)</jdk>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.google.testing.compile</groupId>
-          <artifactId>compile-testing</artifactId>
-          <version>0.9</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
-
   <dependencies>
     <dependency>
       <groupId>io.norberg</groupId>
@@ -62,41 +19,37 @@
     <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service</artifactId>
-      <version>1.0-rc2</version>
+      <version>1.0-rc4</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.squareup</groupId>
       <artifactId>javapoet</artifactId>
-      <version>1.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>19.0</version>
+      <version>1.11.1</version>
     </dependency>
     <dependency>
       <groupId>org.modeshape</groupId>
       <artifactId>modeshape-common</artifactId>
       <version>3.8.1.Final</version>
     </dependency>
+
+    <!--build deps-->
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.1</version>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <!--test deps-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.truth</groupId>
-      <artifactId>truth</artifactId>
-      <version>0.29</version>
+      <groupId>com.google.testing.compile</groupId>
+      <artifactId>compile-testing</artifactId>
+      <version>0.15</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

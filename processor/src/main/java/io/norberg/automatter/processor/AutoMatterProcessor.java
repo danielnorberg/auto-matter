@@ -1,7 +1,7 @@
 package io.norberg.automatter.processor;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -12,9 +12,6 @@ import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -22,6 +19,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -37,11 +35,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -55,7 +55,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -70,22 +69,24 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private static final Inflector INFLECTOR = new Inflector();
 
-  private static final Set<String> KEYWORDS = ImmutableSet.of(
+  private static final Set<String> KEYWORDS = Collections.unmodifiableSet(Stream.of(
       "abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package",
       "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements",
       "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum",
       "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char",
       "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
-      "const", "float", "native", "super", "while");
+      "const", "float", "native", "super", "while")
+      .collect(toSet()));
 
   private static final String GENERATED_LEGACY = "javax.annotation.Generated";
   private static final String GENERATED = "javax.annotation.processing.Generated";
+
+  private final List<String> deferredTypes = new ArrayList<>();
 
   private Filer filer;
   private Elements elements;
   private Messager messager;
   private Types types;
-
 
   @Override
   public synchronized void init(final ProcessingEnvironment processingEnv) {
@@ -99,16 +100,49 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   @Override
   public boolean process(final Set<? extends TypeElement> annotations,
                          final RoundEnvironment env) {
-    final Set<? extends Element> elements = env.getElementsAnnotatedWith(AutoMatter.class);
-    for (Element element : elements) {
-      try {
-        process(element);
-      } catch (IOException e) {
-        messager.printMessage(ERROR, e.getMessage());
-      } catch (AutoMatterProcessorException e) {
-        e.print(messager);
+    final Set<TypeElement> elements = new LinkedHashSet<>();
+
+    // Enqueue new elements for processing
+    env.getElementsAnnotatedWith(AutoMatter.class).stream()
+        .filter(e -> e instanceof TypeElement)
+        .forEach(e -> elements.add((TypeElement) e));
+
+    // Enqueue deferred elements for processing
+    final List<String> previousDeferredTypes = new ArrayList<>(deferredTypes);
+    deferredTypes.clear();
+    for (String deferredType : previousDeferredTypes) {
+      final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
+      if (deferredTypeElement == null) {
+        deferredTypes.add(deferredType);
+      } else {
+        elements.add(deferredTypeElement);
       }
     }
+
+    // Process elements and generate files
+    for (TypeElement element : elements) {
+      try {
+        process(element);
+      } catch (UnresolvedTypeException e) {
+        // Encountered an unresolved type while processing this type, defer it for a
+        // later processing in hope that the type can be resolved in a later round.
+        deferredTypes.add(element.getQualifiedName().toString());
+      } catch (AutoMatterProcessorException e) {
+        e.print(messager);
+      } catch (Exception e) {
+        messager.printMessage(ERROR, e.getMessage());
+      }
+    }
+
+    if (env.processingOver()) {
+      // This was the last round, complain if some types failed due to unresolved types
+      for (String deferredType : deferredTypes) {
+        final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
+        messager.printMessage(ERROR, "Failed to generate @AutoMatter builder for " + deferredType
+            + " because some fields have unresolved types", deferredTypeElement);
+      }
+    }
+
     return false;
   }
 
@@ -213,7 +247,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         }
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
-            fieldName, fieldName, collectionImplType(field), fieldName);
+            fieldName, fieldName, collectionImplType(d, field), fieldName);
       } else {
         if (isParameterized) {
           final TypeName fieldType = fieldType(d, field);
@@ -270,18 +304,18 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
             constructor.addStatement(
                 "this.$N = (v.$N == null) ? null : new $T(v.$N)",
-                fieldName, fieldName, collectionImplType(field), fieldName);
+                fieldName, fieldName, collectionImplType(d, field), fieldName);
           } else {
             constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
                 ctorArgumentType, fieldName, ctorArgumentType, upperBoundedFieldType, fieldName);
             constructor.addStatement(
                 "this.$N = (_$N == null) ? null : new $T(_$N)",
-                fieldName, fieldName, collectionImplType(field), fieldName);
+                fieldName, fieldName, collectionImplType(d, field), fieldName);
           }
         } else {
           constructor.addStatement(
               "this.$N = (v.$N == null) ? null : new $T(v.$N)",
-              fieldName, fieldName, collectionImplType(field), fieldName);
+              fieldName, fieldName, collectionImplType(d, field), fieldName);
         }
       } else {
         if (isParameterized) {
@@ -300,7 +334,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private Set<MethodSpec> accessors(final Descriptor d) throws AutoMatterProcessorException {
-    ImmutableSet.Builder<MethodSpec> result = ImmutableSet.builder();
+    final Set<MethodSpec> result = new LinkedHashSet<>();
     for (ExecutableElement field : d.fields()) {
       result.add(getter(d, field));
 
@@ -335,10 +369,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         result.add(setter(d, field));
       }
     }
-    return result.build();
+    return Collections.unmodifiableSet(result);
   }
 
-  private MethodSpec getter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
+  private MethodSpec getter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
 
     MethodSpec.Builder getter = MethodSpec.methodBuilder(fieldName)
@@ -347,7 +381,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     if ((isCollection(field) || isMap(field)) && shouldEnforceNonNull(field)) {
       getter.beginControlFlow("if (this.$N == null)", fieldName)
-          .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+          .addStatement("this.$N = new $T()", fieldName, collectionImplType(d, field))
           .endControlFlow();
     }
     getter.addStatement("return $N", fieldName);
@@ -358,7 +392,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec optionalRawSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName type = ClassName.bestGuess(optionalType(field));
-    TypeName valueType = genericArgument(field, 0);
+    TypeName valueType = genericArgument(d, field, 0);
 
     return MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
@@ -368,10 +402,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field)
-      throws AutoMatterProcessorException {
+  private MethodSpec optionalSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
-    TypeName valueType = genericArgument(field, 0);
+    TypeName valueType = genericArgument(d, field, 0);
     ClassName optionalType = ClassName.bestGuess(optionalType(field));
     TypeName parameterType = ParameterizedTypeName.get(optionalType, subtypeOf(valueType));
 
@@ -397,7 +430,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec collectionSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName collectionType = collectionRawType(field);
-    TypeName itemType = genericArgument(field, 0);
+    TypeName itemType = genericArgument(d, field, 0);
     WildcardTypeName extendedType = subtypeOf(itemType);
 
     return MethodSpec.methodBuilder(fieldName)
@@ -411,7 +444,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec collectionCollectionSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName collectionType = ClassName.get(Collection.class);
-    TypeName itemType = genericArgument(field, 0);
+    TypeName itemType = genericArgument(d, field, 0);
     WildcardTypeName extendedType = subtypeOf(itemType);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
@@ -426,14 +459,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       setter.endControlFlow();
     }
 
-    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(field), fieldName);
+    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(d, field), fieldName);
     return setter.addStatement("return this").build();
   }
 
   private MethodSpec collectionIterableSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName iterableType = ClassName.get(Iterable.class);
-    TypeName itemType = genericArgument(field, 0);
+    TypeName itemType = genericArgument(d, field, 0);
     WildcardTypeName extendedType = subtypeOf(itemType);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
@@ -455,7 +488,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec collectionIteratorSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
     ClassName iteratorType = ClassName.get(Iterator.class);
-    TypeName itemType = genericArgument(field, 0);
+    TypeName itemType = genericArgument(d, field, 0);
     WildcardTypeName extendedType = subtypeOf(itemType);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
@@ -465,7 +498,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     collectionNullGuard(setter, field);
 
-    setter.addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+    setter.addStatement("this.$N = new $T()", fieldName, collectionImplType(d, field))
         .beginControlFlow("while ($N.hasNext())", fieldName)
         .addStatement("$T item = $N.next()", itemType, fieldName);
 
@@ -481,7 +514,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private MethodSpec collectionVarargSetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
-    TypeName itemType = genericArgument(field, 0);
+    TypeName itemType = genericArgument(d, field, 0);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
@@ -514,7 +547,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     final String appendMethodName = "add" + capitalizeFirstLetter(singular);
-    final TypeName itemType = genericArgument(field, 0);
+    final TypeName itemType = genericArgument(d, field, 0);
     MethodSpec.Builder adder = MethodSpec.methodBuilder(appendMethodName)
         .addModifiers(PUBLIC)
         .addParameter(itemType, singular)
@@ -523,7 +556,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (shouldEnforceNonNull(field)) {
       assertNotNull(adder, singular);
     }
-    lazyCollectionInitialization(adder, field);
+    lazyCollectionInitialization(d, adder, field);
 
     adder.addStatement("$L.add($L)", fieldName, singular);
     return adder.addStatement("return this").build();
@@ -541,17 +574,17 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
   }
 
-  private void lazyCollectionInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
+  private void lazyCollectionInitialization(Descriptor d, final Builder spec, final ExecutableElement field) {
     final String fieldName = fieldName(field);
     spec.beginControlFlow("if (this.$N == null)", fieldName)
-        .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+        .addStatement("this.$N = new $T()", fieldName, collectionImplType(d, field))
         .endControlFlow();
   }
 
   private MethodSpec mapSetter(final Descriptor d, final ExecutableElement field) {
     final String fieldName = fieldName(field);
-    final TypeName keyType = subtypeOf(genericArgument(field, 0));
-    final TypeName valueType = subtypeOf(genericArgument(field, 1));
+    final TypeName keyType = subtypeOf(genericArgument(d, field, 0));
+    final TypeName valueType = subtypeOf(genericArgument(d, field, 1));
     final TypeName paramType = ParameterizedTypeName.get(ClassName.get(Map.class), keyType, valueType);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
@@ -575,16 +608,19 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           .endControlFlow();
     }
 
-    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(field), fieldName);
+    setter.addStatement("this.$N = new $T($N)", fieldName, collectionImplType(d, field), fieldName);
 
     return setter.addStatement("return this").build();
   }
 
   private MethodSpec mapSetterPairs(final Descriptor d, final ExecutableElement field, int entries) {
-    checkArgument(entries > 0, "entries");
+    if (entries == 0) {
+      throw new IllegalArgumentException("entries == 0");
+    }
+
     final String fieldName = fieldName(field);
-    final TypeName keyType = genericArgument(field, 0);
-    final TypeName valueType = genericArgument(field, 1);
+    final TypeName keyType = genericArgument(d, field, 0);
+    final TypeName valueType = genericArgument(d, field, 1);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
@@ -597,12 +633,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Recursion
     if (entries > 1) {
-      final List<String> recursionParameters = Lists.newArrayList();
+      final List<String> recursionParameters = new ArrayList<>();
       for (int i = 1; i < entries; i++) {
         recursionParameters.add("k" + i);
         recursionParameters.add("v" + i);
       }
-      setter.addStatement("$L($L)", fieldName, Joiner.on(", ").join(recursionParameters));
+      setter.addStatement("$L($L)", fieldName, String.join(", ", recursionParameters));
     }
 
     // Null checks
@@ -615,7 +651,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     // Map instantiation
     if (entries == 1) {
-      setter.addStatement("$N = new $T()", fieldName, collectionImplType(field));
+      setter.addStatement("$N = new $T()", fieldName, collectionImplType(d, field));
     }
 
     // Put
@@ -632,8 +668,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     final String putSingular = "put" + capitalizeFirstLetter(singular);
-    final TypeName keyType = genericArgument(field, 0);
-    final TypeName valueType = genericArgument(field, 1);
+    final TypeName keyType = genericArgument(d, field, 0);
+    final TypeName valueType = genericArgument(d, field, 1);
 
     MethodSpec.Builder setter = MethodSpec.methodBuilder(putSingular)
         .addModifiers(PUBLIC)
@@ -648,20 +684,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     // Put
-    lazMapInitialization(setter, field);
+    lazMapInitialization(d, setter, field);
     setter.addStatement("$N.put(key, value)", fieldName);
 
     return setter.addStatement("return this").build();
   }
 
-  private void lazMapInitialization(final MethodSpec.Builder spec, final ExecutableElement field) {
+  private void lazMapInitialization(Descriptor d, final Builder spec, final ExecutableElement field) {
     final String fieldName = fieldName(field);
     spec.beginControlFlow("if (this.$N == null)", fieldName)
-        .addStatement("this.$N = new $T()", fieldName, collectionImplType(field))
+        .addStatement("this.$N = new $T()", fieldName, collectionImplType(d, field))
         .endControlFlow();
   }
 
-  private MethodSpec setter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
+  private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
 
     ParameterSpec.Builder parameterSpecBuilder =
@@ -693,49 +729,49 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec build(final Descriptor d) throws AutoMatterProcessorException {
+  private MethodSpec build(final Descriptor d) {
     MethodSpec.Builder build = MethodSpec.methodBuilder("build")
         .addModifiers(PUBLIC)
         .returns(valueType(d));
 
-    final List<String> parameters = Lists.newArrayList();
+    final List<String> parameters = new ArrayList<>();
     for (ExecutableElement field : d.fields()) {
       final String fieldName = fieldName(field);
       final TypeName fieldType = fieldType(d, field);
       final ClassName collections = ClassName.get(Collections.class);
 
       if (isCollection(field)) {
-        final TypeName itemType = genericArgument(field, 0);
+        final TypeName itemType = genericArgument(d, field, 0);
 
         if (shouldEnforceNonNull(field)) {
           build.addStatement(
               "$T _$L = ($L != null) ? $T.$L(new $T($N)) : $T.<$T>$L()",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), fieldName,
+              collections, unmodifiableCollection(field), collectionImplType(d, field), fieldName,
               collections, itemType, emptyCollection(field));
         } else {
           build.addStatement(
               "$T _$L = ($L != null) ? $T.$L(new $T($N)) : null",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), fieldName);
+              collections, unmodifiableCollection(field), collectionImplType(d, field), fieldName);
         }
 
         parameters.add("_" + fieldName);
       } else if (isMap(field)) {
-        final TypeName keyType = genericArgument(field, 0);
-        final TypeName valueType = genericArgument(field, 1);
+        final TypeName keyType = genericArgument(d, field, 0);
+        final TypeName valueType = genericArgument(d, field, 1);
 
         if (shouldEnforceNonNull(field)) {
           build.addStatement(
               "$T _$L = ($L != null) ? $T.$L(new $T($N)) : $T.<$T, $T>$L()",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), fieldName,
+              collections, unmodifiableCollection(field), collectionImplType(d, field), fieldName,
               collections, keyType, valueType, emptyCollection(field));
         } else {
           build.addStatement(
               "$T _$L = ($L != null) ? $T.$L(new $T($N)) : null",
               fieldType, fieldName, fieldName,
-              collections, unmodifiableCollection(field), collectionImplType(field), fieldName);
+              collections, unmodifiableCollection(field), collectionImplType(d, field), fieldName);
         }
 
         parameters.add("_" + fieldName);
@@ -744,7 +780,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       }
     }
 
-    return build.addStatement("return new $T($N)", valueImplType(d), Joiner.on(", ").join(parameters)).build();
+    return build.addStatement("return new $T($N)", valueImplType(d), String.join(", ", parameters)).build();
   }
 
   private MethodSpec fromValue(final Descriptor d) {
@@ -790,7 +826,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return value.build();
   }
 
-  private MethodSpec valueConstructor(final Descriptor d) throws AutoMatterProcessorException {
+  private MethodSpec valueConstructor(final Descriptor d) {
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE);
 
@@ -812,13 +848,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
       final ClassName collectionsType = ClassName.get(Collections.class);
       if (shouldEnforceNonNull(field) && isCollection(field)) {
-        final TypeName itemType = genericArgument(field, 0);
+        final TypeName itemType = genericArgument(d, field, 0);
         constructor.addStatement(
             "this.$N = ($N != null) ? $N : $T.<$T>$L()",
             fieldName, fieldName, fieldName, collectionsType, itemType, emptyCollection(field));
       } else if (shouldEnforceNonNull(field) && isMap(field)) {
-        final TypeName keyType = genericArgument(field, 0);
-        final TypeName valueType = genericArgument(field, 1);
+        final TypeName keyType = genericArgument(d, field, 0);
+        final TypeName valueType = genericArgument(d, field, 1);
         constructor.addStatement(
             "this.$N = ($N != null) ? $N : $T.<$T, $T>$L()",
             fieldName, fieldName, fieldName, collectionsType, keyType, valueType, emptyCollection(field));
@@ -830,7 +866,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return constructor.build();
   }
 
-  private MethodSpec valueGetter(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
+  private MethodSpec valueGetter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
 
     return MethodSpec.methodBuilder(fieldName)
@@ -905,12 +941,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         break;
       case TYPEVAR:
       case DECLARED:
+      case ERROR:
         result.beginControlFlow(
             "if ($L != null ? !$L.equals(that.$L()) : that.$L() != null)",
             name, name, name, name);
         break;
-      case ERROR:
-        throw fail("Cannot resolve type, might be missing import: " + returnType, field);
       default:
         throw fail("Unsupported type: " + returnType, field);
     }
@@ -961,10 +996,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           break;
         case TYPEVAR:
         case DECLARED:
+        case ERROR:
           hashcode.addStatement("result = 31 * result + ($N != null ? $N.hashCode() : 0)", name, name);
           break;
-        case ERROR:
-          throw fail("Cannot resolve type, might be missing import: " + type, field);
         default:
           throw fail("Unsupported type: " + type, field);
       }
@@ -1083,32 +1117,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return rawBuilderType(d).nestedClass("Value");
   }
 
-  private TypeName fieldType(final Descriptor d, final ExecutableElement field) throws AutoMatterProcessorException {
-    final TypeMirror returnType = field.getReturnType();
-    verifyResolved(returnType, field);
-    final TypeMirror fieldType = d.fieldTypes().get(field);
-    return TypeName.get(fieldType);
-  }
-
-  private void verifyResolved(TypeMirror type, ExecutableElement field) throws AutoMatterProcessorException {
-    if (type.getKind() == TypeKind.ERROR) {
-      throw fail("Cannot resolve type, might be missing import: " + field.getReturnType(), field);
-    }
-    if (type.getKind() == DECLARED) {
-      final DeclaredType declaredType = (DeclaredType) type;
-      for (final TypeMirror typeArgument : declaredType.getTypeArguments()) {
-        verifyResolved(typeArgument, field);
-      }
-    }
+  private TypeName fieldType(final Descriptor d, final ExecutableElement field) {
+    return d.fieldTypes().get(field);
   }
 
   private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
     return upperBoundedFieldType(field, Integer.MAX_VALUE);
   }
 
-  private TypeName upperBoundedFieldType(final ExecutableElement field, int limit) throws AutoMatterProcessorException {
+  private TypeName upperBoundedFieldType(final ExecutableElement field, int limit) {
     TypeMirror type = field.getReturnType();
-    verifyResolved(type, field);
     return upperBoundedType(type, limit);
   }
 
@@ -1153,40 +1171,39 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return type.toString();
   }
 
-  private TypeName genericArgument(final ExecutableElement field, int index) {
-    final DeclaredType type = (DeclaredType) field.getReturnType();
-    checkArgument(type.getTypeArguments().size() >= index);
-    return TypeName.get(type.getTypeArguments().get(index));
+  private TypeName genericArgument(Descriptor d, final ExecutableElement field, int index) {
+    final ParameterizedTypeName fieldType = (ParameterizedTypeName) fieldType(d, field);
+    return fieldType.typeArguments.get(index);
   }
 
-  private TypeName collectionImplType(final ExecutableElement field) {
+  private TypeName collectionImplType(Descriptor d, final ExecutableElement field) {
     switch (collectionType(field)) {
       case "List":
         return ParameterizedTypeName.get(
             ClassName.get(ArrayList.class),
-            genericArgument(field, 0));
+            genericArgument(d, field, 0));
       case "Set":
         return ParameterizedTypeName.get(
             ClassName.get(HashSet.class),
-            genericArgument(field, 0));
+            genericArgument(d, field, 0));
       case "SortedSet":
       case "NavigableSet":
         return ParameterizedTypeName.get(
             ClassName.get(TreeSet.class),
-            genericArgument(field, 0));
+            genericArgument(d, field, 0));
       case "Map":
         return ParameterizedTypeName.get(
             ClassName.get(HashMap.class),
-            genericArgument(field, 0), genericArgument(field, 1));
+            genericArgument(d, field, 0), genericArgument(d, field, 1));
       case "SortedMap":
       case "NavigableMap":
         return ParameterizedTypeName.get(
             ClassName.get(TreeMap.class),
-            genericArgument(field, 0), genericArgument(field, 1));
+            genericArgument(d, field, 0), genericArgument(d, field, 1));
       case "Collection":
         return ParameterizedTypeName.get(
             ClassName.get(ArrayList.class),
-            genericArgument(field, 0));
+            genericArgument(d, field, 0));
       default:
         throw new IllegalStateException("invalid collection type " + field);
     }
@@ -1337,7 +1354,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String variableName(final String name, final String... scope) {
-    return variableName(name, ImmutableSet.copyOf(scope));
+    return variableName(name, Stream.of(scope).collect(toSet()));
   }
 
   private String variableName(final String name, final Set<String> scope) {
@@ -1353,7 +1370,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return ImmutableSet.of(AutoMatter.class.getName());
+    return Collections.singleton(AutoMatter.class.getName());
   }
 
   private boolean shouldEnforceNonNull(final ExecutableElement field) {
