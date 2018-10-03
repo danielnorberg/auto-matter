@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>0.15.1</version>
+    <version>0.15.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>auto-matter-example</artifactId>
