@@ -18,4 +18,9 @@ public @interface AutoMatter {
 
     String value() default "";
   }
+
+  @Target(METHOD)
+  @Retention(RUNTIME)
+  @interface ToString {
+  }
 }

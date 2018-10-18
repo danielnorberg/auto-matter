@@ -383,6 +383,26 @@ public class AutoMatterProcessorTest {
             expectedSource("expected/deferred-processing/BarBuilder.java"));
   }
 
+  @Test
+  public void testCustomToStringDefault() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/CustomToStringDefault.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/CustomToStringDefaultBuilder.java"));
+  }
+
+  @Test
+  public void testCustomToStringStatic() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/CustomToStringStatic.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/CustomToStringStaticBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
