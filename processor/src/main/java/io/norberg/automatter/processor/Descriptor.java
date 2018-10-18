@@ -6,10 +6,13 @@ import static javax.lang.model.element.Modifier.STATIC;
 
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
+import io.norberg.automatter.AutoMatter;
+import io.norberg.automatter.AutoMatter.SerialVersionUID;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -45,6 +48,7 @@ class Descriptor {
   private final boolean isPublic;
   private final String concreteBuilderName;
   private final String fullyQualifiedBuilderName;
+  private final Optional<SerialVersionUID> serialVersionUID;
   private boolean isGeneric;
   private boolean toBuilder;
 
@@ -68,6 +72,7 @@ class Descriptor {
     this.fields = new ArrayList<>();
     this.fieldTypes = new LinkedHashMap<>();
     this.isPublic = element.getModifiers().contains(PUBLIC);
+    this.serialVersionUID = Optional.ofNullable(element.getAnnotation(AutoMatter.SerialVersionUID.class));
     enumerateFields(types);
   }
 
@@ -198,6 +203,10 @@ class Descriptor {
   TypeName[] typeArguments() {
     final List<TypeVariableName> variables = typeVariables();
     return variables.toArray(new TypeName[0]);
+  }
+
+  Optional<SerialVersionUID> serialVersionUID() {
+    return serialVersionUID;
   }
 
   private static void verifyResolved(TypeMirror type) {

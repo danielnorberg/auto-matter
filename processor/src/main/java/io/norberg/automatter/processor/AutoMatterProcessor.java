@@ -169,6 +169,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       builder.addAnnotation(generatedAnnotation);
     }
 
+    d.serialVersionUID().ifPresent(a ->
+        builder.addField(FieldSpec.builder(TypeName.LONG, "serialVersionUID", PRIVATE, STATIC, FINAL)
+            .initializer(Long.toString(a.value()))
+            .build()));
+
     if (d.isPublic()) {
       builder.addModifiers(PUBLIC);
     }
