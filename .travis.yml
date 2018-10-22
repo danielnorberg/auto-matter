@@ -30,8 +30,6 @@ jobs:
     install: jdk_switcher use oraclejdk8
     after_success:
       - mvn -pl rut clean cobertura:cobertura coveralls:report -Dcoveralls.token=${COVERALLS_TOKEN}
-  - env: JDK=10
-    install: source install-jdk.sh -F 10 -L BCL
   - env: JDK=11
     install: source install-jdk.sh -F 11 -L BCL
 
