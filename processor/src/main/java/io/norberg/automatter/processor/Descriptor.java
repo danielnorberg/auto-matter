@@ -13,11 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -92,8 +90,7 @@ class Descriptor {
   private void enumerateFields(final Types types) {
     final List<ExecutableElement> methods = methods(valueTypeElement);
     for (final Element member : methods) {
-      if (member.getKind() != ElementKind.METHOD ||
-          isStaticOrDefault(member)) {
+      if (member.getKind() != ElementKind.METHOD || !Fields.isField(member)) {
         continue;
       }
       final ExecutableElement method = (ExecutableElement) member;
@@ -108,6 +105,16 @@ class Descriptor {
         }
         toBuilder = true;
         continue;
+      }
+
+      if (Fields.hasDefaultValue(method)
+          && (Fields.isPrimitive(method)
+          || Fields.isNullableAnnotated(method)
+          || Fields.isCollection(method)
+          || Fields.isMap(method)
+          || Fields.isOptional(method))) {
+        throw new AutoMatterProcessorException(
+            "Field with default value cannot be nullable, a primitive, a collection, a map or optional.", valueTypeElement);
       }
 
       verifyResolved(method.getReturnType());
@@ -168,11 +175,6 @@ class Descriptor {
       }
     }
     return null;
-  }
-
-  private static boolean isStaticOrDefault(final Element member) {
-    return member.getModifiers().contains(STATIC)
-        || member.getModifiers().contains(DEFAULT);
   }
 
   String packageName() {

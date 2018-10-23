@@ -403,6 +403,16 @@ public class AutoMatterProcessorTest {
         .and().generatesSources(expectedSource("expected/CustomToStringStaticBuilder.java"));
   }
 
+  @Test
+  public void testDefaultValueField() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/DefaultValueField.java");
+    assert_().about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and().generatesSources(expectedSource("expected/DefaultValueFieldBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");

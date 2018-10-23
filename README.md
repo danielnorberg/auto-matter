@@ -366,6 +366,49 @@ interface Foobar {
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
 
+### Default Values
+
+Default values can be specified for fields by annotating a `default` method with `@AutoMatter.Field`.
+
+Note: Default valued fields cannot be cannot be `@Nullable`, primitives, collections, maps or optional.
+
+```java
+@AutoMatter
+interface Foobar {
+
+  String baz();
+
+  @AutoMatter.Field
+  default String foo() {
+    return "foo";
+  }
+
+  @AutoMatter.Field
+  default String bar() {
+    // Default valued fields can refer to other fields
+    // Note: The fields referred to must be _above_ the referring field.
+    return foo() + " bar " + baz();
+  }
+}
+
+// ...
+
+Foobar foobarWithFooDefault = new FoobarBuilder()
+    .baz("baz")
+    .build();
+
+// prints: Foobar{baz=baz, foo=foo, bar=foo bar baz}
+out.println("default values only: " + foobarWithFooDefault);
+
+Foobar foobarWithFooValue = new FoobarBuilder()
+    .baz("baz")
+    .foo("hello")
+    .build();
+
+// prints: Foobar{baz=baz, foo=hello, bar=hello bar baz}
+out.println("with foo value: " + foobarWithFooValue);
+```
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes

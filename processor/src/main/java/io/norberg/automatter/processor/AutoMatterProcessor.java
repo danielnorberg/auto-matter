@@ -1,6 +1,13 @@
 package io.norberg.automatter.processor;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static io.norberg.automatter.processor.Fields.hasDefaultValue;
+import static io.norberg.automatter.processor.Fields.isCollection;
+import static io.norberg.automatter.processor.Fields.isCollectionInterface;
+import static io.norberg.automatter.processor.Fields.isMap;
+import static io.norberg.automatter.processor.Fields.isNullableAnnotated;
+import static io.norberg.automatter.processor.Fields.isOptional;
+import static io.norberg.automatter.processor.Fields.isPrimitive;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.DEFAULT;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -39,7 +46,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -705,7 +712,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     ParameterSpec.Builder parameterSpecBuilder =
             ParameterSpec.builder(fieldType(d, field), fieldName);
     if (!isPrimitive(field)) {
-      AnnotationMirror nullableAnnotation = nullableAnnotation(field);
+      AnnotationMirror nullableAnnotation = Fields.nullableAnnotation(field);
       if (nullableAnnotation != null) {
         parameterSpecBuilder.addAnnotation(AnnotationSpec.get(nullableAnnotation));
       }
@@ -833,7 +840,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .addModifiers(PRIVATE);
 
     for (ExecutableElement field : d.fields()) {
-      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
+      if (!hasDefaultValue(field)
+          && shouldEnforceNonNull(field)
+          && !isCollection(field)
+          && !isMap(field)) {
         assertNotNull(constructor, fieldName(field));
       }
     }
@@ -849,7 +859,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       constructor.addParameter(parameter);
 
       final ClassName collectionsType = ClassName.get(Collections.class);
-      if (shouldEnforceNonNull(field) && isCollection(field)) {
+      if (hasDefaultValue(field)) {
+        constructor.addStatement("this.$N = ($N != null) ? $N : $T.requireNonNull($L.super.$L(), $S)",
+            fieldName, fieldName, fieldName, Objects.class, d.valueTypeName(), fieldName, fieldName);
+      } else if (shouldEnforceNonNull(field) && isCollection(field)) {
         final TypeName itemType = genericArgument(d, field, 0);
         constructor.addStatement(
             "this.$N = ($N != null) ? $N : $T.<$T>$L()",
@@ -1251,20 +1264,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return "ofNullable";
   }
 
-  private boolean isCollection(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.List<") ||
-           returnType.startsWith("java.util.Collection<") ||
-           returnType.startsWith("java.util.Set<") ||
-           returnType.startsWith("java.util.SortedSet<") ||
-           returnType.startsWith("java.util.NavigableSet<");
-  }
-
-  private boolean isCollectionInterface(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.Collection<");
-  }
-
   private String unmodifiableCollection(final ExecutableElement field) {
     final String type = collectionType(field);
     switch (type) {
@@ -1346,23 +1345,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return returnType;
   }
 
-  private boolean isMap(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.Map<") ||
-           returnType.startsWith("java.util.SortedMap<") ||
-           returnType.startsWith("java.util.NavigableMap<");
-  }
-
-  private boolean isPrimitive(final ExecutableElement field) {
-    return field.getReturnType().getKind().isPrimitive();
-  }
-
-  private boolean isOptional(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
-    return returnType.startsWith("java.util.Optional<") ||
-           returnType.startsWith("com.google.common.base.Optional<");
-  }
-
   private String singular(final String name) {
     final String singular = INFLECTOR.singularize(name);
     if (KEYWORDS.contains(singular)) {
@@ -1396,19 +1378,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
   private boolean shouldEnforceNonNull(final ExecutableElement field) {
     return !isPrimitive(field) && !isNullableAnnotated(field);
-  }
-
-  private boolean isNullableAnnotated(final ExecutableElement field) {
-    return nullableAnnotation(field) != null;
-  }
-
-  private AnnotationMirror nullableAnnotation(final ExecutableElement field) {
-    for (AnnotationMirror annotation : field.getAnnotationMirrors()) {
-      if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
-        return annotation;
-      }
-    }
-    return null;
   }
 
   private AutoMatterProcessorException fail(final String msg, final Element element)
