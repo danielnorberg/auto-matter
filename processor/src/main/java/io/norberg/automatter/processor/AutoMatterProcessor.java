@@ -2,6 +2,7 @@ package io.norberg.automatter.processor;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.element.Modifier.DEFAULT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -1007,6 +1009,25 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private MethodSpec valueToString(final Descriptor d) {
+    return d.toStringMethod()
+        .map(toStringMethod -> valueCustomToString(toStringMethod, d))
+        .orElseGet(() -> valueDefaultToString(d));
+  }
+
+  private MethodSpec valueCustomToString(ExecutableElement toStringMethod, Descriptor d) {
+    MethodSpec.Builder toString = MethodSpec.methodBuilder("toString")
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .returns(ClassName.get(String.class));
+    if (toStringMethod.getModifiers().contains(STATIC)) {
+      toString.addCode("return $L.$N(this);\n", d.valueTypeName(), toStringMethod.getSimpleName());
+    } else if (toStringMethod.getModifiers().contains(DEFAULT)) {
+      toString.addCode("return $N();\n", toStringMethod.getSimpleName());
+    }
+    return toString.build();
+  }
+
+  private MethodSpec valueDefaultToString(final Descriptor d) {
     MethodSpec.Builder toString = MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)

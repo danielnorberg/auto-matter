@@ -1,15 +1,18 @@
 package io.norberg.automatter.processor;
 
 import static java.util.stream.Collectors.joining;
+import static javax.lang.model.element.Modifier.DEFAULT;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
+import io.norberg.automatter.AutoMatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -47,6 +50,7 @@ class Descriptor {
   private final String fullyQualifiedBuilderName;
   private boolean isGeneric;
   private boolean toBuilder;
+  private ExecutableElement toString;
 
   Descriptor(final Element element, final Elements elements, final Types types)
       throws AutoMatterProcessorException {
@@ -68,7 +72,12 @@ class Descriptor {
     this.fields = new ArrayList<>();
     this.fieldTypes = new LinkedHashMap<>();
     this.isPublic = element.getModifiers().contains(PUBLIC);
+    this.toString = findToStringMethod(valueTypeElement);
     enumerateFields(types);
+  }
+
+  Optional<ExecutableElement> toStringMethod() {
+    return Optional.ofNullable(toString);
   }
 
   private static String nestedName(final TypeElement element, final Elements elements) {
@@ -134,18 +143,36 @@ class Descriptor {
     }
   }
 
-  private static boolean isStaticOrDefault(final Element member) {
-    final Set<Modifier> modifiers = member.getModifiers();
-    for (final Modifier modifier : modifiers) {
-      if (modifier == STATIC) {
-        return true;
-      }
-      // String comparison to avoid requiring JDK 8
-      if (modifier.name().equals("DEFAULT")) {
-        return true;
+  private ExecutableElement findToStringMethod(final TypeElement element) {
+    final List<ExecutableElement> matches = new ArrayList<>();
+    for (final Element member : element.getEnclosedElements()) {
+      if (member.getKind() == ElementKind.METHOD && member.getAnnotation(AutoMatter.ToString.class) != null) {
+        if (!member.getModifiers().contains(STATIC) && !member.getModifiers().contains(DEFAULT)) {
+          throw new AutoMatterProcessorException(
+              "Method annotated with @AutoMatter.ToString must be static or default", valueTypeElement);
+        }
+        matches.add((ExecutableElement) member);
       }
     }
-    return false;
+    if (matches.size() == 1) {
+      return matches.get(0);
+    } else if (matches.size() > 1) {
+      throw new AutoMatterProcessorException(
+          "There must only be one @AutoMatter.ToString annotated method on a type", valueTypeElement);
+    }
+    for (final TypeMirror interfaceType : element.getInterfaces()) {
+      final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
+      final ExecutableElement method = findToStringMethod(interfaceElement);
+      if (method != null) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  private static boolean isStaticOrDefault(final Element member) {
+    return member.getModifiers().contains(STATIC)
+        || member.getModifiers().contains(DEFAULT);
   }
 
   String packageName() {

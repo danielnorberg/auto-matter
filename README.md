@@ -329,6 +329,43 @@ Baz baz = new BazBuilder()
     .build();
 ```
 
+### Customizing `toString`
+
+The AutoMatter-generated `toString` method can be overriden by annotating a method with `@AutoMatter.ToString`.
+
+This method can be either a `default` method:
+
+```java
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.ToString
+  default String overrideToString() {
+    return foo() + " " + bar();
+  }
+}
+```
+
+Or a `static` method:
+
+```
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.ToString
+  static String toString(Foobar v) {
+    return v.foo() + " " + v.bar();
+  }
+}
+```
+
+Note that in the case of a default method, the method name cannot be `toString` as default methods are not
+allowed to override methods from `java.lang.Object`.
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes
