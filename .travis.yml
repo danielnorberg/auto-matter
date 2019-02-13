@@ -1,11 +1,15 @@
 sudo: false
 dist: trusty
 language: java
+jdk:
+  - oraclejdk11
+
 
 before_install:
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-- jdk_switcher use oraclejdk8
 - mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+- if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"; fi
+- if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"; fi
 
 # https://github.com/sormuras/sormuras.github.io/blob/master/.travis.yml
 jobs:
@@ -48,11 +52,6 @@ jobs:
 install: false
 
 script:
-  # Run tests on oraclejdk8 built binary
+  # Run tests on oraclejdk11 built binary
   - mvn -B surefire:test
   - "./jackson-it.sh"
-  # Rebuild and run tests using current JDK
-  - mvn -B clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true
-  - "./jackson-it.sh"
-  - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"; fi
-  - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"; fi
