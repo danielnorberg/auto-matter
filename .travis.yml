@@ -1,11 +1,9 @@
 sudo: false
 dist: trusty
 language: java
-jdk:
-  - oraclejdk11
-
 
 before_install:
+- jdk_switcher use oraclejdk11
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 - mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
 - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"; fi
@@ -15,32 +13,32 @@ before_install:
 jobs:
   include:
 
-  - # stage: ☕ jdk.java.net - OpenJDK - GPL
-    env: JDK=8
+  - # stage: ☕ OpenJDK - GPL
+    env: JDK=8 - OpenJDK - GPL
     install: jdk_switcher use openjdk8
-  - env: JDK=9
+  - env: JDK=9 - OpenJDK - GPL
     install: source install-jdk.sh -F 9
-  - env: JDK=10
+  - env: JDK=10 - OpenJDK - GPL
     install: source install-jdk.sh -F 10
-  - env: JDK=11
+  - env: JDK=11 - OpenJDK - GPL
     install: source install-jdk.sh -F 11
   - env:
       - JDK=12
       - SKIP_RELEASE_TEST=true
     install: source install-jdk.sh -F 12
 
-  - # stage: 🍰 jdk.java.net/oracle.com - Oracle JDK - BCL
-    env: JDK=8
+  - # stage: 🍰 Oracle JDK - BCL
+    env: JDK=8 - Oracle JDK - BCL
     install: jdk_switcher use oraclejdk8
     after_success:
       - mvn -pl rut clean cobertura:cobertura coveralls:report -Dcoveralls.token=${COVERALLS_TOKEN}
-  - env: JDK=11
+  - env: JDK=11 - Oracle JDK - BCL
     install: source install-jdk.sh -F 11 -L BCL
 
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
-    env: JDK=11 + Hotspot
+    env: JDK=11 - adoptopenjdk + Hotspot
     script: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
-  - env: JDK=11 + OpenJ9
+  - env: JDK=11 - adoptopenjdk + OpenJ9
     script: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=openj9&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
 
   - # stage: 🚀 Graal, Zulu, ...
