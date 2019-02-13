@@ -52,6 +52,9 @@ jobs:
 install: false
 
 script:
+  - echo JAVA_HOME = ${JAVA_HOME}
+  - java -version
+  - mvn --version
   # Run tests on oraclejdk11 built binary
   - mvn -B surefire:test
   - "./jackson-it.sh"
