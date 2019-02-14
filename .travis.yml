@@ -3,7 +3,7 @@ dist: trusty
 language: java
 
 before_install:
-- set -euo pipefail
+- set -eo pipefail
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 # Build using oraclejdk11
 - JAVA_HOME=$(source install-jdk.sh -F 11 -L BCL) mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
