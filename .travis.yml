@@ -5,6 +5,7 @@ language: java
 before_install:
 - set -euo pipefail
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+- chmod +x install-jdk.sh
 # Build using oraclejdk11
 - JAVA_HOME=$(./install-jdk.sh --silent --emit-java-home -F 11 -L BCL) mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
 # Test release
