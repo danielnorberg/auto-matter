@@ -6,7 +6,7 @@ before_install:
 - set -eo pipefail
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 # Build using oraclejdk11
-- JAVA_HOME=$(source install-jdk.sh -F 11 -L BCL) mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+- (source install-jdk.sh -F 11 -L BCL; mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true)
 # Test release
 - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"; fi
 - if [ "$SKIP_RELEASE_TEST" != true ]; then mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"; fi
