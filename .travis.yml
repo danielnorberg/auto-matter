@@ -38,17 +38,17 @@ jobs:
     env: JDK=8 - Oracle JDK - BCL
     install: jdk_switcher use oraclejdk8
   - env: JDK=11 - Oracle JDK - BCL
-    # install: source install-jdk.sh -F 11 -L BCL
+    install: source install-jdk.sh -F 11 -L BCL
 
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=11 - adoptopenjdk + Hotspot
-    script: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
+    install: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
   - env: JDK=11 - adoptopenjdk + OpenJ9
-    script: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=openj9&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
+    install: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=openj9&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
 
   - # stage: 🚀 Graal, Zulu, ...
     env: JDK=graalvm-ce-1.0.0-rc12
-    script: source install-jdk.sh --url https://github.com/oracle/graal/releases/download/vm-1.0.0-rc12/graalvm-ce-1.0.0-rc12-linux-amd64.tar.gz
+    install: source install-jdk.sh --url https://github.com/oracle/graal/releases/download/vm-1.0.0-rc12/graalvm-ce-1.0.0-rc12-linux-amd64.tar.gz
   - env: JDK=zulu11.29.3-ca-jdk11.0.2
     install: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.29.3-ca-jdk11.0.2-linux_x64.tar.gz
 
