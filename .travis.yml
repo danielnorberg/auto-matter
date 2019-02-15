@@ -37,8 +37,6 @@ jobs:
   - # stage: 🍰 Oracle JDK - BCL
     env: JDK=8 - Oracle JDK - BCL
     install: jdk_switcher use oraclejdk8
-    after_success:
-      - mvn -pl rut clean cobertura:cobertura coveralls:report -Dcoveralls.token=${COVERALLS_TOKEN}
   - env: JDK=11 - Oracle JDK - BCL
     # install: source install-jdk.sh -F 11 -L BCL
 
