@@ -114,8 +114,7 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  public final CollectionFieldsBuilder strings(String... strings) {
+  public CollectionFieldsBuilder strings(String... strings) {
     if (strings == null) {
       throw new NullPointerException("strings");
     }
@@ -473,8 +472,7 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  public final CollectionFieldsBuilder numbers(Long... numbers) {
+  public CollectionFieldsBuilder numbers(Long... numbers) {
     if (numbers == null) {
       throw new NullPointerException("numbers");
     }
@@ -541,8 +539,7 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  public final CollectionFieldsBuilder sortedNumbers(Long... sortedNumbers) {
+  public CollectionFieldsBuilder sortedNumbers(Long... sortedNumbers) {
     if (sortedNumbers == null) {
       throw new NullPointerException("sortedNumbers");
     }
@@ -609,8 +606,7 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  public final CollectionFieldsBuilder navigableNumbers(Long... navigableNumbers) {
+  public CollectionFieldsBuilder navigableNumbers(Long... navigableNumbers) {
     if (navigableNumbers == null) {
       throw new NullPointerException("navigableNumbers");
     }

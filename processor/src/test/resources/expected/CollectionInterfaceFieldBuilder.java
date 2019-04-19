@@ -69,8 +69,7 @@ public final class CollectionInterfaceFieldBuilder {
     return this;
   }
 
-  @SafeVarargs
-  public final CollectionInterfaceFieldBuilder strings(String... strings) {
+  public CollectionInterfaceFieldBuilder strings(String... strings) {
     if (strings == null) {
       throw new NullPointerException("strings");
     }
