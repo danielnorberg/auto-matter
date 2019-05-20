@@ -29,9 +29,7 @@ jobs:
     install: source install-jdk.sh -F 10
   - env: JDK=11 - OpenJDK - GPL
     install: source install-jdk.sh -F 11
-  - env:
-      - JDK=12
-      - SKIP_RELEASE_TEST=true
+  - env: JDK=12 - OpenJDK - GPL
     install: source install-jdk.sh -F 12
 
   - # stage: 🍰 Oracle JDK - BCL
