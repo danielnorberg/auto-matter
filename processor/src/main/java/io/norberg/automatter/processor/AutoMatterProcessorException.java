@@ -6,6 +6,8 @@ import javax.tools.Diagnostic;
 
 class AutoMatterProcessorException extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   private final Element element;
 
   public AutoMatterProcessorException(final String message, final Element element) {

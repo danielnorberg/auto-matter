@@ -17,6 +17,7 @@ class AutoMatterResolver extends AbstractTypeResolver {
 
   private final ConcurrentMap<Class<?>, JavaType> types = new ConcurrentHashMap<>();
 
+  @SuppressWarnings("deprecation")
   public JavaType resolveAbstractType(DeserializationConfig config, JavaType type)
   {
     return resolveAbstractType0(config, type.getRawClass());

@@ -23,14 +23,14 @@ import org.junit.Test;
 
 public class AutoMatterProcessorTest {
 
-  private Class generatedAnnotationClass;
+  private Class<?> generatedAnnotationClass;
 
   @Before
   public void setUp() throws Exception {
     generatedAnnotationClass = generatedAnnotationType();
   }
 
-  private static Class generatedAnnotationType() {
+  private static Class<?> generatedAnnotationType() {
     try {
       return Class.forName("javax.annotation.processing.Generated");
     } catch (ClassNotFoundException ignore) {
