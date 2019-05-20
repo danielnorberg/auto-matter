@@ -40,9 +40,9 @@ jobs:
 
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=11 - adoptopenjdk + Hotspot
-    install: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
+    install: source install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
   - env: JDK=11 - adoptopenjdk + OpenJ9
-    install: source install-jdk.sh --url https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=openj9&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk
+    install: source install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=openj9&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
 
   - # stage: 🚀 Graal, Zulu, ...
     env: JDK=graalvm-ce-19.0.0
