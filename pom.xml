@@ -37,7 +37,21 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>jdk9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <maven.compiler.release>8</maven.compiler.release>
+      </properties>
+    </profile>
+  </profiles>
 
   <modules>
     <module>annotation</module>
@@ -124,12 +138,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.8.1</version>
         <configuration>
           <useIncrementalCompilation>false</useIncrementalCompilation>
-          <release>8</release>
-          <source>8</source>
-          <target>8</target>
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
           </compilerArgs>
