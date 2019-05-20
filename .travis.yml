@@ -56,6 +56,12 @@ script:
   - echo JAVA_HOME = ${JAVA_HOME}
   - java -version
   - mvn --version
-  # Run tests on oraclejdk11 built binary
+  # Using the selected JDK and the oraclejdk11 built annotation processor:
+  # 1. Run all tests
   - mvn -B surefire:test
+  # 2. Compile examples
+  - mvn -B clean test -pl example
+  # 3. Compile and run tests
+  - mvn -B clean test -pl test
+  # 4. Run Jackson tests
   - "./jackson-it.sh"
