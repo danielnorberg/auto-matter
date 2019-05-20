@@ -539,6 +539,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     setter
         .addAnnotation(safeVarargsAnnotation)
         .addModifiers(FINAL); // Only because SafeVarargs can be applied to final methods.
+
+    // Suppress the following warnings for varargs setters:
+    // "Redundant java.lang.SafeVarargs annotation. Varargs element type X is reifiable."
+    // "Varargs method could cause heap pollution from non-reifiable varargs parameter x"
+    AnnotationSpec varargWarningSuppression =
+        AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "varargs").build();
+    setter.addAnnotation(varargWarningSuppression);
   }
 
   private MethodSpec collectionAdder(final Descriptor d, final ExecutableElement field) {

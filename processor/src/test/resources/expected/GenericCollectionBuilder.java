@@ -82,6 +82,7 @@ public final class GenericCollectionBuilder<T, K, V> {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public final GenericCollectionBuilder<T, K, V> foos(T... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");

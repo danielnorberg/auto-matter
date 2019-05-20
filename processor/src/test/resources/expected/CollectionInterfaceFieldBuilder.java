@@ -70,6 +70,7 @@ public final class CollectionInterfaceFieldBuilder {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public final CollectionInterfaceFieldBuilder strings(String... strings) {
     if (strings == null) {
       throw new NullPointerException("strings");

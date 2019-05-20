@@ -75,6 +75,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public final ConcreteExtensionOfGenericParentBuilder foos(Integer... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
