@@ -7,6 +7,8 @@ import static java.util.Arrays.asList;
 
 public class ComparableList<T> extends ArrayList<T> implements Comparable<ComparableList<T>> {
 
+  private static final long serialVersionUID = 1L;
+
   public ComparableList(final Collection<? extends T> values) {
     super(values);
   }
@@ -16,6 +18,7 @@ public class ComparableList<T> extends ArrayList<T> implements Comparable<Compar
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public static <T> ComparableList<T> of(final T... values) {
     return new ComparableList<>(asList(values));
   }
