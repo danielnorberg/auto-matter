@@ -9,6 +9,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
+import static javax.lang.model.type.TypeKind.NONE;
 import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
@@ -29,8 +30,6 @@ import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import io.norberg.automatter.AutoMatter;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,11 +40,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -59,6 +56,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -521,13 +519,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     String fieldName = fieldName(field);
     TypeName itemType = genericArgument(d, field, 0);
 
+    DeclaredType fieldTypeMirror = (DeclaredType) d.fieldTypeMirror(field);
+    TypeMirror itemTypeMirror = fieldTypeMirror.getTypeArguments().get(0);
+
     MethodSpec.Builder setter = MethodSpec.methodBuilder(fieldName)
         .addModifiers(PUBLIC)
         .addParameter(ArrayTypeName.of(itemType), fieldName)
         .varargs()
         .returns(builderType(d));
 
-    if (!isReifiable(itemType)) {
+    if (!isReifiable(itemType, itemTypeMirror)) {
       ensureSafeVarargs(setter);
     }
 
@@ -1150,7 +1151,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeName fieldType(final Descriptor d, final ExecutableElement field) {
-    return d.fieldTypes().get(field);
+    return d.fieldTypeName(field);
   }
 
   private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
@@ -1445,20 +1446,28 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return false;
   }
 
-  public static boolean isReifiable(TypeName type) {
+  private static boolean isReifiable(TypeName type, TypeMirror typeMirror) {
     if (type.isPrimitive()) return true;
     if (type.isBoxedPrimitive()) return true;
 
-    // TODO: handle nested types, per JLS §4.7
-    // JavaPoet does not expose ParameterizedTypeName's enclosing type,
-    // so we can't verify that the enclosing type is reifiable.
+    // Nested type?
+    if (typeMirror instanceof DeclaredType) {
+      TypeMirror enclosingTypeMirror = ((DeclaredType) typeMirror).getEnclosingType();
+      if (enclosingTypeMirror.getKind() != NONE) {
+        TypeName enclosingType = TypeName.get(enclosingTypeMirror);
+        if (!isReifiable(enclosingType, enclosingTypeMirror)) {
+          return false;
+        }
+      }
+    }
 
     if (type instanceof ParameterizedTypeName) {
       ParameterizedTypeName parameterized = (ParameterizedTypeName) type;
       return parameterized.typeArguments.stream().allMatch(AutoMatterProcessor::isUnboundedWildcard);
     } else if (type instanceof ArrayTypeName) {
-      ArrayTypeName array = (ArrayTypeName) type;
-      return isReifiable(array.componentType);
+      ArrayTypeName arrayType = (ArrayTypeName) type;
+      ArrayType arrayTypeMirror = (ArrayType) typeMirror;
+      return isReifiable(arrayType.componentType, arrayTypeMirror.getComponentType());
     } else if (type instanceof ClassName) {
       return true;
     }

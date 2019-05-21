@@ -44,7 +44,7 @@ class Descriptor {
   private final String valueTypeName;
   private final String builderName;
   private final List<ExecutableElement> fields;
-  private final Map<ExecutableElement, TypeName> fieldTypes;
+  private final Map<ExecutableElement, TypeMirror> fieldTypes;
   private final boolean isPublic;
   private final String concreteBuilderName;
   private final String fullyQualifiedBuilderName;
@@ -118,9 +118,8 @@ class Descriptor {
       final ExecutableType methodType = (ExecutableType) types.asMemberOf(valueType, member);
       final TypeMirror fieldType = methodType.getReturnType();
 
-
       // Resolve types
-      fieldTypes.put(method, TypeName.get(fieldType));
+      fieldTypes.put(method, fieldType);
     }
   }
 
@@ -199,8 +198,12 @@ class Descriptor {
     return fields;
   }
 
-  Map<ExecutableElement, TypeName> fieldTypes() {
-    return fieldTypes;
+  TypeName fieldTypeName(ExecutableElement field) {
+    return TypeName.get(fieldTypeMirror(field));
+  }
+
+  TypeMirror fieldTypeMirror(ExecutableElement field) {
+    return fieldTypes.get(field);
   }
 
   boolean hasToBuilder() {
