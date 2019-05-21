@@ -75,6 +75,7 @@ public final class GenericCollectionParentBuilder<T> {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public final GenericCollectionParentBuilder<T> foos(T... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");

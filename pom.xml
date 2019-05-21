@@ -144,6 +144,8 @@
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
           </compilerArgs>
+          <showWarnings>true</showWarnings>
+          <showDeprecation>true</showDeprecation>
         </configuration>
       </plugin>
       <plugin>
