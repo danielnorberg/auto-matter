@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class AutoMatterModule extends SimpleModule {
 
+  private static final long serialVersionUID = 1L;
+
   @Override
   public void setupModule(final SetupContext context) {
     super.setupModule(context);

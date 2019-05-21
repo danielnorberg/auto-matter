@@ -3,6 +3,8 @@ package io.norberg.automatter.jackson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,9 +66,21 @@ public class AutoMatterModuleTest {
     assertThat(parsed, is(PUBLIC_BAR));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testUnderScoreNamingStrategy() throws IOException {
     mapper.setPropertyNamingStrategy(CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    final String json = mapper.writeValueAsString(FOO);
+    final JsonNode tree = mapper.readTree(json);
+    assertThat(tree.has("a_camel_case_field"), is(true));
+    final Foo parsed = mapper.readValue(json, Foo.class);
+    assertThat(parsed, is(FOO));
+  }
+
+  @Test
+  public void testSnakeCaseNamingStrategy() throws IOException {
+    Assume.assumeTrue(mapper.version().getMajorVersion() == 2 && mapper.version().getMinorVersion() >= 7);
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     final String json = mapper.writeValueAsString(FOO);
     final JsonNode tree = mapper.readTree(json);
     assertThat(tree.has("a_camel_case_field"), is(true));

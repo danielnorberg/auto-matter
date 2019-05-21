@@ -5,7 +5,7 @@
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.15.3-SNAPSHOT</version>
+  <version>0.15.4-SNAPSHOT</version>
   <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
   <description>
@@ -37,7 +37,21 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>jdk9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <maven.compiler.release>8</maven.compiler.release>
+      </properties>
+    </profile>
+  </profiles>
 
   <modules>
     <module>annotation</module>
@@ -124,15 +138,15 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.8.1</version>
         <configuration>
           <useIncrementalCompilation>false</useIncrementalCompilation>
-          <release>8</release>
-          <source>8</source>
-          <target>8</target>
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
+            <compilerArg>-Xlint:-processing</compilerArg>
           </compilerArgs>
+          <showWarnings>true</showWarnings>
+          <showDeprecation>true</showDeprecation>
         </configuration>
       </plugin>
       <plugin>
@@ -199,7 +213,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0</version>
         <configuration>
           <source>8</source>
         </configuration>

@@ -118,6 +118,7 @@ public class SetFieldBuilderTest {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   private final <T> Set<T> set(final T... items) {
     return new HashSet<>(asList(items));
   }

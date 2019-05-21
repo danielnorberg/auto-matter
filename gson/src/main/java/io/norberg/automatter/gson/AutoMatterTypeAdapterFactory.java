@@ -25,7 +25,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
   private static final String VALUE_SUFFIX = "Builder$Value";
 
-  private final ConcurrentMap<TypeToken, TypeAdapter> adapters = new ConcurrentHashMap<>();
+  private final ConcurrentMap<TypeToken<?>, TypeAdapter<?>> adapters = new ConcurrentHashMap<>();
 
 
   @SuppressWarnings("unchecked")
@@ -38,7 +38,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
       // We are now the proud owners of an AutoMatter annotated interface.
 
       // Return the cached type, if present.
-      final TypeAdapter cached = adapters.get(type);
+      final TypeAdapter<T> cached = (TypeAdapter<T>) adapters.get(type);
       if (cached != null) {
         return cached;
       }
@@ -106,7 +106,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
       materialized = createForValue(gson, this, type, serializedNameMethods);
     }
     // Cache the materialized type before returning
-    final TypeAdapter<T> existing = adapters.putIfAbsent(type, materialized);
+    final TypeAdapter<T> existing = (TypeAdapter<T>) adapters.putIfAbsent(type, materialized);
     return (existing != null) ? existing : materialized;
   }
 

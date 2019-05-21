@@ -11,6 +11,8 @@ import io.norberg.automatter.AutoMatter;
 
 class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {
 
+  private static final long serialVersionUID = 1L;
+
   @Override
   public String findImplicitPropertyName(final AnnotatedMember member) {
     final AutoMatter.Field field = member.getAnnotation(AutoMatter.Field.class);
