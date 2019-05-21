@@ -143,6 +143,7 @@
           <useIncrementalCompilation>false</useIncrementalCompilation>
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
+            <compilerArg>-Xlint:-processing</compilerArg>
           </compilerArgs>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>

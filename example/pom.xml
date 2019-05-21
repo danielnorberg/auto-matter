@@ -36,6 +36,7 @@
         <configuration>
           <compilerArgs>
             <compilerArg>-Xlint:all</compilerArg>
+            <compilerArg>-Xlint:-processing</compilerArg>
           </compilerArgs>
         </configuration>
       </plugin>
