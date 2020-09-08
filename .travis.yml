@@ -64,7 +64,7 @@ script:
   - rm -rf "${JAVA_HOME}/lib/security/cacerts"
   - mkdir -p ${JAVA_HOME}/lib/security/
   - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
-  # Using the selected JDK and the oraclejdk11 built annotation processor:
+  # Using the selected JDK and the openjdk11 built annotation processor:
   # 1. Run all tests
   - mvn -B surefire:test
   # 2. Compile examples
