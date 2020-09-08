@@ -61,9 +61,7 @@ script:
   - java -version
   - mvn --version
   # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-  - rm -rf "${JAVA_HOME}/lib/security/cacerts"
-  - mkdir -p "${JAVA_HOME}/lib/security/"
-  - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+  - rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
   # Using the selected JDK and the openjdk11 built annotation processor:
   # 1. Run all tests
   - mvn -B surefire:test
