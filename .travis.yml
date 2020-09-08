@@ -1,15 +1,25 @@
 sudo: false
 dist: trusty
 language: java
-jdk: oraclejdk11
 
 before_install:
 - set -eo pipefail
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-# Build & test release using oraclejdk11
+# Build & test release using openjdk11
 - |
   (
+    # Install jdk
+    source install-jdk.sh -F 11; rm -f jdk.tar.gz
+
+    # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+    rm -rf "${JAVA_HOME}/lib/security/cacerts"
+    mkdir -p ${JAVA_HOME}/lib/security/
+    ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+
+    # Build
     mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+
+    # Test release
     if [ "$SKIP_RELEASE_TEST" != true ]; then
       mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
       mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
@@ -22,7 +32,7 @@ jobs:
 
   - # stage: ☕ OpenJDK - GPL
     env: JDK=8 - OpenJDK - GPL
-    install: jdk_switcher use openjdk8
+    install: source install-jdk.sh -F 8
   - env: JDK=9 - OpenJDK - GPL
     install: source install-jdk.sh -F 9
   - env: JDK=10 - OpenJDK - GPL
@@ -31,12 +41,6 @@ jobs:
     install: source install-jdk.sh -F 11
   - env: JDK=12 - OpenJDK - GPL
     install: source install-jdk.sh -F 12
-
-  - # stage: 🍰 Oracle JDK - BCL
-    env: JDK=8 - Oracle JDK
-    install: jdk_switcher use oraclejdk8
-  - env: JDK=11 - Oracle JDK
-    install: jdk_switcher use oraclejdk11
 
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=11 - adoptopenjdk + Hotspot
