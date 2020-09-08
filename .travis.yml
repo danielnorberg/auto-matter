@@ -1,6 +1,7 @@
 sudo: false
 dist: trusty
 language: java
+jdk: oraclejdk11
 
 before_install:
 - set -eo pipefail
@@ -8,7 +9,6 @@ before_install:
 # Build & test release using oraclejdk11
 - |
   (
-    jdk_switcher use oraclejdk11
     mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
     if [ "$SKIP_RELEASE_TEST" != true ]; then
       mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
