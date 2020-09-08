@@ -2,6 +2,7 @@ package io.norberg.automatter.processor;
 
 import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.DEFAULT;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
@@ -93,7 +94,7 @@ class Descriptor {
     final List<ExecutableElement> methods = methods(valueTypeElement);
     for (final Element member : methods) {
       if (member.getKind() != ElementKind.METHOD ||
-          isStaticOrDefault(member)) {
+          isStaticOrDefaultOrPrivate(member)) {
         continue;
       }
       final ExecutableElement method = (ExecutableElement) member;
@@ -170,9 +171,11 @@ class Descriptor {
     return null;
   }
 
-  private static boolean isStaticOrDefault(final Element member) {
-    return member.getModifiers().contains(STATIC)
-        || member.getModifiers().contains(DEFAULT);
+  private static boolean isStaticOrDefaultOrPrivate(final Element member) {
+    final Set<Modifier> modifiers = member.getModifiers();
+    return modifiers.contains(STATIC)
+        || modifiers.contains(DEFAULT)
+        || modifiers.contains(PRIVATE);
   }
 
   String packageName() {
