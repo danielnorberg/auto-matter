@@ -8,7 +8,7 @@ before_install:
 # Build & test release using oraclejdk11
 - |
   (
-    source install-jdk.sh -F 11 -L BCL
+    jdk_switcher use oraclejdk11
     mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
     if [ "$SKIP_RELEASE_TEST" != true ]; then
       mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
@@ -33,10 +33,10 @@ jobs:
     install: source install-jdk.sh -F 12
 
   - # stage: 🍰 Oracle JDK - BCL
-    env: JDK=8 - Oracle JDK - BCL
+    env: JDK=8 - Oracle JDK
     install: jdk_switcher use oraclejdk8
-  - env: JDK=11 - Oracle JDK - BCL
-    install: source install-jdk.sh -F 11 -L BCL
+  - env: JDK=11 - Oracle JDK
+    install: jdk_switcher use oraclejdk11
 
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=11 - adoptopenjdk + Hotspot
