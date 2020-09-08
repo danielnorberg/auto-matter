@@ -32,7 +32,7 @@ jobs:
 
   - # stage: ☕ OpenJDK - GPL
     env: JDK=8 - OpenJDK - GPL
-    install: source install-jdk.sh -F 8
+    install: jdk_switcher use openjdk8
   - env: JDK=9 - OpenJDK - GPL
     install: source install-jdk.sh -F 9
   - env: JDK=10 - OpenJDK - GPL
@@ -62,7 +62,7 @@ script:
   - mvn --version
   # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
   - rm -rf "${JAVA_HOME}/lib/security/cacerts"
-  - mkdir -p ${JAVA_HOME}/lib/security/
+  - mkdir -p "${JAVA_HOME}/lib/security/"
   - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
   # Using the selected JDK and the openjdk11 built annotation processor:
   # 1. Run all tests
