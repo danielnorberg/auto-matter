@@ -5,11 +5,21 @@ language: java
 before_install:
 - set -eo pipefail
 - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-# Build & test release using oraclejdk11
+# Build & test release using openjdk11
 - |
   (
-    source install-jdk.sh -F 11 -L BCL
+    # Install jdk
+    source install-jdk.sh -F 11; rm -f jdk.tar.gz
+
+    # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+    rm -rf "${JAVA_HOME}/lib/security/cacerts"
+    mkdir -p ${JAVA_HOME}/lib/security/
+    ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+
+    # Build
     mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+
+    # Test release
     if [ "$SKIP_RELEASE_TEST" != true ]; then
       mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
       mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
@@ -32,12 +42,6 @@ jobs:
   - env: JDK=12 - OpenJDK - GPL
     install: source install-jdk.sh -F 12
 
-  - # stage: 🍰 Oracle JDK - BCL
-    env: JDK=8 - Oracle JDK - BCL
-    install: jdk_switcher use oraclejdk8
-  - env: JDK=11 - Oracle JDK - BCL
-    install: source install-jdk.sh -F 11 -L BCL
-
   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
     env: JDK=11 - adoptopenjdk + Hotspot
     install: source install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
@@ -56,7 +60,9 @@ script:
   - echo JAVA_HOME = ${JAVA_HOME}
   - java -version
   - mvn --version
-  # Using the selected JDK and the oraclejdk11 built annotation processor:
+  # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+  - rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
+  # Using the selected JDK and the openjdk11 built annotation processor:
   # 1. Run all tests
   - mvn -B surefire:test
   # 2. Compile examples
