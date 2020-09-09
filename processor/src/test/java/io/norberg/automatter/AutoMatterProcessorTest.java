@@ -246,6 +246,18 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testPrivateMethods() {
+    Assume.assumeTrue(isJava9());
+    assert_()
+        .about(javaSource())
+        .that(JavaFileObjects.forResource("good/PrivateMethods.java"))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/PrivateMethodsBuilder.java"));
+  }
+
+  @Test
   public void testOverriddenDefaultMethods() {
     Assume.assumeTrue(isJava8());
     assert_().about(javaSource())
@@ -408,6 +420,15 @@ public class AutoMatterProcessorTest {
       Class.forName("java.util.Optional");
       return true;
     } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
+
+  private boolean isJava9() {
+    try {
+      Runtime.class.getMethod("version");
+      return true;
+    } catch (NoSuchMethodException e) {
       return false;
     }
   }
