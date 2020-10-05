@@ -9,6 +9,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import io.norberg.automatter.AutoMatter;
+
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,6 +54,7 @@ class Descriptor {
   private boolean isGeneric;
   private boolean toBuilder;
   private ExecutableElement toString;
+  private ExecutableElement checkInvariant;
 
   Descriptor(final Element element, final Elements elements, final Types types)
       throws AutoMatterProcessorException {
@@ -73,12 +76,17 @@ class Descriptor {
     this.fields = new ArrayList<>();
     this.fieldTypes = new LinkedHashMap<>();
     this.isPublic = element.getModifiers().contains(PUBLIC);
-    this.toString = findToStringMethod(valueTypeElement);
+    this.toString = findInstanceMethod(valueTypeElement, AutoMatter.ToString.class);
+    this.checkInvariant = findInstanceMethod(valueTypeElement, AutoMatter.CheckInvariant.class);
     enumerateFields(types);
   }
 
   Optional<ExecutableElement> toStringMethod() {
     return Optional.ofNullable(toString);
+  }
+
+  Optional<ExecutableElement> checkInvariantMethod() {
+    return Optional.ofNullable(checkInvariant);
   }
 
   private static String nestedName(final TypeElement element, final Elements elements) {
@@ -144,13 +152,13 @@ class Descriptor {
     }
   }
 
-  private ExecutableElement findToStringMethod(final TypeElement element) {
+  private ExecutableElement findInstanceMethod(final TypeElement element, final Class<? extends Annotation> tag) {
     final List<ExecutableElement> matches = new ArrayList<>();
     for (final Element member : element.getEnclosedElements()) {
-      if (member.getKind() == ElementKind.METHOD && member.getAnnotation(AutoMatter.ToString.class) != null) {
+      if (member.getKind() == ElementKind.METHOD && member.getAnnotation(tag) != null) {
         if (!member.getModifiers().contains(STATIC) && !member.getModifiers().contains(DEFAULT)) {
           throw new AutoMatterProcessorException(
-              "Method annotated with @AutoMatter.ToString must be static or default", valueTypeElement);
+              "Method annotated with @AutoMatter."+tag.getSimpleName()+" must be static or default", valueTypeElement);
         }
         matches.add((ExecutableElement) member);
       }
@@ -159,11 +167,11 @@ class Descriptor {
       return matches.get(0);
     } else if (matches.size() > 1) {
       throw new AutoMatterProcessorException(
-          "There must only be one @AutoMatter.ToString annotated method on a type", valueTypeElement);
+          "There must only be one @AutoMatter."+tag.getSimpleName()+"annotated method on a type", valueTypeElement);
     }
     for (final TypeMirror interfaceType : element.getInterfaces()) {
       final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
-      final ExecutableElement method = findToStringMethod(interfaceElement);
+      final ExecutableElement method = findInstanceMethod(interfaceElement, tag);
       if (method != null) {
         return method;
       }

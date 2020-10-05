@@ -364,6 +364,43 @@ interface Foobar {
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
 
+### Verify complex type constraints
+
+To verify more complex type constraints besides only verifying non nullable fields, annotating a method
+with `@AutoMatter.CheckInvariant` allows asserting on complex type constraints.
+
+This method can be either a `default` method:
+
+```java
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.CheckInvariant
+  default void checkInvariant() {
+    assert foo().length < bar() : "bar needs to be greater than length of foo";
+  }
+}
+```
+
+Or a `static` method:
+
+```
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.CheckInvariant
+  static void checkInvariant(Foobar v) {
+    if (v.foo().length >= v.bar()) {
+      throw new IllegalArgumentException("bar needs to be greater than length of foo");
+    }
+  }
+}
+```
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes

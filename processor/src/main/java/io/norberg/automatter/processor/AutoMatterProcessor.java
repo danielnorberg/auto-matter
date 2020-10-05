@@ -872,6 +872,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       }
     }
 
+    d.checkInvariantMethod().ifPresent(checkInvariantMethod -> {
+      if (checkInvariantMethod.getModifiers().contains(STATIC)) {
+        constructor.addCode("$L.$N(this);\n", d.valueTypeName(), checkInvariantMethod.getSimpleName());
+      } else if (checkInvariantMethod.getModifiers().contains(DEFAULT)) {
+        constructor.addCode("$N();\n", checkInvariantMethod.getSimpleName());
+      }
+    });
+
     return constructor.build();
   }
 
