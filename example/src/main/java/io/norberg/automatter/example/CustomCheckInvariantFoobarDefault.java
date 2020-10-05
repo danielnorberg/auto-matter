@@ -10,7 +10,7 @@ public interface CustomCheckInvariantFoobarDefault {
   @AutoMatter.CheckInvariant
   default void checkInvariant() {
     if (foo().length() >= bar()) {
-      throw new IllegalArgumentException("bar needs to be greater than lenth of foo");
+      throw new IllegalArgumentException("bar needs to be greater than length of foo");
     }
   }
 }
