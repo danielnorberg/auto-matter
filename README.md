@@ -379,7 +379,7 @@ interface Foobar {
 
   @AutoMatter.CheckInvariant
   default void checkInvariant() {
-    assert foo().length < bar() : "bar needs to be greater than length of foo";
+    assert foo().length() < bar() : "bar needs to be greater than length of foo";
   }
 }
 ```
@@ -394,7 +394,7 @@ interface Foobar {
 
   @AutoMatter.CheckInvariant
   static void checkInvariant(Foobar v) {
-    if (v.foo().length >= v.bar()) {
+    if (v.foo().length() >= v.bar()) {
       throw new IllegalArgumentException("bar needs to be greater than length of foo");
     }
   }
