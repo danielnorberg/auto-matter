@@ -416,23 +416,23 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
-  public void testCustomCheckInvariantStatic() {
-    final JavaFileObject source = JavaFileObjects.forResource("good/CustomCheckInvariantStatic.java");
+  public void testCustomCheckStatic() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/CustomCheckStatic.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expectedSource("expected/CustomCheckInvariantStaticBuilder.java"));
+        .and().generatesSources(expectedSource("expected/CustomCheckStaticBuilder.java"));
   }
 
   @Test
-  public void testCustomCheckInvariantDefault() {
-    final JavaFileObject source = JavaFileObjects.forResource("good/CustomCheckInvariantDefault.java");
+  public void testCustomCheckDefault() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/CustomCheckDefault.java");
     assert_().about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
-        .and().generatesSources(expectedSource("expected/CustomCheckInvariantDefaultBuilder.java"));
+        .and().generatesSources(expectedSource("expected/CustomCheckDefaultBuilder.java"));
   }
 
   private boolean isJava8() {

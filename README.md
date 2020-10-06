@@ -373,9 +373,9 @@ place in the constructor or the builder for hand-written types.
 
 As the constructor and builder is generated, we need some way of adding these
 checks. To verify these more complex type constraints, annotating a method with
-`@AutoMatter.CheckInvariant` allows asserting on complex type constraints.
+`@AutoMatter.Check` allows asserting on complex type constraints.
 
-The method annotated with `@AutoMatter.CheckInvariant` will be called from the
+The method annotated with `@AutoMatter.Check` will be called from the
 constructor when all fields have been assigned and all null checks have been
 performed.
 
@@ -387,8 +387,8 @@ interface Foobar {
   String foo();
   int bar();
 
-  @AutoMatter.CheckInvariant
-  default void checkInvariant() {
+  @AutoMatter.Check
+  default void check() {
     assert foo().length() < bar() : "bar needs to be greater than length of foo";
   }
 }
@@ -402,8 +402,8 @@ interface Foobar {
   String foo();
   int bar();
 
-  @AutoMatter.CheckInvariant
-  static void checkInvariant(Foobar v) {
+  @AutoMatter.Check
+  static void check(Foobar v) {
     if (v.foo().length() >= v.bar()) {
       throw new IllegalArgumentException("bar needs to be greater than length of foo");
     }

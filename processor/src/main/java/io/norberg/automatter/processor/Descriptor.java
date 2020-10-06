@@ -54,7 +54,7 @@ class Descriptor {
   private boolean isGeneric;
   private boolean toBuilder;
   private ExecutableElement toString;
-  private ExecutableElement checkInvariant;
+  private ExecutableElement check;
 
   Descriptor(final Element element, final Elements elements, final Types types)
       throws AutoMatterProcessorException {
@@ -77,7 +77,7 @@ class Descriptor {
     this.fieldTypes = new LinkedHashMap<>();
     this.isPublic = element.getModifiers().contains(PUBLIC);
     this.toString = findInstanceMethod(valueTypeElement, AutoMatter.ToString.class);
-    this.checkInvariant = findInstanceMethod(valueTypeElement, AutoMatter.CheckInvariant.class);
+    this.check = findInstanceMethod(valueTypeElement, AutoMatter.Check.class);
     enumerateFields(types);
   }
 
@@ -85,8 +85,8 @@ class Descriptor {
     return Optional.ofNullable(toString);
   }
 
-  Optional<ExecutableElement> checkInvariantMethod() {
-    return Optional.ofNullable(checkInvariant);
+  Optional<ExecutableElement> checkMethod() {
+    return Optional.ofNullable(check);
   }
 
   private static String nestedName(final TypeElement element, final Elements elements) {

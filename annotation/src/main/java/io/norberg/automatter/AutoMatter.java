@@ -26,6 +26,6 @@ public @interface AutoMatter {
 
   @Target(METHOD)
   @Retention(RUNTIME)
-  @interface CheckInvariant {
+  @interface Check {
   }
 }

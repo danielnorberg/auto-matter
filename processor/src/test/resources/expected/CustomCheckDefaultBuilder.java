@@ -4,17 +4,17 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
-public final class CustomCheckInvariantStaticBuilder {
+public final class CustomCheckDefaultBuilder {
   private String foo;
 
-  public CustomCheckInvariantStaticBuilder() {
+  public CustomCheckDefaultBuilder() {
   }
 
-  private CustomCheckInvariantStaticBuilder(CustomCheckInvariantStatic v) {
+  private CustomCheckDefaultBuilder(CustomCheckDefault v) {
     this.foo = v.foo();
   }
 
-  private CustomCheckInvariantStaticBuilder(CustomCheckInvariantStaticBuilder v) {
+  private CustomCheckDefaultBuilder(CustomCheckDefaultBuilder v) {
     this.foo = v.foo;
   }
 
@@ -22,7 +22,7 @@ public final class CustomCheckInvariantStaticBuilder {
     return foo;
   }
 
-  public CustomCheckInvariantStaticBuilder foo(String foo) {
+  public CustomCheckDefaultBuilder foo(String foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
@@ -30,19 +30,19 @@ public final class CustomCheckInvariantStaticBuilder {
     return this;
   }
 
-  public CustomCheckInvariantStatic build() {
+  public CustomCheckDefault build() {
     return new Value(foo);
   }
 
-  public static CustomCheckInvariantStaticBuilder from(CustomCheckInvariantStatic v) {
-    return new CustomCheckInvariantStaticBuilder(v);
+  public static CustomCheckDefaultBuilder from(CustomCheckDefault v) {
+    return new CustomCheckDefaultBuilder(v);
   }
 
-  public static CustomCheckInvariantStaticBuilder from(CustomCheckInvariantStaticBuilder v) {
-    return new CustomCheckInvariantStaticBuilder(v);
+  public static CustomCheckDefaultBuilder from(CustomCheckDefaultBuilder v) {
+    return new CustomCheckDefaultBuilder(v);
   }
 
-  private static final class Value implements CustomCheckInvariantStatic {
+  private static final class Value implements CustomCheckDefault {
     private final String foo;
 
     private Value(@AutoMatter.Field("foo") String foo) {
@@ -50,7 +50,7 @@ public final class CustomCheckInvariantStaticBuilder {
         throw new NullPointerException("foo");
       }
       this.foo = foo;
-      CustomCheckInvariantStatic.checkInvariant(this);
+      check();
     }
 
     @AutoMatter.Field
@@ -59,8 +59,8 @@ public final class CustomCheckInvariantStaticBuilder {
       return foo;
     }
 
-    public CustomCheckInvariantStaticBuilder builder() {
-      return new CustomCheckInvariantStaticBuilder(this);
+    public CustomCheckDefaultBuilder builder() {
+      return new CustomCheckDefaultBuilder(this);
     }
 
     @Override
@@ -68,10 +68,10 @@ public final class CustomCheckInvariantStaticBuilder {
       if (this == o) {
         return true;
       }
-      if (!(o instanceof CustomCheckInvariantStatic)) {
+      if (!(o instanceof CustomCheckDefault)) {
         return false;
       }
-      final CustomCheckInvariantStatic that = (CustomCheckInvariantStatic) o;
+      final CustomCheckDefault that = (CustomCheckDefault) o;
       if (foo != null ? !foo.equals(that.foo()) : that.foo() != null) {
         return false;
       }
@@ -88,7 +88,7 @@ public final class CustomCheckInvariantStaticBuilder {
 
     @Override
     public String toString() {
-      return "CustomCheckInvariantStatic{" +
+      return "CustomCheckDefault{" +
       "foo=" + foo +
       '}';
     }

@@ -11,11 +11,11 @@ import javax.annotation.Nullable;
 import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
-public interface CustomCheckInvariantDefault {
+public interface CustomCheckDefault {
   String foo();
 
-  @AutoMatter.CheckInvariant
-  default void checkInvariant() {
+  @AutoMatter.Check
+  default void check() {
     throw new IllegalArgumentException();
   }
 }
