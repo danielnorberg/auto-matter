@@ -366,8 +366,18 @@ allowed to override methods from `java.lang.Object`.
 
 ### Verify complex type constraints
 
-To verify more complex type constraints besides only verifying non nullable fields, annotating a method
-with `@AutoMatter.CheckInvariant` allows asserting on complex type constraints.
+Sometimes it is desirable to only allow certain combinations of the values of
+the fields, or some fields should only be allowed to contain a subset of the
+values of the field type. This validation is something that would normally take
+place in the constructor or the builder for hand-written types.
+
+As the constructor and builder is generated, we need some way of adding these
+checks. To verify these more complex type constraints, annotating a method with
+`@AutoMatter.CheckInvariant` allows asserting on complex type constraints.
+
+The method annotated with `@AutoMatter.CheckInvariant` will be called from the
+constructor when all fields have been assigned and all null checks have been
+performed.
 
 This method can be either a `default` method:
 
@@ -400,6 +410,9 @@ interface Foobar {
   }
 }
 ```
+
+These kinds of checks is sometimes called invariant checks for mutable objects. But as
+these objects are immutable, it is sufficient to have it as a precondition check.
 
 ### Known Issues
 
