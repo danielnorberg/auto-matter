@@ -364,6 +364,56 @@ interface Foobar {
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
 
+### Verify complex type constraints
+
+Sometimes it is desirable to only allow certain combinations of the values of
+the fields, or some fields should only be allowed to contain a subset of the
+values of the field type. This validation is something that would normally take
+place in the constructor or the builder for hand-written types.
+
+As the constructor and builder is generated, we need some way of adding these
+checks. To verify these more complex type constraints, annotating a method with
+`@AutoMatter.Check` allows asserting on complex type constraints.
+
+The method annotated with `@AutoMatter.Check` will be called from the
+constructor when all fields have been assigned and all null checks have been
+performed.
+
+This method can be either a `default` method:
+
+```java
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.Check
+  default void check() {
+    assert foo().length() < bar() : "bar needs to be greater than length of foo";
+  }
+}
+```
+
+Or a `static` method:
+
+```
+@AutoMatter
+interface Foobar {
+  String foo();
+  int bar();
+
+  @AutoMatter.Check
+  static void check(Foobar v) {
+    if (v.foo().length() >= v.bar()) {
+      throw new IllegalArgumentException("bar needs to be greater than length of foo");
+    }
+  }
+}
+```
+
+These kinds of checks is sometimes called invariant checks for mutable objects. But as
+these objects are immutable, it is sufficient to have it as a precondition check.
+
 ### Known Issues
 
 There's an issue with maven-compiler-plugin 3.x and annotation processors that causes

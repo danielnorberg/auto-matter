@@ -23,4 +23,9 @@ public @interface AutoMatter {
   @Retention(RUNTIME)
   @interface ToString {
   }
+
+  @Target(METHOD)
+  @Retention(RUNTIME)
+  @interface Check {
+  }
 }
