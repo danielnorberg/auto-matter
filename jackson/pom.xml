@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <jackson.databind.version>2.9.10.5</jackson.databind.version>
+    <jackson.databind.version>2.9.10.7</jackson.databind.version>
   </properties>
 
   <artifactId>auto-matter-jackson</artifactId>
