@@ -33,7 +33,7 @@ jobs:
     docker:
       - image: cimg/openjdk:15.0.1
     steps:
-      - checkout
+      - run: ls -lah
       - run:
           name: Install JDK Version
           command: << parameters.jdk >>
@@ -62,6 +62,14 @@ workflows:
           requires: [build]
           name: JDK=8 - OpenJDK - GPL
           jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
+      - test-jdk:
+          requires: [build]
+          name: JDK=11 - OpenJDK - GPL
+          jdk: source install-jdk.sh -F 11
+      - test-jdk:
+          requires: [build]
+          name: JDK=15 - OpenJDK - GPL
+          jdk: source install-jdk.sh -F 15
 
 # jobs:
 #   build:
