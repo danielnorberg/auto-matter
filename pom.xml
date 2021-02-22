@@ -39,6 +39,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
+    <jackson.bom.version>2.12.1</jackson.bom.version>
   </properties>
 
   <profiles>
@@ -75,7 +76,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.12.1</version>
+        <version>${jackson.bom.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
