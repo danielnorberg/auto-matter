@@ -3,8 +3,6 @@ version: 2.1
 jobs:
   build:
     parameters:
-      name:
-        type: string
       jdk:
         type: string
     docker:
