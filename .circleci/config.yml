@@ -8,6 +8,7 @@ jobs:
     docker:
       - image: cimg/openjdk:15.0.1
     steps:
+      - checkout
       - run:
           name: Build & Test JDK 11
           command: |
