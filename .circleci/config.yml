@@ -2,9 +2,6 @@ version: 2.1
 
 jobs:
   build:
-    parameters:
-      jdk:
-        type: string
     docker:
       - image: cimg/openjdk:15.0.1
     steps:
@@ -28,6 +25,15 @@ jobs:
                 mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
               fi
             )
+
+  test-jdk:
+    parameters:
+      jdk:
+        type: string
+    docker:
+      - image: cimg/openjdk:15.0.1
+    steps:
+      - checkout
       - run:
           name: Install JDK Version
           command: << parameters.jdk >>
@@ -37,8 +43,6 @@ jobs:
             echo JAVA_HOME = ${JAVA_HOME}
             java -version
             mvn --version
-            # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-            rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
             # Using the selected JDK and the openjdk11 built annotation processor:
             # 1. Run all tests
             mvn -B surefire:test
@@ -50,9 +54,12 @@ jobs:
             "./jackson-it.sh"
 
 workflows:
-  build:
+  version: 2
+  build_test:
     jobs:
-      - build: 
+      - build
+      - test-jdk:
+          requires: [build]
           name: JDK=8 - OpenJDK - GPL
           jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
 
