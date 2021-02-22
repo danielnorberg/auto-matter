@@ -9,45 +9,49 @@ jobs:
       - image: cimg/base:2021.02
     steps:
       - run:
-        command: |
-          set -eo pipefail
-          wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-          # Build & test release using openjdk11
-          (
-            # Install jdk
-            source install-jdk.sh -F 11; rm -f jdk.tar.gz
+          name: Build & Test JDK 11
+          command: |
+            set -eo pipefail
+            wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+            # Build & test release using openjdk11
+            (
+              # Install jdk
+              source install-jdk.sh -F 11; rm -f jdk.tar.gz
 
-            # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-            rm -rf "${JAVA_HOME}/lib/security/cacerts"
-            mkdir -p ${JAVA_HOME}/lib/security/
-            ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+              # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+              rm -rf "${JAVA_HOME}/lib/security/cacerts"
+              mkdir -p ${JAVA_HOME}/lib/security/
+              ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
 
-            # Build
-            mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+              # Build
+              mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
 
-            # Test release
-            if [ "$SKIP_RELEASE_TEST" != true ]; then
-              mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-              mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
-            fi
-          )
-      - run: << parameters.jdk >>
+              # Test release
+              if [ "$SKIP_RELEASE_TEST" != true ]; then
+                mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+                mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+              fi
+            )
       - run:
-        command: |
-          echo JAVA_HOME = ${JAVA_HOME}
-          java -version
-          mvn --version
-          # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-          rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
-          # Using the selected JDK and the openjdk11 built annotation processor:
-          # 1. Run all tests
-          mvn -B surefire:test
-          # 2. Compile examples
-          mvn -B clean test -pl example
-          # 3. Compile and run tests
-          mvn -B clean test -pl test
-          # 4. Run Jackson tests
-          "./jackson-it.sh"
+          name: Install JDK Version
+          command: << parameters.jdk >>
+      - run:
+          name: Test JDK Version
+          command: |
+            echo JAVA_HOME = ${JAVA_HOME}
+            java -version
+            mvn --version
+            # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
+            rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
+            # Using the selected JDK and the openjdk11 built annotation processor:
+            # 1. Run all tests
+            mvn -B surefire:test
+            # 2. Compile examples
+            mvn -B clean test -pl example
+            # 3. Compile and run tests
+            mvn -B clean test -pl test
+            # 4. Run Jackson tests
+            "./jackson-it.sh"
 
 workflows:
   build:
