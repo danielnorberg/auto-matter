@@ -27,9 +27,10 @@ jobs:
                 mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
               fi
             )
-      # - persist_to_workspace:
-      #     root: .
-      #     paths:
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
 
   test-jdk:
     parameters:
@@ -38,6 +39,8 @@ jobs:
     docker:
       - image: cimg/openjdk:15.0.1
     steps:
+      - attach_workspace:
+          at: .
       - run: pwd
       - run: ls -lah
       - run:
