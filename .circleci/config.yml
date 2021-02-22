@@ -47,6 +47,9 @@ jobs:
           name: Install JDK Version
           command: << parameters.jdk >>
       - run:
+          name: Install artifacts
+          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      - run:
           name: Test JDK Version
           command: |
             echo JAVA_HOME = ${JAVA_HOME}
