@@ -19,11 +19,6 @@ jobs:
               # Install jdk
               source install-jdk.sh -F 11; rm -f jdk.tar.gz
 
-              # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-              rm -rf "${JAVA_HOME}/lib/security/cacerts"
-              mkdir -p ${JAVA_HOME}/lib/security/
-              ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
-
               # Build
               mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
 
