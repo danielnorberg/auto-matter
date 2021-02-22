@@ -6,7 +6,7 @@ jobs:
       jdk:
         type: string
     docker:
-      - image: cimg/base:2021.02
+      - image: cimg/openjdk:15.0.1
     steps:
       - run:
           name: Build & Test JDK 11
