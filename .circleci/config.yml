@@ -83,59 +83,24 @@ workflows:
           name: JDK=15 - OpenJDK - GPL
           jdk: source install-jdk.sh -F 15
 
-# jobs:
-#   build:
-#     # machine: true
-#     steps:
-#       - run-tests:
-#           install-jdk:
-#             - run: echo "The dependencies are installed"
-#             - run: echo "And now I'm going to run the tests"
+      - test-jdk:
+          requires: [build]
+          name: JDK=11 - adoptopenjdk + Hotspot
+          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
+      - test-jdk:
+          requires: [build]
+          name: JDK=11 - adoptopenjdk + OpenJ9
+          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
 
-# jobs:
-#   include:
-
-#   - # stage: ☕ OpenJDK - GPL
-#     env: JDK=8 - OpenJDK - GPL
-#     install: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
-#   - env: JDK=9 - OpenJDK - GPL
-#     install: source install-jdk.sh -F 9
-#   - env: JDK=10 - OpenJDK - GPL
-#     install: source install-jdk.sh -F 10
-#   - env: JDK=11 - OpenJDK - GPL
-#     install: source install-jdk.sh -F 11
-#   - env: JDK=15 - OpenJDK - GPL
-#     install: source install-jdk.sh -F 15
-
-#   - # stage: 🍺 adoptopenjdk.net - HotSpot - Eclipse OpenJ9
-#     env: JDK=11 - adoptopenjdk + Hotspot
-#     install: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
-#   - env: JDK=11 - adoptopenjdk + OpenJ9
-#     install: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
-
-#   - # stage: 🚀 Graal, Zulu, ...
-#     env: JDK=graalvm-ce-java11-linux-amd64-21.0.0.2
-#     install: source install-jdk.sh --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
-#   - env: JDK=zulu11.45.27-ca-jdk11.0.10
-#     install: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
-#   - env: JDK=zulu15.29.15-ca-jdk15.0.2
-#     install: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
-
-# install: false
-
-# script:
-#   - echo JAVA_HOME = ${JAVA_HOME}
-#   - java -version
-#   - mvn --version
-#   # https://www.deps.co/guides/travis-ci-latest-java/#certificate-issues
-#   - rm -rf "${JAVA_HOME}/lib/security/cacerts" && mkdir -p "${JAVA_HOME}/lib/security/" && ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts" || true
-#   # Using the selected JDK and the openjdk11 built annotation processor:
-#   # 1. Run all tests
-#   - mvn -B surefire:test
-#   # 2. Compile examples
-#   - mvn -B clean test -pl example
-#   # 3. Compile and run tests
-#   - mvn -B clean test -pl test
-#   # 4. Run Jackson tests
-#   - "./jackson-it.sh"
-
+      - test-jdk:
+          requires: [build]
+          name: JDK=graalvm-ce-java11-linux-amd64-21.0.0.2
+          jdk: source install-jdk.sh --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
+      - test-jdk:
+          requires: [build]
+          name: JDK=zulu11.45.27-ca-jdk11.0.10
+          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
+      - test-jdk:
+          requires: [build]
+          name: JDK=zulu15.29.15-ca-jdk15.0.2
+          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
