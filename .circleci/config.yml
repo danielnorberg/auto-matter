@@ -6,12 +6,21 @@ jobs:
       - image: cimg/openjdk:11.0.9
     steps:
       - checkout
-      - run: |
-          # Install JDK installation script
-          wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-
-          # Build
-          mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      # Install JDK installation script
+      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+      # Cache deps
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run: mvn dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+      # Install artifacts
+      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true      
       - persist_to_workspace:
           root: .
           paths:
