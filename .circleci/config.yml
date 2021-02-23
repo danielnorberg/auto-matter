@@ -48,6 +48,11 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
       # Install JDK Version
       - run: << parameters.jdk >>
       # Install artifacts
@@ -67,6 +72,11 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
       - run:
           name: Install artifacts
           command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
