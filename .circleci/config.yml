@@ -3,11 +3,9 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/openjdk:15.0.1
+      - image: cimg/openjdk:11.0.9
     steps:
       - checkout
-      - run: pwd
-      - run: ls -lah
       - run:
           name: Build & Test JDK 11
           command: |
@@ -37,12 +35,10 @@ jobs:
       jdk:
         type: string
     docker:
-      - image: cimg/openjdk:15.0.1
+      - image: cimg/openjdk:11.0.9
     steps:
       - attach_workspace:
           at: .
-      - run: pwd
-      - run: ls -lah
       - run:
           name: Install JDK Version
           command: << parameters.jdk >>
@@ -62,45 +58,59 @@ jobs:
             mvn -B clean test -pl example
             # 3. Compile and run tests
             mvn -B clean test -pl test
-            # 4. Run Jackson tests
-            "./jackson-it.sh"
+
+  jackson-it:
+    parallelism: 4
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install artifacts
+          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      - run:
+          name: Test Jackson Versions
+          command: ./jackson-it.sh
 
 workflows:
   version: 2
   build_test:
     jobs:
       - build
+      - jackson-it:
+          requires: [build]          
       - test-jdk:
           requires: [build]
-          name: JDK=8 - OpenJDK - GPL
+          name: 8 - OpenJDK - GPL
           jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
       - test-jdk:
           requires: [build]
-          name: JDK=11 - OpenJDK - GPL
+          name: 11 - OpenJDK - GPL
           jdk: source install-jdk.sh -F 11
       - test-jdk:
           requires: [build]
-          name: JDK=15 - OpenJDK - GPL
+          name: 15 - OpenJDK - GPL
           jdk: source install-jdk.sh -F 15
 
       - test-jdk:
           requires: [build]
-          name: JDK=11 - adoptopenjdk + Hotspot
+          name: 11 - adoptopenjdk + Hotspot
           jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
       - test-jdk:
           requires: [build]
-          name: JDK=11 - adoptopenjdk + OpenJ9
+          name: 11 - adoptopenjdk + OpenJ9
           jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
 
       - test-jdk:
           requires: [build]
-          name: JDK=graalvm-ce-java11-linux-amd64-21.0.0.2
+          name: graalvm-ce-java11-linux-amd64-21.0.0.2
           jdk: source install-jdk.sh --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
       - test-jdk:
           requires: [build]
-          name: JDK=zulu11.45.27-ca-jdk11.0.10
+          name: zulu11.45.27-ca-jdk11.0.10
           jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
       - test-jdk:
           requires: [build]
-          name: JDK=zulu15.29.15-ca-jdk15.0.2
+          name: zulu15.29.15-ca-jdk15.0.2
           jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
