@@ -25,7 +25,7 @@ public class SimpleGenericJacksonExample {
     String json = mapper.writeValueAsString(foobar);
     out.println("json: " + json);
 
-    GenericFoobar<Integer> parsed = mapper.readValue(json, new TypeReference<GenericFoobar<String>>() {});
+    GenericFoobar<Integer> parsed = mapper.readValue(json, new TypeReference<GenericFoobar<Integer>>() {});
     out.println("parsed: " + parsed);
 
     out.println("equals: " + foobar.equals(parsed));
