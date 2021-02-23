@@ -22,9 +22,8 @@ jobs:
       - image: cimg/openjdk:11.0.9
     steps:
       - checkout
-      - run: |
-          mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-          mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+      - run: mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests" 
+      - run: mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
 
   test-jdk:
     parameters:
@@ -35,25 +34,17 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: Install JDK Version
-          command: << parameters.jdk >>
-      - run:
-          name: Install artifacts
-          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
-      - run:
-          name: Test JDK Version
-          command: |
-            echo JAVA_HOME = ${JAVA_HOME}
-            java -version
-            mvn --version
-            # Using the selected JDK and the openjdk11 built annotation processor:
-            # 1. Run all tests
-            mvn -B surefire:test
-            # 2. Compile examples
-            mvn -B clean test -pl example
-            # 3. Compile and run tests
-            mvn -B clean test -pl test
+      # Install JDK Version
+      - run: << parameters.jdk >>
+      # Install artifacts
+      - run: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      # Using the selected JDK and the openjdk11 built annotation processor:
+      # 1. Run all tests
+      - run: mvn -B surefire:test
+      # 2. Compile examples
+      - run: mvn -B clean test -pl example
+      # 3. Compile and run tests
+      - run: mvn -B clean test -pl test
 
   jackson-it:
     parallelism: 4
