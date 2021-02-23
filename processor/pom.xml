@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.modeshape</groupId>
       <artifactId>modeshape-common</artifactId>
-      <version>3.8.1.Final</version>
+      <version>5.4.1.Final</version>
     </dependency>
 
     <!--build deps-->
