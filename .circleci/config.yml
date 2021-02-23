@@ -6,29 +6,25 @@ jobs:
       - image: cimg/openjdk:11.0.9
     steps:
       - checkout
-      - run:
-          name: Build & Test JDK 11
-          command: |
-            set -eo pipefail
-            wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-            # Build & test release using openjdk11
-            (
-              # Install jdk
-              source install-jdk.sh -F 11; rm -f jdk.tar.gz
+      - run: |
+          # Install JDK installation script
+          wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 
-              # Build
-              mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
-
-              # Test release
-              if [ "$SKIP_RELEASE_TEST" != true ]; then
-                mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-                mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
-              fi
-            )
+          # Build
+          mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - persist_to_workspace:
           root: .
           paths:
             - ./*
+
+  test-release:
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - checkout
+      - run: |
+          mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+          mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
 
   test-jdk:
     parameters:
@@ -78,8 +74,9 @@ workflows:
   build_test:
     jobs:
       - build
+      - test-release
       - jackson-it:
-          requires: [build]          
+          requires: [build]
       - test-jdk:
           requires: [build]
           name: 8 - OpenJDK - GPL
