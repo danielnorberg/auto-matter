@@ -24,12 +24,23 @@ function lookup_jackson_versions() {
   exit 1
 }
 
+if [ "$CI" == "" ]; then
+  SPLIT="cat"
+else
+  SPLIT="circleci tests split"
+fi
+export SPLIT
+
 jackson_versions=$(lookup_jackson_versions)
+split_versions=$(echo "$jackson_versions" | $SPLIT)
 
 echo "Found Jackson versions: "
 echo "${jackson_versions}"
+echo
+echo "Testing Jackson versions in this split: "
+echo "${split_versions}"
 
-for v in ${jackson_versions}; do
+for v in ${split_versions}; do
   echo
   echo "Testing Jackson $v"
   echo "========================================================================"

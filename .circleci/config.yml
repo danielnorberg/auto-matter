@@ -1,0 +1,128 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - checkout
+      # Install JDK installation script
+      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+      # Cache deps
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run: mvn dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+      # Install artifacts
+      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true      
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
+
+  test-release:
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run: mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests" 
+      - run: mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+
+  test-jdk:
+    parameters:
+      jdk:
+        type: string
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      # Install JDK Version
+      - run: << parameters.jdk >>
+      # Install artifacts
+      - run: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      # Using the selected JDK and the openjdk11 built annotation processor:
+      # 1. Run all tests
+      - run: mvn -B surefire:test
+      # 2. Compile examples
+      - run: mvn -B clean test -pl example
+      # 3. Compile and run tests
+      - run: mvn -B clean test -pl test
+
+  jackson-it:
+    parallelism: 4
+    docker:
+      - image: cimg/openjdk:11.0.9
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run:
+          name: Install artifacts
+          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      - run:
+          name: Test Jackson Versions
+          command: ./jackson-it.sh
+
+workflows:
+  version: 2
+  build_test:
+    jobs:
+      - build
+      - test-release
+      - jackson-it:
+          requires: [build]
+      - test-jdk:
+          requires: [build]
+          name: 8 - OpenJDK - GPL
+          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
+      - test-jdk:
+          requires: [build]
+          name: 11 - OpenJDK - GPL
+          jdk: source install-jdk.sh -F 11
+      - test-jdk:
+          requires: [build]
+          name: 15 - OpenJDK - GPL
+          jdk: source install-jdk.sh -F 15
+
+      - test-jdk:
+          requires: [build]
+          name: 11 - adoptopenjdk + Hotspot
+          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
+      - test-jdk:
+          requires: [build]
+          name: 11 - adoptopenjdk + OpenJ9
+          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
+
+      - test-jdk:
+          requires: [build]
+          name: graalvm-ce-java11-linux-amd64-21.0.0.2
+          jdk: source install-jdk.sh --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
+      - test-jdk:
+          requires: [build]
+          name: zulu11.45.27-ca-jdk11.0.10
+          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
+      - test-jdk:
+          requires: [build]
+          name: zulu15.29.15-ca-jdk15.0.2
+          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
