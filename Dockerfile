@@ -1,4 +1,4 @@
-FROM ubuntu:14.10
+FROM ubuntu:20.04
 MAINTAINER Daniel Norberg <daniel.norberg@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
