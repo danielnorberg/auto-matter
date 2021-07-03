@@ -62,30 +62,7 @@ class Descriptor {
     if (!element.getKind().isInterface()) {
       throw new AutoMatterProcessorException("@AutoMatter target must be an interface", element);
     }
-    return new Descriptor(element, elements, types);
-  }
-
-  Descriptor(final Element element, final Elements elements, final Types types)
-      throws AutoMatterProcessorException {
-    this.valueType = (DeclaredType) element.asType();
-    this.valueTypeElement = (TypeElement) valueType.asElement();
-    this.valueTypeArguments = valueType.getTypeArguments();
-    this.valueTypeName = nestedName(valueTypeElement, elements);
-    this.isGeneric = !valueTypeArguments.isEmpty();
-    this.packageName = elements.getPackageOf(valueTypeElement).getQualifiedName().toString();
-    this.builderName = valueTypeElement.getSimpleName().toString() + "Builder";
-    final String typeParameterization = isGeneric ?
-        "<" + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(",")) + ">"
-        : "";
-    this.concreteBuilderName = builderName + typeParameterization;
-    this.fullyQualifiedBuilderName = fullyQualifedName(packageName, concreteBuilderName);
-    this.fields = new ArrayList<>();
-    this.fieldTypes = new LinkedHashMap<>();
-    this.isPublic = valueTypeElement.getModifiers().contains(PUBLIC);
-    this.toString = findInstanceMethod(valueTypeElement, AutoMatter.ToString.class);
-    this.check = findInstanceMethod(valueTypeElement, AutoMatter.Check.class);
-    this.superValueTypes = enumerateSuperValueTypes(elements, types);
-    enumerateFields(types);
+    return new Descriptor((DeclaredType) element.asType(), elements, types);
   }
 
   Descriptor(final DeclaredType valueType, final Elements elements, final Types types)
@@ -120,7 +97,6 @@ class Descriptor {
       if (interfaceElement.getAnnotation(AutoMatter.class) == null) {
         continue;
       }
-      // TODO: Store type variable values
       superValueTypes.add(new Descriptor(valueType, elements, types));
     }
     return Collections.unmodifiableList(superValueTypes);
