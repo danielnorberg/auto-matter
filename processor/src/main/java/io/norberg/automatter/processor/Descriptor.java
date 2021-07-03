@@ -27,6 +27,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.IntersectionType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
@@ -62,7 +63,8 @@ class Descriptor {
     if (!element.getKind().isInterface()) {
       throw new AutoMatterProcessorException("@AutoMatter target must be an interface", element);
     }
-    return new Descriptor((DeclaredType) element.asType(), elements, types);
+    final DeclaredType valueType = (DeclaredType) element.asType();
+    return new Descriptor(valueType, elements, types);
   }
 
   Descriptor(final DeclaredType valueType, final Elements elements, final Types types)
@@ -88,18 +90,28 @@ class Descriptor {
     enumerateFields(types);
   }
 
-  private List<Descriptor> enumerateSuperValueTypes(Elements elements,
-      Types types) {
+  private List<Descriptor> enumerateSuperValueTypes(Elements elements, Types types) {
     final List<Descriptor> superValueTypes = new ArrayList<>();
-    for (final TypeMirror interfaceType : valueTypeElement.getInterfaces()) {
-      final DeclaredType valueType = (DeclaredType) interfaceType;
-      final TypeElement interfaceElement = (TypeElement) valueType.asElement();
-      if (interfaceElement.getAnnotation(AutoMatter.class) == null) {
+    enumerateSuperValueTypes(valueType, elements, types, superValueTypes);
+    return Collections.unmodifiableList(superValueTypes);
+  }
+
+  private void enumerateSuperValueTypes(DeclaredType valueType, Elements elements,
+      Types types, List<Descriptor> superValueTypes) {
+    for (final TypeMirror superType : types.directSupertypes(valueType)) {
+      if (superType.getKind() != TypeKind.DECLARED) {
         continue;
       }
-      superValueTypes.add(new Descriptor(valueType, elements, types));
+      final DeclaredType superValueType = (DeclaredType) superType;
+      final TypeElement superValueTypeElement = (TypeElement) superValueType.asElement();
+      if (superValueTypeElement.getKind() != ElementKind.INTERFACE) {
+        continue;
+      }
+      enumerateSuperValueTypes(superValueType, elements, types, superValueTypes);
+      if (superValueTypeElement.getAnnotation(AutoMatter.class) != null) {
+        superValueTypes.add(new Descriptor(superValueType, elements, types));
+      }
     }
-    return Collections.unmodifiableList(superValueTypes);
   }
 
   Optional<ExecutableElement> toStringMethod() {
@@ -126,13 +138,11 @@ class Descriptor {
 
   private void enumerateFields(final Types types) {
     final List<ExecutableElement> methods = methods(valueTypeElement);
-    for (final Element member : methods) {
-      if (member.getKind() != ElementKind.METHOD ||
-          isStaticOrDefaultOrPrivate(member)) {
+    for (final ExecutableElement method : methods) {
+      if (isStaticOrDefaultOrPrivate(method)) {
         continue;
       }
-      final ExecutableElement method = (ExecutableElement) member;
-      if (member.getSimpleName().toString().equals("builder")) {
+      if (method.getSimpleName().toString().equals("builder")) {
         final TypeMirror returnType = (method).getReturnType();
         // TODO: javac does not seem to want to provide the name of the return type if it is not yet present and generic
         if (!isGeneric &&
@@ -150,7 +160,7 @@ class Descriptor {
       fields.add(method);
 
       // Resolve inherited members
-      final ExecutableType methodType = (ExecutableType) types.asMemberOf(valueType, member);
+      final ExecutableType methodType = (ExecutableType) types.asMemberOf(valueType, method);
       final TypeMirror fieldType = methodType.getReturnType();
 
       // Resolve types

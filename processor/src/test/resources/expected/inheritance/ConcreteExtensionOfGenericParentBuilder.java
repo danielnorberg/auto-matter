@@ -54,6 +54,19 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     this.oneFoo = v.oneFoo();
   }
 
+  private ConcreteExtensionOfGenericParentBuilder(GenericSuperParent<? extends Integer> v) {
+    List<? extends Integer> _foos = v.foos();
+    this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
+    @SuppressWarnings("unchecked") Bar<Integer> _oneParameterizedBar = (Bar<Integer>) (Bar<? extends Integer>) v.oneParameterizedBar();
+    this.oneParameterizedBar = _oneParameterizedBar;
+    this.oneIntegerBar = v.oneIntegerBar();
+    @SuppressWarnings("unchecked") Bar<Quux<Integer>> _oneParameterizedQuuxBar = (Bar<Quux<Integer>>) (Bar<? extends Quux<? extends Integer>>) v.oneParameterizedQuuxBar();
+    this.oneParameterizedQuuxBar = _oneParameterizedQuuxBar;
+    this.oneIntegerQuuxBar = v.oneIntegerQuuxBar();
+    @SuppressWarnings("unchecked") Quux<Integer> _oneParameterizedQuux = (Quux<Integer>) (Quux<? extends Integer>) v.oneParameterizedQuux();
+    this.oneParameterizedQuux = _oneParameterizedQuux;
+  }
+
   private ConcreteExtensionOfGenericParentBuilder(GenericCollectionParent<? extends Integer> v) {
     List<? extends Integer> _foos = v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
@@ -338,6 +351,11 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   public static ConcreteExtensionOfGenericParentBuilder from(ConcreteExtensionOfGenericParent v) {
+    return new ConcreteExtensionOfGenericParentBuilder(v);
+  }
+
+  public static ConcreteExtensionOfGenericParentBuilder from(
+      GenericSuperParent<? extends Integer> v) {
     return new ConcreteExtensionOfGenericParentBuilder(v);
   }
 
