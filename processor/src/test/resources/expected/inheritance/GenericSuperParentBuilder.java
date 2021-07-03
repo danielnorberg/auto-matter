@@ -10,7 +10,7 @@ import java.util.List;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
-public final class GenericCollectionParentBuilder<T> {
+public final class GenericSuperParentBuilder<T> {
   private List<T> foos;
 
   private Bar<T> oneParameterizedBar;
@@ -23,35 +23,10 @@ public final class GenericCollectionParentBuilder<T> {
 
   private Quux<T> oneParameterizedQuux;
 
-  private Bar<T> secondParameterizedBar;
-
-  private Quux<T> secondParameterizedQuux;
-
-  private List<T> moreFoos;
-
-  public GenericCollectionParentBuilder() {
+  public GenericSuperParentBuilder() {
   }
 
-  private GenericCollectionParentBuilder(GenericCollectionParent<? extends T> v) {
-    List<? extends T> _foos = v.foos();
-    this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
-    @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
-    this.oneParameterizedBar = _oneParameterizedBar;
-    this.oneIntegerBar = v.oneIntegerBar();
-    @SuppressWarnings("unchecked") Bar<Quux<T>> _oneParameterizedQuuxBar = (Bar<Quux<T>>) (Bar<? extends Quux<? extends T>>) v.oneParameterizedQuuxBar();
-    this.oneParameterizedQuuxBar = _oneParameterizedQuuxBar;
-    this.oneIntegerQuuxBar = v.oneIntegerQuuxBar();
-    @SuppressWarnings("unchecked") Quux<T> _oneParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.oneParameterizedQuux();
-    this.oneParameterizedQuux = _oneParameterizedQuux;
-    @SuppressWarnings("unchecked") Bar<T> _secondParameterizedBar = (Bar<T>) (Bar<? extends T>) v.secondParameterizedBar();
-    this.secondParameterizedBar = _secondParameterizedBar;
-    @SuppressWarnings("unchecked") Quux<T> _secondParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.secondParameterizedQuux();
-    this.secondParameterizedQuux = _secondParameterizedQuux;
-    List<? extends T> _moreFoos = v.moreFoos();
-    this.moreFoos = (_moreFoos == null) ? null : new ArrayList<T>(_moreFoos);
-  }
-
-  private GenericCollectionParentBuilder(GenericSuperParent<? extends T> v) {
+  private GenericSuperParentBuilder(GenericSuperParent<? extends T> v) {
     List<? extends T> _foos = v.foos();
     this.foos = (_foos == null) ? null : new ArrayList<T>(_foos);
     @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
@@ -64,7 +39,7 @@ public final class GenericCollectionParentBuilder<T> {
     this.oneParameterizedQuux = _oneParameterizedQuux;
   }
 
-  private GenericCollectionParentBuilder(GenericCollectionParentBuilder<? extends T> v) {
+  private GenericSuperParentBuilder(GenericSuperParentBuilder<? extends T> v) {
     this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
     @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar;
     this.oneParameterizedBar = _oneParameterizedBar;
@@ -74,11 +49,6 @@ public final class GenericCollectionParentBuilder<T> {
     this.oneIntegerQuuxBar = v.oneIntegerQuuxBar;
     @SuppressWarnings("unchecked") Quux<T> _oneParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.oneParameterizedQuux;
     this.oneParameterizedQuux = _oneParameterizedQuux;
-    @SuppressWarnings("unchecked") Bar<T> _secondParameterizedBar = (Bar<T>) (Bar<? extends T>) v.secondParameterizedBar;
-    this.secondParameterizedBar = _secondParameterizedBar;
-    @SuppressWarnings("unchecked") Quux<T> _secondParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.secondParameterizedQuux;
-    this.secondParameterizedQuux = _secondParameterizedQuux;
-    this.moreFoos = (v.moreFoos == null) ? null : new ArrayList<T>(v.moreFoos);
   }
 
   public List<T> foos() {
@@ -88,11 +58,11 @@ public final class GenericCollectionParentBuilder<T> {
     return foos;
   }
 
-  public GenericCollectionParentBuilder<T> foos(List<? extends T> foos) {
+  public GenericSuperParentBuilder<T> foos(List<? extends T> foos) {
     return foos((Collection<? extends T>) foos);
   }
 
-  public GenericCollectionParentBuilder<T> foos(Collection<? extends T> foos) {
+  public GenericSuperParentBuilder<T> foos(Collection<? extends T> foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
@@ -105,7 +75,7 @@ public final class GenericCollectionParentBuilder<T> {
     return this;
   }
 
-  public GenericCollectionParentBuilder<T> foos(Iterable<? extends T> foos) {
+  public GenericSuperParentBuilder<T> foos(Iterable<? extends T> foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
@@ -115,7 +85,7 @@ public final class GenericCollectionParentBuilder<T> {
     return foos(foos.iterator());
   }
 
-  public GenericCollectionParentBuilder<T> foos(Iterator<? extends T> foos) {
+  public GenericSuperParentBuilder<T> foos(Iterator<? extends T> foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
@@ -132,14 +102,14 @@ public final class GenericCollectionParentBuilder<T> {
 
   @SafeVarargs
   @SuppressWarnings("varargs")
-  public final GenericCollectionParentBuilder<T> foos(T... foos) {
+  public final GenericSuperParentBuilder<T> foos(T... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
     return foos(Arrays.asList(foos));
   }
 
-  public GenericCollectionParentBuilder<T> addFoo(T foo) {
+  public GenericSuperParentBuilder<T> addFoo(T foo) {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
@@ -154,7 +124,7 @@ public final class GenericCollectionParentBuilder<T> {
     return oneParameterizedBar;
   }
 
-  public GenericCollectionParentBuilder<T> oneParameterizedBar(Bar<T> oneParameterizedBar) {
+  public GenericSuperParentBuilder<T> oneParameterizedBar(Bar<T> oneParameterizedBar) {
     if (oneParameterizedBar == null) {
       throw new NullPointerException("oneParameterizedBar");
     }
@@ -166,7 +136,7 @@ public final class GenericCollectionParentBuilder<T> {
     return oneIntegerBar;
   }
 
-  public GenericCollectionParentBuilder<T> oneIntegerBar(Bar<Integer> oneIntegerBar) {
+  public GenericSuperParentBuilder<T> oneIntegerBar(Bar<Integer> oneIntegerBar) {
     if (oneIntegerBar == null) {
       throw new NullPointerException("oneIntegerBar");
     }
@@ -178,7 +148,7 @@ public final class GenericCollectionParentBuilder<T> {
     return oneParameterizedQuuxBar;
   }
 
-  public GenericCollectionParentBuilder<T> oneParameterizedQuuxBar(
+  public GenericSuperParentBuilder<T> oneParameterizedQuuxBar(
       Bar<Quux<T>> oneParameterizedQuuxBar) {
     if (oneParameterizedQuuxBar == null) {
       throw new NullPointerException("oneParameterizedQuuxBar");
@@ -191,7 +161,7 @@ public final class GenericCollectionParentBuilder<T> {
     return oneIntegerQuuxBar;
   }
 
-  public GenericCollectionParentBuilder<T> oneIntegerQuuxBar(Bar<Quux<Integer>> oneIntegerQuuxBar) {
+  public GenericSuperParentBuilder<T> oneIntegerQuuxBar(Bar<Quux<Integer>> oneIntegerQuuxBar) {
     if (oneIntegerQuuxBar == null) {
       throw new NullPointerException("oneIntegerQuuxBar");
     }
@@ -203,7 +173,7 @@ public final class GenericCollectionParentBuilder<T> {
     return oneParameterizedQuux;
   }
 
-  public GenericCollectionParentBuilder<T> oneParameterizedQuux(Quux<T> oneParameterizedQuux) {
+  public GenericSuperParentBuilder<T> oneParameterizedQuux(Quux<T> oneParameterizedQuux) {
     if (oneParameterizedQuux == null) {
       throw new NullPointerException("oneParameterizedQuux");
     }
@@ -211,120 +181,20 @@ public final class GenericCollectionParentBuilder<T> {
     return this;
   }
 
-  public Bar<T> secondParameterizedBar() {
-    return secondParameterizedBar;
-  }
-
-  public GenericCollectionParentBuilder<T> secondParameterizedBar(Bar<T> secondParameterizedBar) {
-    if (secondParameterizedBar == null) {
-      throw new NullPointerException("secondParameterizedBar");
-    }
-    this.secondParameterizedBar = secondParameterizedBar;
-    return this;
-  }
-
-  public Quux<T> secondParameterizedQuux() {
-    return secondParameterizedQuux;
-  }
-
-  public GenericCollectionParentBuilder<T> secondParameterizedQuux(
-      Quux<T> secondParameterizedQuux) {
-    if (secondParameterizedQuux == null) {
-      throw new NullPointerException("secondParameterizedQuux");
-    }
-    this.secondParameterizedQuux = secondParameterizedQuux;
-    return this;
-  }
-
-  public List<T> moreFoos() {
-    if (this.moreFoos == null) {
-      this.moreFoos = new ArrayList<T>();
-    }
-    return moreFoos;
-  }
-
-  public GenericCollectionParentBuilder<T> moreFoos(List<? extends T> moreFoos) {
-    return moreFoos((Collection<? extends T>) moreFoos);
-  }
-
-  public GenericCollectionParentBuilder<T> moreFoos(Collection<? extends T> moreFoos) {
-    if (moreFoos == null) {
-      throw new NullPointerException("moreFoos");
-    }
-    for (T item : moreFoos) {
-      if (item == null) {
-        throw new NullPointerException("moreFoos: null item");
-      }
-    }
-    this.moreFoos = new ArrayList<T>(moreFoos);
-    return this;
-  }
-
-  public GenericCollectionParentBuilder<T> moreFoos(Iterable<? extends T> moreFoos) {
-    if (moreFoos == null) {
-      throw new NullPointerException("moreFoos");
-    }
-    if (moreFoos instanceof Collection) {
-      return moreFoos((Collection<? extends T>) moreFoos);
-    }
-    return moreFoos(moreFoos.iterator());
-  }
-
-  public GenericCollectionParentBuilder<T> moreFoos(Iterator<? extends T> moreFoos) {
-    if (moreFoos == null) {
-      throw new NullPointerException("moreFoos");
-    }
-    this.moreFoos = new ArrayList<T>();
-    while (moreFoos.hasNext()) {
-      T item = moreFoos.next();
-      if (item == null) {
-        throw new NullPointerException("moreFoos: null item");
-      }
-      this.moreFoos.add(item);
-    }
-    return this;
-  }
-
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  public final GenericCollectionParentBuilder<T> moreFoos(T... moreFoos) {
-    if (moreFoos == null) {
-      throw new NullPointerException("moreFoos");
-    }
-    return moreFoos(Arrays.asList(moreFoos));
-  }
-
-  public GenericCollectionParentBuilder<T> addMoreFoo(T moreFoo) {
-    if (moreFoo == null) {
-      throw new NullPointerException("moreFoo");
-    }
-    if (this.moreFoos == null) {
-      this.moreFoos = new ArrayList<T>();
-    }
-    moreFoos.add(moreFoo);
-    return this;
-  }
-
-  public GenericCollectionParent<T> build() {
+  public GenericSuperParent<T> build() {
     List<T> _foos = (foos != null) ? Collections.unmodifiableList(new ArrayList<T>(foos)) : Collections.<T>emptyList();
-    List<T> _moreFoos = (moreFoos != null) ? Collections.unmodifiableList(new ArrayList<T>(moreFoos)) : Collections.<T>emptyList();
-    return new Value<T>(_foos, oneParameterizedBar, oneIntegerBar, oneParameterizedQuuxBar, oneIntegerQuuxBar, oneParameterizedQuux, secondParameterizedBar, secondParameterizedQuux, _moreFoos);
+    return new Value<T>(_foos, oneParameterizedBar, oneIntegerBar, oneParameterizedQuuxBar, oneIntegerQuuxBar, oneParameterizedQuux);
   }
 
-  public static <T> GenericCollectionParentBuilder<T> from(GenericCollectionParent<? extends T> v) {
-    return new GenericCollectionParentBuilder<T>(v);
+  public static <T> GenericSuperParentBuilder<T> from(GenericSuperParent<? extends T> v) {
+    return new GenericSuperParentBuilder<T>(v);
   }
 
-  public static <T> GenericCollectionParentBuilder<T> from(GenericSuperParent<? extends T> v) {
-    return new GenericCollectionParentBuilder<T>(v);
+  public static <T> GenericSuperParentBuilder<T> from(GenericSuperParentBuilder<? extends T> v) {
+    return new GenericSuperParentBuilder<T>(v);
   }
 
-  public static <T> GenericCollectionParentBuilder<T> from(
-      GenericCollectionParentBuilder<? extends T> v) {
-    return new GenericCollectionParentBuilder<T>(v);
-  }
-
-  private static final class Value<T> implements GenericCollectionParent<T> {
+  private static final class Value<T> implements GenericSuperParent<T> {
     private final List<T> foos;
 
     private final Bar<T> oneParameterizedBar;
@@ -337,21 +207,12 @@ public final class GenericCollectionParentBuilder<T> {
 
     private final Quux<T> oneParameterizedQuux;
 
-    private final Bar<T> secondParameterizedBar;
-
-    private final Quux<T> secondParameterizedQuux;
-
-    private final List<T> moreFoos;
-
     private Value(@AutoMatter.Field("foos") List<T> foos,
         @AutoMatter.Field("oneParameterizedBar") Bar<T> oneParameterizedBar,
         @AutoMatter.Field("oneIntegerBar") Bar<Integer> oneIntegerBar,
         @AutoMatter.Field("oneParameterizedQuuxBar") Bar<Quux<T>> oneParameterizedQuuxBar,
         @AutoMatter.Field("oneIntegerQuuxBar") Bar<Quux<Integer>> oneIntegerQuuxBar,
-        @AutoMatter.Field("oneParameterizedQuux") Quux<T> oneParameterizedQuux,
-        @AutoMatter.Field("secondParameterizedBar") Bar<T> secondParameterizedBar,
-        @AutoMatter.Field("secondParameterizedQuux") Quux<T> secondParameterizedQuux,
-        @AutoMatter.Field("moreFoos") List<T> moreFoos) {
+        @AutoMatter.Field("oneParameterizedQuux") Quux<T> oneParameterizedQuux) {
       if (oneParameterizedBar == null) {
         throw new NullPointerException("oneParameterizedBar");
       }
@@ -367,21 +228,12 @@ public final class GenericCollectionParentBuilder<T> {
       if (oneParameterizedQuux == null) {
         throw new NullPointerException("oneParameterizedQuux");
       }
-      if (secondParameterizedBar == null) {
-        throw new NullPointerException("secondParameterizedBar");
-      }
-      if (secondParameterizedQuux == null) {
-        throw new NullPointerException("secondParameterizedQuux");
-      }
       this.foos = (foos != null) ? foos : Collections.<T>emptyList();
       this.oneParameterizedBar = oneParameterizedBar;
       this.oneIntegerBar = oneIntegerBar;
       this.oneParameterizedQuuxBar = oneParameterizedQuuxBar;
       this.oneIntegerQuuxBar = oneIntegerQuuxBar;
       this.oneParameterizedQuux = oneParameterizedQuux;
-      this.secondParameterizedBar = secondParameterizedBar;
-      this.secondParameterizedQuux = secondParameterizedQuux;
-      this.moreFoos = (moreFoos != null) ? moreFoos : Collections.<T>emptyList();
     }
 
     @AutoMatter.Field
@@ -420,26 +272,8 @@ public final class GenericCollectionParentBuilder<T> {
       return oneParameterizedQuux;
     }
 
-    @AutoMatter.Field
-    @Override
-    public Bar<T> secondParameterizedBar() {
-      return secondParameterizedBar;
-    }
-
-    @AutoMatter.Field
-    @Override
-    public Quux<T> secondParameterizedQuux() {
-      return secondParameterizedQuux;
-    }
-
-    @AutoMatter.Field
-    @Override
-    public List<T> moreFoos() {
-      return moreFoos;
-    }
-
-    public GenericCollectionParentBuilder<T> builder() {
-      return new GenericCollectionParentBuilder<T>(this);
+    public GenericSuperParentBuilder<T> builder() {
+      return new GenericSuperParentBuilder<T>(this);
     }
 
     @Override
@@ -447,10 +281,10 @@ public final class GenericCollectionParentBuilder<T> {
       if (this == o) {
         return true;
       }
-      if (!(o instanceof GenericCollectionParent)) {
+      if (!(o instanceof GenericSuperParent)) {
         return false;
       }
-      final GenericCollectionParent<?> that = (GenericCollectionParent<?>) o;
+      final GenericSuperParent<?> that = (GenericSuperParent<?>) o;
       if (foos != null ? !foos.equals(that.foos()) : that.foos() != null) {
         return false;
       }
@@ -469,15 +303,6 @@ public final class GenericCollectionParentBuilder<T> {
       if (oneParameterizedQuux != null ? !oneParameterizedQuux.equals(that.oneParameterizedQuux()) : that.oneParameterizedQuux() != null) {
         return false;
       }
-      if (secondParameterizedBar != null ? !secondParameterizedBar.equals(that.secondParameterizedBar()) : that.secondParameterizedBar() != null) {
-        return false;
-      }
-      if (secondParameterizedQuux != null ? !secondParameterizedQuux.equals(that.secondParameterizedQuux()) : that.secondParameterizedQuux() != null) {
-        return false;
-      }
-      if (moreFoos != null ? !moreFoos.equals(that.moreFoos()) : that.moreFoos() != null) {
-        return false;
-      }
       return true;
     }
 
@@ -491,24 +316,18 @@ public final class GenericCollectionParentBuilder<T> {
       result = 31 * result + (this.oneParameterizedQuuxBar != null ? this.oneParameterizedQuuxBar.hashCode() : 0);
       result = 31 * result + (this.oneIntegerQuuxBar != null ? this.oneIntegerQuuxBar.hashCode() : 0);
       result = 31 * result + (this.oneParameterizedQuux != null ? this.oneParameterizedQuux.hashCode() : 0);
-      result = 31 * result + (this.secondParameterizedBar != null ? this.secondParameterizedBar.hashCode() : 0);
-      result = 31 * result + (this.secondParameterizedQuux != null ? this.secondParameterizedQuux.hashCode() : 0);
-      result = 31 * result + (this.moreFoos != null ? this.moreFoos.hashCode() : 0);
       return result;
     }
 
     @Override
     public String toString() {
-      return "GenericCollectionParent{" +
+      return "GenericSuperParent{" +
           "foos=" + foos +
           ", oneParameterizedBar=" + oneParameterizedBar +
           ", oneIntegerBar=" + oneIntegerBar +
           ", oneParameterizedQuuxBar=" + oneParameterizedQuuxBar +
           ", oneIntegerQuuxBar=" + oneIntegerQuuxBar +
           ", oneParameterizedQuux=" + oneParameterizedQuux +
-          ", secondParameterizedBar=" + secondParameterizedBar +
-          ", secondParameterizedQuux=" + secondParameterizedQuux +
-          ", moreFoos=" + moreFoos +
           '}';
     }
   }

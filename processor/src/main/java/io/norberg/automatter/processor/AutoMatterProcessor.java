@@ -257,8 +257,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             fieldName, fieldName, collectionImplType(target, field), fieldName);
       } else {
         if (isParameterized) {
-          final TypeName fieldType = fieldType(target, field);
-          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          final TypeMirror fieldType = source.fieldType(field);
+          final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
               fieldType, fieldName, fieldType, upperBoundedFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
@@ -306,8 +306,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
       if (isCollection(field) || isMap(field)) {
         if (isParameterized) {
-          final TypeName ctorArgumentType = upperBoundedFieldType(field, 1);
-          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          final TypeMirror fieldType = d.fieldType(field);
+          final TypeName ctorArgumentType = upperBoundedType(fieldType, 1);
+          final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
             constructor.addStatement(
                 "this.$N = (v.$N == null) ? null : new $T(v.$N)",
@@ -326,8 +327,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         }
       } else {
         if (isParameterized) {
-          final TypeName fieldType = fieldType(d, field);
-          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          final TypeMirror fieldType = d.fieldType(field);
+          final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
               fieldType, fieldName, fieldType, upperBoundedFieldType, fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
@@ -1162,17 +1163,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return d.fieldTypeName(field);
   }
 
-  private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
-    return upperBoundedFieldType(field, Integer.MAX_VALUE);
-  }
-
   private TypeName upperBoundedType(TypeMirror type) throws AutoMatterProcessorException {
     return upperBoundedType(type, Integer.MAX_VALUE);
-  }
-
-  private TypeName upperBoundedFieldType(final ExecutableElement field, int limit) {
-    TypeMirror type = field.getReturnType();
-    return upperBoundedType(type, limit);
   }
 
   private TypeName upperBoundedType(TypeMirror type, int limit) {
@@ -1196,20 +1188,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       typeNames[i] = subtypeOf(upperBoundedTypeArgument);
     }
     return ParameterizedTypeName.get(raw, typeNames);
-  }
-
-  private ClassName rawClassName(final DeclaredType declaredType) {
-    final String simpleName = declaredType.asElement().getSimpleName().toString();
-    final String packageName = packageName(declaredType);
-    return ClassName.get(packageName, simpleName);
-  }
-
-  private String packageName(final DeclaredType declaredType) {
-    Element type = declaredType.asElement();
-    while (type.getKind() != ElementKind.PACKAGE) {
-      type = type.getEnclosingElement();
-    }
-    return type.toString();
   }
 
   private TypeName genericArgument(Descriptor d, final ExecutableElement field, int index) {

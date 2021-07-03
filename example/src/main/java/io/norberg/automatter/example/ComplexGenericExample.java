@@ -42,5 +42,12 @@ public class ComplexGenericExample {
     final ComplexGenericFoobar<CharSequence, Number, List<Integer>, ComparableList<Integer>> foobar2 = builder.build();
 
     System.out.println(foobar2);
+
+    final InheritingComplexGenericFoobar<String> inheritingFoobar =
+        InheritingComplexGenericFoobarBuilder.from(foobar)
+            .foot("foo")
+            .build();
+
+    System.out.println(inheritingFoobar);
   }
 }

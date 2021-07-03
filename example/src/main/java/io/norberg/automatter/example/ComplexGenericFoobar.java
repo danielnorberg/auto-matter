@@ -1,12 +1,10 @@
 package io.norberg.automatter.example;
 
 import com.google.common.base.Optional;
-
+import io.norberg.automatter.AutoMatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
 interface ComplexGenericFoobar<
@@ -36,4 +34,10 @@ interface ComplexGenericFoobar<
     K k();
     V v();
   }
+}
+
+@AutoMatter
+interface InheritingComplexGenericFoobar<FOO>
+    extends ComplexGenericFoobar<FOO, Integer, List<Integer>, ComparableList<Integer>> {
+  FOO foot();
 }
