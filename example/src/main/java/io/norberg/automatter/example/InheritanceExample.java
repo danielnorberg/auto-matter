@@ -5,8 +5,9 @@ import io.norberg.automatter.AutoMatter;
 public class InheritanceExample {
 
   @AutoMatter
-  interface Foo {
+  interface Foo<T> {
     String foo();
+    T foot();
   }
 
   interface Bar<T> {
@@ -14,7 +15,12 @@ public class InheritanceExample {
   }
 
   @AutoMatter
-  interface Baz extends Foo, Bar<Integer> {
+  interface Baz extends Foo<Integer>, Bar<Integer> {
+    int baz();
+  }
+
+  @AutoMatter
+  interface Quux<T> extends Foo<T> {
     int baz();
   }
 
@@ -22,20 +28,37 @@ public class InheritanceExample {
     // Create builder and set values of inherited fields
     Baz baz = new BazBuilder()
         .foo("hello")
+        .foot(3)
         .bar(17)
         .baz(4711)
         .build();
+    System.out.println(baz);
 
-    Foo foo = new FooBuilder()
+    // Create builder and value from inheriting sub type
+    Foo<Integer> foo = FooBuilder.from(baz)
         .foo("world")
+        .foot(3)
         .build();
+    System.out.println(foo);
 
-    // Create builder from inherited value type
-    BazBuilder.from(foo)
+    // Create builder and value from inherited super type
+    Baz bazFromFoo = BazBuilder.from(foo)
         .bar(123)
         .baz(456)
+        .foot(3)
         .build();
+    System.out.println(bazFromFoo);
 
-    System.out.println(baz);
+    // Create generic builder and value from inherited super type
+    Quux<Integer> quuxFromFoo = QuuxBuilder.from(foo)
+        .foo("hello world")
+        .foot(42)
+        .build();
+    System.out.println(quuxFromFoo);
+
+    // Create generic builder and value from inheriting sub type
+    Foo<Integer> fooFromQuux = FooBuilder.from(quuxFromFoo)
+        .build();
+    System.out.println(fooFromQuux);
   }
 }
