@@ -21,6 +21,11 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
   }
 
+  private ConcreteExtensionOfGenericParentBuilder(GenericCollectionParent<? extends Integer> v) {
+    List<? extends Integer> _foos = v.foos();
+    this.foos = (_foos == null) ? null : new ArrayList<Integer>(_foos);
+  }
+
   private ConcreteExtensionOfGenericParentBuilder(ConcreteExtensionOfGenericParentBuilder v) {
     this.foos = (v.foos == null) ? null : new ArrayList<Integer>(v.foos);
   }
@@ -100,6 +105,10 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   public static ConcreteExtensionOfGenericParentBuilder from(ConcreteExtensionOfGenericParent v) {
+    return new ConcreteExtensionOfGenericParentBuilder(v);
+  }
+
+  public static ConcreteExtensionOfGenericParentBuilder from(GenericCollectionParent<? extends Integer> v) {
     return new ConcreteExtensionOfGenericParentBuilder(v);
   }
 

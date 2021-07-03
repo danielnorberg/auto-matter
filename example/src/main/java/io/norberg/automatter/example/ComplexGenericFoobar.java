@@ -22,12 +22,17 @@ interface ComplexGenericFoobar<
 
   Optional<List<FOO>> maybeFoos();
   List<BAR> someBars();
-  Map<FOO, Fizz<BAR, BAZ>> foobars();
+  Map<FOO, Fizz<BAR, BAZ, FOO>> foobars();
 
   String name();
 
   @AutoMatter
-  interface Fizz<K, V> {
+  interface Fuzz<M> {
+    M m();
+  }
+
+  @AutoMatter
+  interface Fizz<K, V, M> extends Fuzz<M> {
     K k();
     V v();
   }

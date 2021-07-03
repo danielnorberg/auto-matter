@@ -25,7 +25,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import io.norberg.automatter.AutoMatter;
 import java.io.IOException;
@@ -39,7 +38,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -149,7 +147,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void process(final Element element) throws IOException, AutoMatterProcessorException {
-    final Descriptor d = new Descriptor(element, elements, types);
+    final Descriptor d = Descriptor.of(element, elements, types);
 
     TypeSpec builder = builder(d);
     JavaFile javaFile = JavaFile.builder(d.packageName(), builder)
@@ -180,7 +178,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     builder.addMethod(defaultConstructor(d));
-    builder.addMethod(copyValueConstructor(d));
+    builder.addMethod(copyValueConstructor(d, d));
+    for (Descriptor superValueType : d.superValueTypes()) {
+      builder.addMethod(copyValueConstructor(d, superValueType));
+    }
     builder.addMethod(copyBuilderConstructor(d));
 
     for (MethodSpec accessor : accessors(d)) {
@@ -192,7 +193,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     builder.addMethod(build(d));
-    builder.addMethod(fromValue(d));
+    builder.addMethod(fromValue(d, d));
+    for (Descriptor superValueType : d.superValueTypes()) {
+      builder.addMethod(fromValue(d, superValueType));
+    }
     builder.addMethod(fromBuilder(d));
 
     builder.addType(valueClass(d));
@@ -222,21 +226,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return constructor.build();
   }
 
-  private MethodSpec copyValueConstructor(final Descriptor d) throws AutoMatterProcessorException {
-    final TypeName valueType = upperBoundedValueType(d);
+  private MethodSpec copyValueConstructor(final Descriptor target, final Descriptor source) throws AutoMatterProcessorException {
+    final TypeName valueType = upperBoundedValueType(source);
     final MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
         .addModifiers(PRIVATE)
         .addParameter(valueType, "v");
 
-    for (ExecutableElement field : d.fields()) {
+    for (ExecutableElement field : source.fields()) {
       String fieldName = fieldName(field);
 
       final boolean isParameterized = isFieldTypeParameterized(field);
 
       if (isCollection(field) || isMap(field)) {
         if (isParameterized) {
-          final TypeName ctorArgumentType = upperBoundedFieldType(field, 1);
-          final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
+          final TypeMirror fieldType = source.fieldType(field);
+          final TypeName ctorArgumentType = upperBoundedType(fieldType, 1);
+          final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
             constructor.addStatement("$T _$N = v.$N()", ctorArgumentType, fieldName, fieldName);
           } else {
@@ -244,15 +249,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                 ctorArgumentType, fieldName, ctorArgumentType, upperBoundedFieldType, fieldName);
           }
         } else {
-          final TypeName fieldType = fieldType(d, field);
+          final TypeName fieldType = fieldType(target, field);
           constructor.addStatement("$T _$N = v.$N()", fieldType, fieldName, fieldName);
         }
         constructor.addStatement(
             "this.$N = (_$N == null) ? null : new $T(_$N)",
-            fieldName, fieldName, collectionImplType(d, field), fieldName);
+            fieldName, fieldName, collectionImplType(target, field), fieldName);
       } else {
         if (isParameterized) {
-          final TypeName fieldType = fieldType(d, field);
+          final TypeName fieldType = fieldType(target, field);
           final TypeName upperBoundedFieldType = upperBoundedFieldType(field);
           constructor.addStatement("@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
               fieldType, fieldName, fieldType, upperBoundedFieldType, fieldName);
@@ -792,13 +797,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return build.addStatement("return new $T($N)", valueImplType(d), String.join(", ", parameters)).build();
   }
 
-  private MethodSpec fromValue(final Descriptor d) {
+  private MethodSpec fromValue(final Descriptor target, final Descriptor source) {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
-        .addTypeVariables(d.typeVariables())
-        .addParameter(upperBoundedValueType(d), "v")
-        .returns(builderType(d))
-        .addStatement("return new $T(v)", builderType(d))
+        .addTypeVariables(target.typeVariables())
+        .addParameter(upperBoundedValueType(source), "v")
+        .returns(builderType(target))
+        .addStatement("return new $T(v)", builderType(target))
         .build();
   }
 
@@ -1089,13 +1094,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, upperBounded(d.typeVariables()));
+    return ParameterizedTypeName.get(raw, upperBounded(d.typeArguments()));
   }
 
-  private TypeName[] upperBounded(final List<TypeVariableName> typeVariables) {
-    final TypeName[] typeNames = new TypeName[typeVariables.size()];
-    for (int i = 0; i < typeVariables.size(); i++) {
-      typeNames[i] = subtypeOf(typeVariables.get(i));
+  private TypeName[] upperBounded(final TypeName[] typeArguments) {
+    final TypeName[] typeNames = new TypeName[typeArguments.length];
+    for (int i = 0; i < typeArguments.length; i++) {
+      typeNames[i] = subtypeOf(typeArguments[i]);
     }
     return typeNames;
   }
@@ -1138,7 +1143,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     if (!d.isGeneric()) {
       return raw;
     }
-    return ParameterizedTypeName.get(raw, upperBounded(d.typeVariables()));
+    return ParameterizedTypeName.get(raw, upperBounded(d.typeArguments()));
   }
 
   private TypeName valueImplType(final Descriptor d) {
@@ -1154,11 +1159,15 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeName fieldType(final Descriptor d, final ExecutableElement field) {
-    return d.fieldTypes().get(field);
+    return d.fieldTypeName(field);
   }
 
   private TypeName upperBoundedFieldType(final ExecutableElement field) throws AutoMatterProcessorException {
     return upperBoundedFieldType(field, Integer.MAX_VALUE);
+  }
+
+  private TypeName upperBoundedType(TypeMirror type) throws AutoMatterProcessorException {
+    return upperBoundedType(type, Integer.MAX_VALUE);
   }
 
   private TypeName upperBoundedFieldType(final ExecutableElement field, int limit) {
@@ -1183,12 +1192,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final TypeName[] typeNames = new TypeName[n];
     for (int i = 0; i < n; i++) {
       final TypeMirror typeArgument = declaredType.getTypeArguments().get(i);
-      if (typeArgument.getKind() == TYPEVAR || isTypeParameterized(typeArgument)) {
-        final TypeName upperBoundedTypeArgument = upperBoundedType(typeArgument, limit - 1);
-        typeNames[i] = subtypeOf(upperBoundedTypeArgument);
-      } else {
-        typeNames[i] = TypeName.get(typeArgument);
-      }
+      final TypeName upperBoundedTypeArgument = upperBoundedType(typeArgument, limit - 1);
+      typeNames[i] = subtypeOf(upperBoundedTypeArgument);
     }
     return ParameterizedTypeName.get(raw, typeNames);
   }

@@ -10,10 +10,11 @@ import java.util.List;
 
 public class ComplexGenericExample {
 
-  static <K, V> Fizz<K, V> fizz(K k, V v) {
-    return new FizzBuilder<K, V>()
+  static <K, V, M> Fizz<K, V, M> fizz(K k, V v, M m) {
+    return new FizzBuilder<K, V, M>()
         .k(k)
         .v(v)
+        .m(m)
         .build();
   }
 
@@ -28,9 +29,9 @@ public class ComplexGenericExample {
             .maybeFoos(Optional.of(ImmutableList.of("foo1", "foo2")))
             .someBars(3, 1, 4)
             .foobars(
-                "foo", fizz(34, ImmutableList.of(7, 4, 3)),
-                "bar", fizz(75, ImmutableList.of(93, 6, 23)))
-            .putFoobar("baz", fizz(853, ImmutableList.of(9, 46, 23)))
+                "foo", fizz(34, ImmutableList.of(7, 4, 3), "a"),
+                "bar", fizz(75, ImmutableList.of(93, 6, 23), "b"))
+            .putFoobar("baz", fizz(853, ImmutableList.of(9, 46, 23), "c"))
             .build();
 
     System.out.println(foobar);
