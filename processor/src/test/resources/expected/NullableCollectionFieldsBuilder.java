@@ -79,9 +79,7 @@ public final class NullableCollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  public final NullableCollectionFieldsBuilder strings(String... strings) {
+  public NullableCollectionFieldsBuilder strings(String... strings) {
     if (strings == null) {
       this.strings = null;
       return this;
@@ -199,9 +197,7 @@ public final class NullableCollectionFieldsBuilder {
     return this;
   }
 
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  public final NullableCollectionFieldsBuilder numbers(Long... numbers) {
+  public NullableCollectionFieldsBuilder numbers(Long... numbers) {
     if (numbers == null) {
       this.numbers = null;
       return this;

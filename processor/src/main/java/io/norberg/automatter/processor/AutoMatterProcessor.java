@@ -28,6 +28,8 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import io.norberg.automatter.AutoMatter;
 import java.io.IOException;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -550,7 +553,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .varargs()
         .returns(builderType(d));
 
-    ensureSafeVarargs(setter);
+    if (!isReifiable(itemType)) {
+      ensureSafeVarargs(setter);
+    }
 
     collectionNullGuard(setter, field);
 
@@ -559,7 +564,6 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private void ensureSafeVarargs(MethodSpec.Builder setter) {
-    // TODO: Add SafeVarargs annotation only for non-reifiable types.
     AnnotationSpec safeVarargsAnnotation = AnnotationSpec.builder(SafeVarargs.class).build();
 
     setter
@@ -1442,6 +1446,35 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       return "";
     }
     return s.substring(0, 1).toUpperCase() + (s.length() > 1 ? s.substring(1) : "");
+  }
+
+  private static boolean isUnboundedWildcard(TypeName type) {
+    if (type instanceof WildcardTypeName) {
+      WildcardTypeName t = (WildcardTypeName) type;
+      return t.lowerBounds.isEmpty() && t.upperBounds.stream().allMatch(bound -> bound.equals(TypeName.OBJECT));
+    }
+    return false;
+  }
+
+  public static boolean isReifiable(TypeName type) {
+    if (type.isPrimitive()) return true;
+    if (type.isBoxedPrimitive()) return true;
+
+    // TODO: handle nested types, per JLS §4.7
+    // JavaPoet does not expose ParameterizedTypeName's enclosing type,
+    // so we can't verify that the enclosing type is reifiable.
+
+    if (type instanceof ParameterizedTypeName) {
+      ParameterizedTypeName parameterized = (ParameterizedTypeName) type;
+      return parameterized.typeArguments.stream().allMatch(AutoMatterProcessor::isUnboundedWildcard);
+    } else if (type instanceof ArrayTypeName) {
+      ArrayTypeName array = (ArrayTypeName) type;
+      return isReifiable(array.componentType);
+    } else if (type instanceof ClassName) {
+      return true;
+    }
+
+    return false;
   }
 
   @Override

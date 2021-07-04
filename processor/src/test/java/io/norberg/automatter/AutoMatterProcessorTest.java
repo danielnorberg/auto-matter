@@ -5,14 +5,23 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.WildcardTypeName;
 import io.norberg.automatter.processor.AutoMatterProcessor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.tools.Diagnostic;
@@ -470,5 +479,29 @@ public class AutoMatterProcessorTest {
     } catch (ClassNotFoundException e) {
       return false;
     }
+  }
+
+  private TypeName[] wildcards(final int size) {
+    final WildcardTypeName wildcard = subtypeOf(ClassName.get(Object.class));
+    final TypeName[] wildcards = new TypeName[size];
+    for (int i = 0; i < size; i++) {
+      wildcards[i] = wildcard;
+    }
+    return wildcards;
+  }
+
+  @Test
+  public void testReifiable() {
+    ParameterizedTypeName listOfObject = ParameterizedTypeName.get(ClassName.get("java.util", "List"), TypeName.OBJECT);
+    assertTrue(AutoMatterProcessor.isReifiable(TypeName.BOOLEAN));
+    assertTrue(AutoMatterProcessor.isReifiable(TypeName.get(String.class)));
+    assertTrue(AutoMatterProcessor.isReifiable(ClassName.get("java.util", "List")));
+    assertTrue(AutoMatterProcessor.isReifiable(ParameterizedTypeName.get(ClassName.get("java.util", "List"), wildcards(1)[0])));
+    assertFalse(AutoMatterProcessor.isReifiable(listOfObject));
+    assertTrue(AutoMatterProcessor.isReifiable(ArrayTypeName.of(String.class)));
+    assertFalse(AutoMatterProcessor.isReifiable(ArrayTypeName.of(listOfObject)));
+
+    // TODO: handle nested classes
+    //assertFalse(AutoMatterProcessor.isReifiable(listOfObject.nestedClass("Foo")));
   }
 }

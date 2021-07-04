@@ -153,9 +153,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     return this;
   }
 
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  public final ConcreteExtensionOfGenericParentBuilder foos(Integer... foos) {
+  public ConcreteExtensionOfGenericParentBuilder foos(Integer... foos) {
     if (foos == null) {
       throw new NullPointerException("foos");
     }
