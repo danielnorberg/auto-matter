@@ -1,11 +1,15 @@
 package io.norberg.automatter.gson;
 
+import static io.norberg.automatter.gson.AutoMatterTypeAdapter.createForInterface;
+import static io.norberg.automatter.gson.AutoMatterTypeAdapter.createForValue;
+import static java.util.Arrays.asList;
+
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-
+import io.norberg.automatter.AutoMatter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,18 +19,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.norberg.automatter.AutoMatter;
-
-import static io.norberg.automatter.gson.AutoMatterTypeAdapter.createForInterface;
-import static io.norberg.automatter.gson.AutoMatterTypeAdapter.createForValue;
-import static java.util.Arrays.asList;
-
 public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
   private static final String VALUE_SUFFIX = "Builder$Value";
 
   private final ConcurrentMap<TypeToken<?>, TypeAdapter<?>> adapters = new ConcurrentHashMap<>();
-
 
   @SuppressWarnings("unchecked")
   @Override
@@ -66,22 +63,22 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
       }
 
       // Find those magic remapping-of-name-annotations (SerializedName)
-      final Map<String, List<String>>
-          serializedNameMethods = getSerializedNameMethods(gson, type.getRawType(), cls);
+      final Map<String, List<String>> serializedNameMethods =
+          getSerializedNameMethods(gson, type.getRawType(), cls);
 
       // If the interface passed to us didn't have any SerializedName annotations, go the fast path
       // and just pass it on the type adapter chain,
       // it will most likely end up in the ReflectiveTypeAdapterFactory, good riddance!
       // If it was annotated, we create a TypeAdapter that knows how to poke the json into
       // Java world submission.
-      materialized = serializedNameMethods.isEmpty()
-                     ? gson.getAdapter(cls)
-                     : createForInterface(gson, cls, serializedNameMethods);
+      materialized =
+          serializedNameMethods.isEmpty()
+              ? gson.getAdapter(cls)
+              : createForInterface(gson, cls, serializedNameMethods);
     } else {
       // Maybe a value class with SerializedName annotations?
 
-      final Map<String, List<String>>
-          serializedNameMethodsbuilder = new HashMap<>();
+      final Map<String, List<String>> serializedNameMethodsbuilder = new HashMap<>();
 
       // Since AutoMatter supports inheritance we need to walk through all of the interfaces with
       // AutoMatter annotations.
@@ -92,8 +89,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
         }
       }
 
-      final Map<String, List<String>>
-          serializedNameMethods = serializedNameMethodsbuilder;
+      final Map<String, List<String>> serializedNameMethods = serializedNameMethodsbuilder;
 
       // Either what we were passed wasn't a value class or it was not annotated with SerializedName
       // either way, we don't have to care, pass it on to the chain of factories that might be
@@ -101,7 +97,8 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
       if (serializedNameMethods.isEmpty()) {
         return null;
       }
-      // We create a TypeAdapter that knows how to read between the lines (A.K.A is annotation aware)
+      // We create a TypeAdapter that knows how to read between the lines (A.K.A is annotation
+      // aware)
       // and can translate the restricted Java world names to beautiful free form json fields. Nom!
       materialized = createForValue(gson, this, type, serializedNameMethods);
     }
@@ -112,8 +109,7 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
 
   private <T> Map<String, List<String>> getSerializedNameMethods(
       final Gson gson, final Class<T> c, final Class<?> valueClass) {
-    final Map<String, List<String>>
-        methodToAnnotation = new HashMap<>();
+    final Map<String, List<String>> methodToAnnotation = new HashMap<>();
 
     for (Method method : c.getMethods()) {
       if (method.isAnnotationPresent(SerializedName.class)) {
@@ -121,18 +117,15 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
         List<String> values = new ArrayList<>();
         values.add(serializedName.value());
         values.addAll(asList(serializedName.alternate()));
-        methodToAnnotation.put(
-            translateField(gson, method.getName(), valueClass),
-            values
-        );
+        methodToAnnotation.put(translateField(gson, method.getName(), valueClass), values);
       }
-
     }
 
     return methodToAnnotation;
   }
 
-  private String translateField(final Gson gson, final String fieldName, final Class<?> valueClass) {
+  private String translateField(
+      final Gson gson, final String fieldName, final Class<?> valueClass) {
     final Field field;
     try {
       field = valueClass.getDeclaredField(fieldName);
@@ -141,5 +134,4 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
     }
     return gson.fieldNamingStrategy().translateName(field);
   }
-
 }

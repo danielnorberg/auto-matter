@@ -37,9 +37,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.TypeKindVisitor8;
 import javax.lang.model.util.Types;
 
-/**
- * Holds information about an automatter annotated interface and the entities it generates.
- */
+/** Holds information about an automatter annotated interface and the entities it generates. */
 class Descriptor {
 
   private final DeclaredType valueType;
@@ -77,9 +75,12 @@ class Descriptor {
     this.isGeneric = !valueTypeArguments.isEmpty();
     this.packageName = elements.getPackageOf(valueTypeElement).getQualifiedName().toString();
     this.builderName = valueTypeElement.getSimpleName().toString() + "Builder";
-    final String typeParameterization = isGeneric ?
-        "<" + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(",")) + ">"
-        : "";
+    final String typeParameterization =
+        isGeneric
+            ? "<"
+                + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(","))
+                + ">"
+            : "";
     this.concreteBuilderName = builderName + typeParameterization;
     this.fullyQualifiedBuilderName = fullyQualifedName(packageName, concreteBuilderName);
     this.fields = new ArrayList<>();
@@ -97,8 +98,8 @@ class Descriptor {
     return Collections.unmodifiableList(superValueTypes);
   }
 
-  private void enumerateSuperValueTypes(DeclaredType valueType, Elements elements,
-      Types types, List<Descriptor> superValueTypes) {
+  private void enumerateSuperValueTypes(
+      DeclaredType valueType, Elements elements, Types types, List<Descriptor> superValueTypes) {
     for (final TypeMirror superType : types.directSupertypes(valueType)) {
       if (superType.getKind() != TypeKind.DECLARED) {
         continue;
@@ -122,7 +123,6 @@ class Descriptor {
   Optional<ExecutableElement> checkMethod() {
     return Optional.ofNullable(check);
   }
-
 
   public List<Descriptor> superValueTypes() {
     return superValueTypes;
@@ -167,8 +167,8 @@ class Descriptor {
     return new ArrayList<>(methodMap.values());
   }
 
-  private void enumerateMethods(final TypeElement element,
-      final Map<String, ExecutableElement> methods) {
+  private void enumerateMethods(
+      final TypeElement element, final Map<String, ExecutableElement> methods) {
     for (final TypeMirror interfaceType : element.getInterfaces()) {
       final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
       enumerateMethods(interfaceElement, methods);
@@ -181,15 +181,17 @@ class Descriptor {
     }
   }
 
-  private ExecutableElement findInstanceMethod(final TypeElement element,
-      final Class<? extends Annotation> tag) {
+  private ExecutableElement findInstanceMethod(
+      final TypeElement element, final Class<? extends Annotation> tag) {
     final List<ExecutableElement> matches = new ArrayList<>();
     for (final Element member : element.getEnclosedElements()) {
       if (member.getKind() == ElementKind.METHOD && member.getAnnotation(tag) != null) {
         if (!member.getModifiers().contains(STATIC) && !member.getModifiers().contains(DEFAULT)) {
           throw new AutoMatterProcessorException(
-              "Method annotated with @AutoMatter." + tag.getSimpleName()
-                  + " must be static or default", valueTypeElement);
+              "Method annotated with @AutoMatter."
+                  + tag.getSimpleName()
+                  + " must be static or default",
+              valueTypeElement);
         }
         matches.add((ExecutableElement) member);
       }
@@ -198,8 +200,10 @@ class Descriptor {
       return matches.get(0);
     } else if (matches.size() > 1) {
       throw new AutoMatterProcessorException(
-          "There must only be one @AutoMatter." + tag.getSimpleName()
-              + "annotated method on a type", valueTypeElement);
+          "There must only be one @AutoMatter."
+              + tag.getSimpleName()
+              + "annotated method on a type",
+          valueTypeElement);
     }
     for (final TypeMirror interfaceType : element.getInterfaces()) {
       final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
@@ -213,9 +217,7 @@ class Descriptor {
 
   private static boolean isStaticOrDefaultOrPrivate(final Element member) {
     final Set<Modifier> modifiers = member.getModifiers();
-    return modifiers.contains(STATIC)
-        || modifiers.contains(DEFAULT)
-        || modifiers.contains(PRIVATE);
+    return modifiers.contains(STATIC) || modifiers.contains(DEFAULT) || modifiers.contains(PRIVATE);
   }
 
   String packageName() {
@@ -282,62 +284,61 @@ class Descriptor {
   }
 
   private static void verifyResolved(TypeMirror type) {
-    type.accept(new TypeKindVisitor8<Void, Void>() {
-      @Override
-      public Void visitIntersection(IntersectionType t, Void aVoid) {
-        t.getBounds().forEach(Descriptor::verifyResolved);
-        return null;
-      }
+    type.accept(
+        new TypeKindVisitor8<Void, Void>() {
+          @Override
+          public Void visitIntersection(IntersectionType t, Void aVoid) {
+            t.getBounds().forEach(Descriptor::verifyResolved);
+            return null;
+          }
 
-      @Override
-      public Void visitUnion(UnionType t, Void aVoid) {
-        t.getAlternatives().forEach(Descriptor::verifyResolved);
-        return null;
-      }
+          @Override
+          public Void visitUnion(UnionType t, Void aVoid) {
+            t.getAlternatives().forEach(Descriptor::verifyResolved);
+            return null;
+          }
 
-      @Override
-      public Void visitArray(ArrayType t, Void aVoid) {
-        verifyResolved(t.getComponentType());
-        return null;
-      }
+          @Override
+          public Void visitArray(ArrayType t, Void aVoid) {
+            verifyResolved(t.getComponentType());
+            return null;
+          }
 
-      @Override
-      public Void visitError(ErrorType t, Void aVoid) {
-        throw new UnresolvedTypeException(t.toString());
-      }
+          @Override
+          public Void visitError(ErrorType t, Void aVoid) {
+            throw new UnresolvedTypeException(t.toString());
+          }
 
-      @Override
-      public Void visitTypeVariable(TypeVariable t, Void aVoid) {
-        verifyResolved(t.getLowerBound());
-        verifyResolved(t.getUpperBound());
-        return null;
-      }
+          @Override
+          public Void visitTypeVariable(TypeVariable t, Void aVoid) {
+            verifyResolved(t.getLowerBound());
+            verifyResolved(t.getUpperBound());
+            return null;
+          }
 
-      @Override
-      public Void visitWildcard(WildcardType t, Void aVoid) {
-        final TypeMirror extendsBound = t.getExtendsBound();
-        if (extendsBound != null) {
-          verifyResolved(extendsBound);
-        }
-        final TypeMirror superBound = t.getSuperBound();
-        if (superBound != null) {
-          verifyResolved(superBound);
-        }
-        return null;
-      }
-    }, null);
+          @Override
+          public Void visitWildcard(WildcardType t, Void aVoid) {
+            final TypeMirror extendsBound = t.getExtendsBound();
+            if (extendsBound != null) {
+              verifyResolved(extendsBound);
+            }
+            final TypeMirror superBound = t.getSuperBound();
+            if (superBound != null) {
+              verifyResolved(superBound);
+            }
+            return null;
+          }
+        },
+        null);
   }
 
-  /**
-   * Perform post-processing validation.
-   */
+  /** Perform post-processing validation. */
   public void validate(Elements elements, Types types) {
     // Validate the `builder()` return type. In some cases this can only be done after the
     // builder has been generated, otherwise the return type will not be resolved.
     if (hasToBuilder()) {
       final Name name = valueTypeElement.getQualifiedName();
-      final TypeElement updatedValueTypeElement = elements
-          .getTypeElement(name);
+      final TypeElement updatedValueTypeElement = elements.getTypeElement(name);
       final Map<String, ExecutableElement> methods = new LinkedHashMap<>();
       enumerateMethods(updatedValueTypeElement, methods);
       ExecutableElement builderMethod = methods.get("builder");
@@ -345,11 +346,10 @@ class Descriptor {
         throw new AssertionError("Expected to find builder method");
       }
       final TypeMirror returnType = builderMethod.getReturnType();
-      if (!returnType.toString().equals(concreteBuilderName) &&
-          !returnType.toString().equals(fullyQualifiedBuilderName)) {
+      if (!returnType.toString().equals(concreteBuilderName)
+          && !returnType.toString().equals(fullyQualifiedBuilderName)) {
         throw new AutoMatterProcessorException(
-            name + ".builder() return type must be " + concreteBuilderName,
-            builderMethod);
+            name + ".builder() return type must be " + concreteBuilderName, builderMethod);
       }
     }
   }

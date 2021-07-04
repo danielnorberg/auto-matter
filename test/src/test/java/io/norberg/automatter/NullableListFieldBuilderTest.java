@@ -1,16 +1,15 @@
 package io.norberg.automatter;
 
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+
+import java.util.List;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import javax.annotation.Nullable;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 
 public class NullableListFieldBuilderTest {
 
@@ -18,7 +17,8 @@ public class NullableListFieldBuilderTest {
 
   @AutoMatter
   interface NullableLists {
-    @Nullable List<String> apples();
+    @Nullable
+    List<String> apples();
   }
 
   NullableListsBuilder builder;

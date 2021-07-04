@@ -11,11 +11,7 @@ import java.util.List;
 public class ComplexGenericExample {
 
   static <K, V, M> Fizz<K, V, M> fizz(K k, V v, M m) {
-    return new FizzBuilder<K, V, M>()
-        .k(k)
-        .v(v)
-        .m(m)
-        .build();
+    return new FizzBuilder<K, V, M>().k(k).v(v).m(m).build();
   }
 
   public static void main(final String... args) throws IOException {
@@ -36,17 +32,18 @@ public class ComplexGenericExample {
 
     System.out.println(foobar);
 
-    final ComplexGenericFoobarBuilder<CharSequence, Number, List<Integer>, ComparableList<Integer>> builder =
-        ComplexGenericFoobarBuilder.<CharSequence, Number, List<Integer>, ComparableList<Integer>>from(foobar);
+    final ComplexGenericFoobarBuilder<CharSequence, Number, List<Integer>, ComparableList<Integer>>
+        builder =
+            ComplexGenericFoobarBuilder
+                .<CharSequence, Number, List<Integer>, ComparableList<Integer>>from(foobar);
 
-    final ComplexGenericFoobar<CharSequence, Number, List<Integer>, ComparableList<Integer>> foobar2 = builder.build();
+    final ComplexGenericFoobar<CharSequence, Number, List<Integer>, ComparableList<Integer>>
+        foobar2 = builder.build();
 
     System.out.println(foobar2);
 
     final InheritingComplexGenericFoobar<String> inheritingFoobar =
-        InheritingComplexGenericFoobarBuilder.from(foobar)
-            .foot("foo")
-            .build();
+        InheritingComplexGenericFoobarBuilder.from(foobar).foot("foo").build();
 
     System.out.println(inheritingFoobar);
   }

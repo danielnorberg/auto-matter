@@ -1,9 +1,9 @@
 package io.norberg.automatter.example;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static java.util.Arrays.asList;
 
 public class ComparableList<T> extends ArrayList<T> implements Comparable<ComparableList<T>> {
 

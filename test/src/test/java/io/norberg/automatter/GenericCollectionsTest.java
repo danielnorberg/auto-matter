@@ -1,16 +1,14 @@
 package io.norberg.automatter;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.ImmutableMap;
-
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 public class GenericCollectionsTest {
 
@@ -40,12 +38,16 @@ public class GenericCollectionsTest {
         new GenericCollectionFoobarBuilder<>();
 
     final Map<String, String> stringToString = ImmutableMap.of("k1", "v1", "k2", "v2");
-    final Map<CharSequence, CharSequence> charSequenceToCharSequence = ImmutableMap.<CharSequence, CharSequence>copyOf(stringToString);
-    final Map<String, CharSequence> stringToCharSequence = ImmutableMap.<String, CharSequence>copyOf(stringToString);
-    final Map<CharSequence, String> charSequenceToString = ImmutableMap.<CharSequence, String>copyOf(stringToString);
+    final Map<CharSequence, CharSequence> charSequenceToCharSequence =
+        ImmutableMap.<CharSequence, CharSequence>copyOf(stringToString);
+    final Map<String, CharSequence> stringToCharSequence =
+        ImmutableMap.<String, CharSequence>copyOf(stringToString);
+    final Map<CharSequence, String> charSequenceToString =
+        ImmutableMap.<CharSequence, String>copyOf(stringToString);
 
     assertThat(builder.bars(stringToString).build().bars(), is(charSequenceToCharSequence));
-    assertThat(builder.bars(charSequenceToCharSequence).build().bars(), is(charSequenceToCharSequence));
+    assertThat(
+        builder.bars(charSequenceToCharSequence).build().bars(), is(charSequenceToCharSequence));
     assertThat(builder.bars(stringToCharSequence).build().bars(), is(charSequenceToCharSequence));
     assertThat(builder.bars(charSequenceToString).build().bars(), is(charSequenceToCharSequence));
   }

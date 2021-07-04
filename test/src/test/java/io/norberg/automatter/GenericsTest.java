@@ -1,23 +1,19 @@
 package io.norberg.automatter;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.ImmutableList;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
 public class GenericsTest {
 
   @AutoMatter
-  interface GenericFoobar<
-      T1,
-      T2 extends Collection<? extends T1>> {
+  interface GenericFoobar<T1, T2 extends Collection<? extends T1>> {
 
     T1 field1();
 
@@ -73,7 +69,8 @@ public class GenericsTest {
     final Number value1 = 17;
     final List<? extends Integer> value2 = ImmutableList.of(1, 2, 3);
 
-    final GenericFoobarBuilder<Number, List<? extends Integer>> builder = new GenericFoobarBuilder<>();
+    final GenericFoobarBuilder<Number, List<? extends Integer>> builder =
+        new GenericFoobarBuilder<>();
 
     builder.field1(value1);
     builder.field2(value2);
@@ -106,8 +103,10 @@ public class GenericsTest {
     assertThat(builder.build().field2(), Matchers.<List<? extends Integer>>is(value2b));
 
     // Verify copy constructors
-    final GenericFoobarBuilder<Number, List<? extends Integer>> copied1 = GenericFoobarBuilder.from(builder);
-    final GenericFoobarBuilder<Number, List<? extends Integer>> copied2 = GenericFoobarBuilder.from(foobar);
+    final GenericFoobarBuilder<Number, List<? extends Integer>> copied1 =
+        GenericFoobarBuilder.from(builder);
+    final GenericFoobarBuilder<Number, List<? extends Integer>> copied2 =
+        GenericFoobarBuilder.from(foobar);
     final GenericFoobarBuilder<Number, List<? extends Number>> copied3 =
         GenericFoobarBuilder.<Number, List<? extends Number>>from(builder);
     final GenericFoobarBuilder<Number, List<? extends Number>> copied4 =
@@ -160,7 +159,6 @@ public class GenericsTest {
         GenericFoobarBuilder.<Object, List<? extends Serializable>>from(builder);
     final GenericFoobarBuilder<Object, List<? extends Serializable>> copied6 =
         GenericFoobarBuilder.<Object, List<? extends Serializable>>from(foobar);
-
   }
 
   @Test
@@ -168,7 +166,8 @@ public class GenericsTest {
     final Number value1 = 17;
     final List<? extends Number> value2 = ImmutableList.<Number>of(1, 2, 3);
 
-    final GenericFoobarBuilder<Number, List<? extends Number>> builder = new GenericFoobarBuilder<>();
+    final GenericFoobarBuilder<Number, List<? extends Number>> builder =
+        new GenericFoobarBuilder<>();
 
     builder.field1(value1);
     builder.field2(value2);
@@ -201,15 +200,17 @@ public class GenericsTest {
     assertThat(builder.build().field2(), Matchers.<List<? extends Number>>is(value2b));
 
     // Verify copy constructors
-    final GenericFoobarBuilder<Number, List<? extends Number>> copied1 = GenericFoobarBuilder.from(builder);
-    final GenericFoobarBuilder<Number, List<? extends Number>> copied2 = GenericFoobarBuilder.from(foobar);
+    final GenericFoobarBuilder<Number, List<? extends Number>> copied1 =
+        GenericFoobarBuilder.from(builder);
+    final GenericFoobarBuilder<Number, List<? extends Number>> copied2 =
+        GenericFoobarBuilder.from(foobar);
     final GenericFoobarBuilder<Object, List<? extends Serializable>> copied3 =
         GenericFoobarBuilder.<Object, List<? extends Serializable>>from(builder);
     final GenericFoobarBuilder<Object, List<? extends Serializable>> copied4 =
         GenericFoobarBuilder.<Object, List<? extends Serializable>>from(foobar);
-    final GenericFoobarBuilder<Object, List<?>> copied5 = GenericFoobarBuilder.<Object, List<?>>from(builder);
-    final GenericFoobarBuilder<Object, List<?>> copied6 = GenericFoobarBuilder.<Object, List<?>>from(foobar);
+    final GenericFoobarBuilder<Object, List<?>> copied5 =
+        GenericFoobarBuilder.<Object, List<?>>from(builder);
+    final GenericFoobarBuilder<Object, List<?>> copied6 =
+        GenericFoobarBuilder.<Object, List<?>>from(foobar);
   }
-
-
 }

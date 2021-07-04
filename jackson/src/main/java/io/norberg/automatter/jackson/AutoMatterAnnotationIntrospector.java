@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotatedParameter;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
-
 import io.norberg.automatter.AutoMatter;
 
 class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {

@@ -1,17 +1,16 @@
 package io.norberg.automatter;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
+import java.util.HashSet;
+import java.util.Set;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class SetFieldBuilderTest {
 
@@ -20,7 +19,9 @@ public class SetFieldBuilderTest {
   @AutoMatter
   interface Sets {
     Set<String> apples();
+
     Set<Integer> oxen();
+
     Set<Integer> serial();
   }
 
@@ -51,9 +52,7 @@ public class SetFieldBuilderTest {
 
   @Test
   public void verifyMutatingBuilderSetDoesNotChangeValue() {
-    final Sets lists1 = builder
-        .apples("red")
-        .build();
+    final Sets lists1 = builder.apples("red").build();
     builder.addApple("green");
     final Sets lists2 = builder.build();
     assertThat(lists1.apples(), is(set("red")));
@@ -62,25 +61,19 @@ public class SetFieldBuilderTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable1() {
-    final Sets lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Sets lists = builder.addApple("red").addApple("green").build();
     lists.apples().remove("red");
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable2() {
-    final Sets lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Sets lists = builder.addApple("red").addApple("green").build();
     lists.apples().add("blue");
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueSetIsImmutable3() {
-    final Sets lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Sets lists = builder.addApple("red").addApple("green").build();
     lists.apples().clear();
   }
 

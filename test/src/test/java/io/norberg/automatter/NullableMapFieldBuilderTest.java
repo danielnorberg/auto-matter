@@ -1,17 +1,16 @@
 package io.norberg.automatter;
 
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import javax.annotation.Nullable;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
 
 public class NullableMapFieldBuilderTest {
 
@@ -19,7 +18,8 @@ public class NullableMapFieldBuilderTest {
 
   @AutoMatter
   interface NullableMap {
-    @Nullable Map<String, Integer> prices();
+    @Nullable
+    Map<String, Integer> prices();
   }
 
   NullableMapBuilder builder;
@@ -44,20 +44,22 @@ public class NullableMapFieldBuilderTest {
 
   @Test
   public void testAddingEntriesInstantiatesMap() {
-    builder.prices("red", 17,
-                   "green", 18);
+    builder.prices(
+        "red", 17,
+        "green", 18);
     final NullableMap map = builder.build();
-    assertThat(map.prices(), is((Map<String, Integer>) ImmutableMap.of("red", 17,
-                                                                       "green", 18)));
+    assertThat(
+        map.prices(),
+        is(
+            (Map<String, Integer>)
+                ImmutableMap.of(
+                    "red", 17,
+                    "green", 18)));
   }
 
   @Test
   public void testAddingNullEntries() {
-    builder.prices("red", 17,
-                   null, 1,
-                   null, 2,
-                   "blue", null,
-                   "green", 18);
+    builder.prices("red", 17, null, 1, null, 2, "blue", null, "green", 18);
     final NullableMap map = builder.build();
     assertThat(map.prices(), is(notNullValue()));
     Map<String, Integer> prices = map.prices();

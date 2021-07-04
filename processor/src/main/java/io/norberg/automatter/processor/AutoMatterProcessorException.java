@@ -15,8 +15,8 @@ class AutoMatterProcessorException extends RuntimeException {
     this.element = element;
   }
 
-  public AutoMatterProcessorException(final String message, final Throwable cause,
-                                      final Element element) {
+  public AutoMatterProcessorException(
+      final String message, final Throwable cause, final Element element) {
     super(message, cause);
     this.element = element;
   }
