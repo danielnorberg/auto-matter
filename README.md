@@ -319,6 +319,11 @@ interface Baz extends Foo, Bar<Integer> {
     int baz();
 }
 
+@AutoMatter
+interface Quux extends Baz {
+    String quux();
+}
+
 // ...
 
 Baz baz = new BazBuilder()
@@ -329,19 +334,26 @@ Baz baz = new BazBuilder()
 
 ```
 
-The `from` method can create builders by copying values from both inherited and inheriting value types. The inherited (super) types must be annotated with `@AutoMatter`.
+The `from` method can create builders by copying values from both inherited (super) and inheriting (sub) value types. The super types must be annotated with `@AutoMatter`.
 
 ```java
-// Copy from inheriting sub type. Will have all fields populated
+// Copy from subtype. Will have all fields populated
 // as `Baz` extends `Foo`.
 Foo fooFromBaz = FooBuilder.from(baz)
     .build(); 
 
-// Copy from inherited super type. Will only have some fields
+// Copy from supertype. Will only have some fields
 // populated, the remaining fields must be explicitly set.        
 Baz bazFromFoo = BazBuilder.from(fooFromBaz)
     .bar(17)
     .baz(4711)
+    .build();
+        
+// Copy from transitive supertype (parent of parent).
+Quux quux = QuuxBuilder.from(fooFromBaz)
+    .bar(17)
+    .baz(4711)
+    .quux("world")
     .build();
 ```
 
