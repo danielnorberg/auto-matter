@@ -151,7 +151,7 @@ public class AutoMatterProcessorTest {
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .failsToCompile()
-        .withErrorContaining("builder() return type must be BadBuilderReturnTypeBuilder");
+        .withErrorContaining("BadBuilderReturnType.builder() return type must be BadBuilderReturnTypeBuilder");
   }
 
   @Test
