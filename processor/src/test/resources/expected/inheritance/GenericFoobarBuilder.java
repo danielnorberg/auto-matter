@@ -5,9 +5,12 @@ ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
 final class GenericFoobarBuilder<T> {
-
   private String foo;
+
   private T bar;
+
+  private T Quux;
+
   private int baz;
 
   public GenericFoobarBuilder() {
@@ -16,12 +19,18 @@ final class GenericFoobarBuilder<T> {
   private GenericFoobarBuilder(GenericFoobar<? extends T> v) {
     this.foo = v.foo();
     this.bar = v.bar();
+    this.Quux = v.Quux();
     this.baz = v.baz();
+  }
+
+  private GenericFoobarBuilder(Quux<? extends T> v) {
+    this.Quux = v.Quux();
   }
 
   private GenericFoobarBuilder(GenericFoobarBuilder<? extends T> v) {
     this.foo = v.foo;
     this.bar = v.bar;
+    this.Quux = v.Quux;
     this.baz = v.baz;
   }
 
@@ -49,6 +58,18 @@ final class GenericFoobarBuilder<T> {
     return this;
   }
 
+  public T Quux() {
+    return Quux;
+  }
+
+  public GenericFoobarBuilder<T> Quux(T Quux) {
+    if (Quux == null) {
+      throw new NullPointerException("Quux");
+    }
+    this.Quux = Quux;
+    return this;
+  }
+
   public int baz() {
     return baz;
   }
@@ -59,10 +80,14 @@ final class GenericFoobarBuilder<T> {
   }
 
   public GenericFoobar<T> build() {
-    return new Value<T>(foo, bar, baz);
+    return new Value<T>(foo, bar, Quux, baz);
   }
 
   public static <T> GenericFoobarBuilder<T> from(GenericFoobar<? extends T> v) {
+    return new GenericFoobarBuilder<T>(v);
+  }
+
+  public static <T> GenericFoobarBuilder<T> from(Quux<? extends T> v) {
     return new GenericFoobarBuilder<T>(v);
   }
 
@@ -71,20 +96,28 @@ final class GenericFoobarBuilder<T> {
   }
 
   private static final class Value<T> implements GenericFoobar<T> {
-
     private final String foo;
+
     private final T bar;
+
+    private final T Quux;
+
     private final int baz;
 
-    private Value(@AutoMatter.Field("foo") String foo, @AutoMatter.Field("bar") T bar, @AutoMatter.Field("baz") int baz) {
+    private Value(@AutoMatter.Field("foo") String foo, @AutoMatter.Field("bar") T bar,
+        @AutoMatter.Field("Quux") T Quux, @AutoMatter.Field("baz") int baz) {
       if (foo == null) {
         throw new NullPointerException("foo");
       }
       if (bar == null) {
         throw new NullPointerException("bar");
       }
+      if (Quux == null) {
+        throw new NullPointerException("Quux");
+      }
       this.foo = foo;
       this.bar = bar;
+      this.Quux = Quux;
       this.baz = baz;
     }
 
@@ -98,6 +131,12 @@ final class GenericFoobarBuilder<T> {
     @Override
     public T bar() {
       return bar;
+    }
+
+    @AutoMatter.Field
+    @Override
+    public T Quux() {
+      return Quux;
     }
 
     @AutoMatter.Field
@@ -118,19 +157,19 @@ final class GenericFoobarBuilder<T> {
       if (!(o instanceof GenericFoobar)) {
         return false;
       }
-
       final GenericFoobar<?> that = (GenericFoobar<?>) o;
-
       if (foo != null ? !foo.equals(that.foo()) : that.foo() != null) {
         return false;
       }
       if (bar != null ? !bar.equals(that.bar()) : that.bar() != null) {
         return false;
       }
+      if (Quux != null ? !Quux.equals(that.Quux()) : that.Quux() != null) {
+        return false;
+      }
       if (baz != that.baz()) {
         return false;
       }
-
       return true;
     }
 
@@ -138,9 +177,9 @@ final class GenericFoobarBuilder<T> {
     public int hashCode() {
       int result = 1;
       long temp;
-
       result = 31 * result + (this.foo != null ? this.foo.hashCode() : 0);
       result = 31 * result + (this.bar != null ? this.bar.hashCode() : 0);
+      result = 31 * result + (this.Quux != null ? this.Quux.hashCode() : 0);
       result = 31 * result + this.baz;
       return result;
     }
@@ -148,10 +187,11 @@ final class GenericFoobarBuilder<T> {
     @Override
     public String toString() {
       return "GenericFoobar{" +
-             "foo=" + foo +
-             ", bar=" + bar +
-             ", baz=" + baz +
-             '}';
+          "foo=" + foo +
+          ", bar=" + bar +
+          ", Quux=" + Quux +
+          ", baz=" + baz +
+          '}';
     }
   }
 }

@@ -1,12 +1,10 @@
 package io.norberg.automatter.example;
 
 import com.google.common.base.Optional;
-
+import io.norberg.automatter.AutoMatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import io.norberg.automatter.AutoMatter;
 
 @AutoMatter
 interface ComplexGenericFoobar<
@@ -22,13 +20,24 @@ interface ComplexGenericFoobar<
 
   Optional<List<FOO>> maybeFoos();
   List<BAR> someBars();
-  Map<FOO, Fizz<BAR, BAZ>> foobars();
+  Map<FOO, Fizz<BAR, BAZ, FOO>> foobars();
 
   String name();
 
   @AutoMatter
-  interface Fizz<K, V> {
+  interface Fuzz<M> {
+    M m();
+  }
+
+  @AutoMatter
+  interface Fizz<K, V, M> extends Fuzz<M> {
     K k();
     V v();
   }
+}
+
+@AutoMatter
+interface InheritingComplexGenericFoobar<FOO>
+    extends ComplexGenericFoobar<FOO, Integer, List<Integer>, ComparableList<Integer>> {
+  FOO foot();
 }

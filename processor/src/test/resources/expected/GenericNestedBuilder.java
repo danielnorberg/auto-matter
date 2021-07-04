@@ -29,7 +29,7 @@ public final class GenericNestedBuilder<Q, W> {
     this.mapBaz = (_mapBaz == null) ? null : new HashMap<Q, GenericNested.Baz<W>>(_mapBaz);
     @SuppressWarnings("unchecked") GenericNested.Quux<Q, GenericNested.Baz<W>> _quuxBaz = (GenericNested.Quux<Q, GenericNested.Baz<W>>) (GenericNested.Quux<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.quuxBaz();
     this.quuxBaz = _quuxBaz;
-    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<GenericNested.Quux<String, Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz();
+    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<? extends GenericNested.Quux<? extends String, ? extends Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz();
     this.quuxQuuxBaz = _quuxQuuxBaz;
     @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _bazBaz = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.bazBaz();
     this.bazBaz = _bazBaz;
@@ -44,7 +44,7 @@ public final class GenericNestedBuilder<Q, W> {
     this.mapBaz = (_mapBaz == null) ? null : new HashMap<Q, GenericNested.Baz<W>>(_mapBaz);
     @SuppressWarnings("unchecked") GenericNested.Quux<Q, GenericNested.Baz<W>> _quuxBaz = (GenericNested.Quux<Q, GenericNested.Baz<W>>) (GenericNested.Quux<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.quuxBaz;
     this.quuxBaz = _quuxBaz;
-    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<GenericNested.Quux<String, Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz;
+    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<? extends GenericNested.Quux<? extends String, ? extends Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz;
     this.quuxQuuxBaz = _quuxQuuxBaz;
     @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _bazBaz = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.bazBaz;
     this.bazBaz = _bazBaz;

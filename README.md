@@ -305,6 +305,7 @@ Foobar<String> foobar = new FoobarBuilder<String>()
 AutoMatter value types can inherit fields from interfaces.
 
 ```java
+@AutoMatter
 interface Foo {
     String foo();
 }
@@ -318,12 +319,41 @@ interface Baz extends Foo, Bar<Integer> {
     int baz();
 }
 
+@AutoMatter
+interface Quux extends Baz {
+    String quux();
+}
+
 // ...
 
 Baz baz = new BazBuilder()
     .foo("hello")
     .bar(17)
     .baz(4711)
+    .build();
+
+```
+
+The `from` method can create builders by copying values from both inherited (super) and inheriting (sub) value types. The super types must be annotated with `@AutoMatter`.
+
+```java
+// Copy from subtype. Will have all fields populated
+// as `Baz` extends `Foo`.
+Foo fooFromBaz = FooBuilder.from(baz)
+    .build(); 
+
+// Copy from supertype. Will only have some fields
+// populated, the remaining fields must be explicitly set.        
+Baz bazFromFoo = BazBuilder.from(fooFromBaz)
+    .bar(17)
+    .baz(4711)
+    .build();
+        
+// Copy from transitive supertype (parent of parent).
+Quux quux = QuuxBuilder.from(fooFromBaz)
+    .bar(17)
+    .baz(4711)
+    .quux("world")
     .build();
 ```
 
