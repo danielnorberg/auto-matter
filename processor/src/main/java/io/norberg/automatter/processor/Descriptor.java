@@ -266,34 +266,26 @@ class Descriptor {
   }
 
   List<TypeVariableName> typeVariables() {
-    try {
-      final List<TypeVariableName> variables = new ArrayList<>();
-      if (isGeneric) {
-        for (final TypeMirror argument : valueTypeArguments) {
-          if (argument instanceof TypeVariable) {
-            final TypeVariable typeVariable = (TypeVariable) argument;
-            variables.add(TypeVariableName.get(typeVariable));
-          }
+    final List<TypeVariableName> variables = new ArrayList<>();
+    if (isGeneric) {
+      for (final TypeMirror argument : valueTypeArguments) {
+        if (argument instanceof TypeVariable) {
+          final TypeVariable typeVariable = (TypeVariable) argument;
+          variables.add(TypeVariableName.get(typeVariable));
         }
       }
-      return variables;
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
     }
+    return variables;
   }
 
   TypeName[] typeArguments() {
-    try {
-      final List<TypeName> variables = new ArrayList<>();
-      if (isGeneric) {
-        for (final TypeMirror argument : valueTypeArguments) {
-          variables.add(TypeVariableName.get(argument));
-        }
+    final List<TypeName> variables = new ArrayList<>();
+    if (isGeneric) {
+      for (final TypeMirror argument : valueTypeArguments) {
+        variables.add(TypeVariableName.get(argument));
       }
-      return variables.toArray(new TypeName[0]);
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
     }
+    return variables.toArray(new TypeName[0]);
   }
 
   private static void verifyResolved(TypeMirror type) {
