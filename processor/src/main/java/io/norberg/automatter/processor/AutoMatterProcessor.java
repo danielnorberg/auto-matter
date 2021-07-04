@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -81,7 +83,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private static final String GENERATED_LEGACY = "javax.annotation.Generated";
   private static final String GENERATED = "javax.annotation.processing.Generated";
 
-  private final List<String> deferredTypes = new ArrayList<>();
+  private final List<Name> deferredTypes = new ArrayList<>();
+  private final LinkedHashMap<Name, Descriptor> processedTypes = new LinkedHashMap<>();
 
   private Filer filer;
   private Elements elements;
@@ -108,9 +111,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .forEach(e -> elements.add((TypeElement) e));
 
     // Enqueue deferred elements for processing
-    final List<String> previousDeferredTypes = new ArrayList<>(deferredTypes);
+    final List<Name> previousDeferredTypes = new ArrayList<>(deferredTypes);
     deferredTypes.clear();
-    for (String deferredType : previousDeferredTypes) {
+    for (Name deferredType : previousDeferredTypes) {
       final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
       if (deferredTypeElement == null) {
         deferredTypes.add(deferredType);
@@ -122,11 +125,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     // Process elements and generate files
     for (TypeElement element : elements) {
       try {
-        process(element);
+        final Descriptor descriptor = process(element);
+        processedTypes.put(element.getQualifiedName(), descriptor);
       } catch (UnresolvedTypeException e) {
         // Encountered an unresolved type while processing this type, defer it for a
         // later processing in hope that the type can be resolved in a later round.
-        deferredTypes.add(element.getQualifiedName().toString());
+        deferredTypes.add(element.getQualifiedName());
       } catch (AutoMatterProcessorException e) {
         e.print(messager);
       } catch (Exception e) {
@@ -136,17 +140,31 @@ public final class AutoMatterProcessor extends AbstractProcessor {
 
     if (env.processingOver()) {
       // This was the last round, complain if some types failed due to unresolved types
-      for (String deferredType : deferredTypes) {
+      for (Name deferredType : deferredTypes) {
         final TypeElement deferredTypeElement = processingEnv.getElementUtils().getTypeElement(deferredType);
         messager.printMessage(ERROR, "Failed to generate @AutoMatter builder for " + deferredType
             + " because some fields have unresolved types", deferredTypeElement);
+      }
+      // Perform validation that can only be done after processing has been completed
+      for (Descriptor descriptor : processedTypes.values()) {
+        try {
+          validate(descriptor);
+        } catch (AutoMatterProcessorException e) {
+          e.print(messager);
+        } catch (Exception e) {
+          messager.printMessage(ERROR, e.getMessage());
+        }
       }
     }
 
     return false;
   }
 
-  private void process(final Element element) throws IOException, AutoMatterProcessorException {
+  private void validate(Descriptor descriptor) {
+    descriptor.validate(elements, types);
+  }
+
+  private Descriptor process(final Element element) throws IOException, AutoMatterProcessorException {
     final Descriptor d = Descriptor.of(element, elements, types);
 
     TypeSpec builder = builder(d);
@@ -154,6 +172,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .skipJavaLangImports(true)
         .build();
     javaFile.writeTo(filer);
+
+    return d;
   }
 
   private TypeSpec builder(final Descriptor d) throws AutoMatterProcessorException {

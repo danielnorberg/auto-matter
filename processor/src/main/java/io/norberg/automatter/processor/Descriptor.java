@@ -21,6 +21,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -143,14 +144,6 @@ class Descriptor {
         continue;
       }
       if (method.getSimpleName().toString().equals("builder")) {
-        final TypeMirror returnType = (method).getReturnType();
-        // TODO: javac does not seem to want to provide the name of the return type if it is not yet present and generic
-        if (!isGeneric &&
-            !returnType.toString().equals(concreteBuilderName) &&
-            !returnType.toString().equals(fullyQualifiedBuilderName)) {
-          throw new AutoMatterProcessorException(
-              "builder() return type must be " + concreteBuilderName, valueTypeElement);
-        }
         toBuilder = true;
         continue;
       }
@@ -333,5 +326,31 @@ class Descriptor {
         return null;
       }
     }, null);
+  }
+
+  /**
+   * Perform post-processing validation.
+   */
+  public void validate(Elements elements, Types types) {
+    // Validate the `builder()` return type. In some cases this can only be done after the
+    // builder has been generated, otherwise the return type will not be resolved.
+    if (hasToBuilder()) {
+      final Name name = valueTypeElement.getQualifiedName();
+      final TypeElement updatedValueTypeElement = elements
+          .getTypeElement(name);
+      final Map<String, ExecutableElement> methods = new LinkedHashMap<>();
+      enumerateMethods(updatedValueTypeElement, methods);
+      ExecutableElement builderMethod = methods.get("builder");
+      if (builderMethod == null) {
+        throw new AssertionError("Expected to find builder method");
+      }
+      final TypeMirror returnType = builderMethod.getReturnType();
+      if (!returnType.toString().equals(concreteBuilderName) &&
+          !returnType.toString().equals(fullyQualifiedBuilderName)) {
+        throw new AutoMatterProcessorException(
+            name + ".builder() return type must be " + concreteBuilderName,
+            builderMethod);
+      }
+    }
   }
 }
