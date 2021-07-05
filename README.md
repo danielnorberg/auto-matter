@@ -1,7 +1,7 @@
 AutoMatter
 ==========
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter) [![Build Status](https://travis-ci.org/danielnorberg/auto-matter.svg?branch=master)](https://travis-ci.org/danielnorberg/auto-matter)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.norberg/auto-matter) [![Build Status](https://circleci.com/gh/danielnorberg/auto-matter.svg?style=shield)](https://circleci.com/gh/danielnorberg/auto-matter)
 
 A small library for materializing value classes and builders from value types defined as minimal
 interfaces. Inspired by [AutoValue](https://github.com/google/auto/tree/master/value).
