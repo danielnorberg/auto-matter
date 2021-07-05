@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.AbstractTypeResolver;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
-
-import java.lang.reflect.Type;
+import io.norberg.automatter.AutoMatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import io.norberg.automatter.AutoMatter;
 
 class AutoMatterResolver extends AbstractTypeResolver {
 
@@ -18,17 +15,16 @@ class AutoMatterResolver extends AbstractTypeResolver {
   private final ConcurrentMap<Class<?>, JavaType> types = new ConcurrentHashMap<>();
 
   @SuppressWarnings("deprecation")
-  public JavaType resolveAbstractType(DeserializationConfig config, JavaType type)
-  {
+  public JavaType resolveAbstractType(DeserializationConfig config, JavaType type) {
     return resolveAbstractType0(config, type.getRawClass());
   }
 
-  public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc)
-  {
+  public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc) {
     return resolveAbstractType0(config, typeDesc.getBeanClass());
   }
 
-  private JavaType resolveAbstractType0(final DeserializationConfig config, final Class<?> rawClass) {
+  private JavaType resolveAbstractType0(
+      final DeserializationConfig config, final Class<?> rawClass) {
     final AutoMatter annotation = rawClass.getAnnotation(AutoMatter.class);
     if (annotation == null) {
       // This was not an @AutoMatter type.

@@ -1,48 +1,33 @@
 package io.norberg.automatter.jackson;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import java.io.IOException;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+
 public class AutoMatterModuleTest {
 
-  static final Foo FOO = new FooBuilder()
-      .a(17)
-      .b("foobar")
-      .aCamelCaseField(true)
-      .build();
+  static final Foo FOO = new FooBuilder().a(17).b("foobar").aCamelCaseField(true).build();
 
-  static final WithInner.Bar BAR = new BarBuilder()
-      .a(17)
-      .b("foobar")
-      .aCamelCaseField(true)
-      .build();
+  static final WithInner.Bar BAR = new BarBuilder().a(17).b("foobar").aCamelCaseField(true).build();
 
-  static final WithInner.PublicBar PUBLIC_BAR = new PublicBarBuilder()
-      .a(17)
-      .b("foobar")
-      .aCamelCaseField(true)
-      .build();
+  static final WithInner.PublicBar PUBLIC_BAR =
+      new PublicBarBuilder().a(17).b("foobar").aCamelCaseField(true).build();
 
-  static WithCollections WITH_COLLECTIONS = new WithCollectionsBuilder()
-      .build();
+  static WithCollections WITH_COLLECTIONS = new WithCollectionsBuilder().build();
 
   ObjectMapper mapper;
 
   @Before
   public void setUp() {
-    mapper = new ObjectMapper()
-        .registerModule(new AutoMatterModule());
+    mapper = new ObjectMapper().registerModule(new AutoMatterModule());
   }
 
   @Test
@@ -79,7 +64,8 @@ public class AutoMatterModuleTest {
 
   @Test
   public void testSnakeCaseNamingStrategy() throws IOException {
-    Assume.assumeTrue(mapper.version().getMajorVersion() == 2 && mapper.version().getMinorVersion() >= 7);
+    Assume.assumeTrue(
+        mapper.version().getMajorVersion() == 2 && mapper.version().getMinorVersion() >= 7);
     mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     final String json = mapper.writeValueAsString(FOO);
     final JsonNode tree = mapper.readTree(json);

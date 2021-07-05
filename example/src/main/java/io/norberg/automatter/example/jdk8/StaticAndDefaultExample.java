@@ -1,11 +1,9 @@
-
 package io.norberg.automatter.example.jdk8;
 
-import java.io.IOException;
+import static java.lang.System.out;
 
 import io.norberg.automatter.AutoMatter;
-
-import static java.lang.System.out;
+import java.io.IOException;
 
 public class StaticAndDefaultExample {
 
@@ -26,13 +24,10 @@ public class StaticAndDefaultExample {
   }
 
   public static void main(final String... args) throws IOException {
-    Baz baz = new BazBuilder()
-        .baz("hello")
-        .build();
+    Baz baz = new BazBuilder().baz("hello").build();
 
     out.println("baz: " + baz.baz());
     out.println("quux: " + Baz.quux());
     out.println("bazquux: " + baz.bazquux());
   }
 }
-

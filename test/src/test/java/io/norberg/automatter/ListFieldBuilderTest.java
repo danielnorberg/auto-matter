@@ -1,19 +1,18 @@
 package io.norberg.automatter;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import java.util.List;
-import java.util.Map;
-
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ListFieldBuilderTest {
 
@@ -22,8 +21,11 @@ public class ListFieldBuilderTest {
   @AutoMatter
   interface Lists {
     List<String> apples();
+
     List<Integer> oxen();
+
     List<Integer> serial();
+
     List<Map<String, Integer>> maps();
   }
 
@@ -54,9 +56,7 @@ public class ListFieldBuilderTest {
 
   @Test
   public void verifyMutatingBuilderListDoesNotChangeValue() {
-    final Lists lists1 = builder
-        .apples("red")
-        .build();
+    final Lists lists1 = builder.apples("red").build();
     builder.addApple("green");
     final Lists lists2 = builder.build();
     assertThat(lists1.apples(), is(asList("red")));
@@ -65,25 +65,19 @@ public class ListFieldBuilderTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable1() {
-    final Lists lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Lists lists = builder.addApple("red").addApple("green").build();
     lists.apples().remove("red");
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable2() {
-    final Lists lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Lists lists = builder.addApple("red").addApple("green").build();
     lists.apples().add("blue");
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable3() {
-    final Lists lists = builder
-        .addApple("red").addApple("green")
-        .build();
+    final Lists lists = builder.addApple("red").addApple("green").build();
     lists.apples().clear();
   }
 
@@ -127,16 +121,11 @@ public class ListFieldBuilderTest {
 
   @Test
   public void testListMethodsReplaceOldValue() {
-    final Lists list = builder
-        .apples("red", "green")
-        .apples("green")
-        .build();
+    final Lists list = builder.apples("red", "green").apples("green").build();
 
     assertThat(list.apples(), is(asList("green")));
 
-    final Lists listWithRed = ListsBuilder.from(list)
-        .apples("red")
-        .build();
+    final Lists listWithRed = ListsBuilder.from(list).apples("red").build();
     assertThat(listWithRed.apples(), is(asList("red")));
   }
 }

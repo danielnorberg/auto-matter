@@ -1,20 +1,18 @@
 package io.norberg.automatter;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import java.util.List;
-import java.util.Map;
-
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class MapFieldBuilderTest {
 
@@ -23,8 +21,11 @@ public class MapFieldBuilderTest {
   @AutoMatter
   interface Maps {
     Map<String, Integer> prices();
+
     Map<Integer, String> oxen();
+
     Map<Integer, String> serial();
+
     Map<Integer, List<String>> lists();
   }
 
@@ -55,9 +56,7 @@ public class MapFieldBuilderTest {
 
   @Test
   public void verifyMutatingBuilderMapDoesNotChangeValue() {
-    final Maps maps1 = builder
-        .prices("apple", 17)
-        .build();
+    final Maps maps1 = builder.prices("apple", 17).build();
     builder.putPrice("orange", 18);
     final Maps maps2 = builder.build();
     assertThat(maps1.prices(), is(singletonMap("apple", 17)));
@@ -114,26 +113,19 @@ public class MapFieldBuilderTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueMapIsImmutable1() {
-    final Maps maps = builder
-        .putPrice("apple", 17)
-        .putPrice("orange", 18)
-        .build();
+    final Maps maps = builder.putPrice("apple", 17).putPrice("orange", 18).build();
     maps.prices().remove("apple");
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable2() {
-    final Maps maps = builder
-        .putPrice("apple", 17)
-        .build();
+    final Maps maps = builder.putPrice("apple", 17).build();
     maps.prices().put("orange", 18);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void verifyValueListIsImmutable3() {
-    final Maps maps = builder
-        .putPrice("apple", 17)
-        .build();
+    final Maps maps = builder.putPrice("apple", 17).build();
     maps.prices().clear();
   }
 
@@ -177,15 +169,12 @@ public class MapFieldBuilderTest {
 
   @Test
   public void verifyMapMethodsReplaceValue() {
-    final Maps onlyApples = builder.prices("apples", 2, "pears", 3)
-        .prices("apples", 4)
-        .build();
+    final Maps onlyApples = builder.prices("apples", 2, "pears", 3).prices("apples", 4).build();
 
     assertEquals(ImmutableMap.of("apples", 4), onlyApples.prices());
 
-    final Maps pearsAndOranges = MapsBuilder.from(onlyApples)
-        .prices("pears", 5, "orange", 6)
-        .build();
+    final Maps pearsAndOranges =
+        MapsBuilder.from(onlyApples).prices("pears", 5, "orange", 6).build();
     assertEquals(ImmutableMap.of("pears", 5, "orange", 6), pearsAndOranges.prices());
   }
 }

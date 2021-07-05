@@ -7,8 +7,8 @@ public interface NestedGson {
 
   Nestee cutee();
 
-  @AutoMatter interface Nestee {
+  @AutoMatter
+  interface Nestee {
     String floof();
   }
-
 }

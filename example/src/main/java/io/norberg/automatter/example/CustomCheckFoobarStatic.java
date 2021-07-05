@@ -5,6 +5,7 @@ import io.norberg.automatter.AutoMatter;
 @AutoMatter
 public interface CustomCheckFoobarStatic {
   String foo();
+
   int bar();
 
   @AutoMatter.Check

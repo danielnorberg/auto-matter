@@ -1,6 +1,3 @@
 package io.norberg.automatter.processor;
 
-class Reserved {
-
-
-}
+class Reserved {}

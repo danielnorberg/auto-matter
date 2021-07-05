@@ -1,20 +1,17 @@
 package io.norberg.automatter;
 
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-
+import java.util.List;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 public class GuavaOptionalTest {
 
@@ -24,9 +21,11 @@ public class GuavaOptionalTest {
   interface GuavaOptionals {
 
     Optional<String> foo();
+
     Optional<List<String>> bar();
 
-    @Nullable Optional<String> baz();
+    @Nullable
+    Optional<String> baz();
   }
 
   GuavaOptionalsBuilder builder;

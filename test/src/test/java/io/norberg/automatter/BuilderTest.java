@@ -1,17 +1,16 @@
 package io.norberg.automatter;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import javax.annotation.Nullable;
-
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+
+import javax.annotation.Nullable;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class BuilderTest {
 
@@ -20,8 +19,11 @@ public class BuilderTest {
   @AutoMatter
   interface Foobar {
     int foo();
+
     String bar();
-    @Nullable String quux();
+
+    @Nullable
+    String quux();
 
     FoobarBuilder builder();
   }
@@ -144,7 +146,6 @@ public class BuilderTest {
     assertThat(foobarCopy.bar(), is("hello2"));
     assertThat(foobarCopy.quux(), is("world2"));
   }
-
 
   @Test
   public void testValueToBuilder() {

@@ -14,12 +14,17 @@ interface ComplexGenericFoobar<
     QUUX extends Iterable<? extends BAR> & Comparable<QUUX>> {
 
   FOO foo();
+
   BAR bar();
+
   BAZ baz();
+
   QUUX quux();
 
   Optional<List<FOO>> maybeFoos();
+
   List<BAR> someBars();
+
   Map<FOO, Fizz<BAR, BAZ, FOO>> foobars();
 
   String name();
@@ -32,6 +37,7 @@ interface ComplexGenericFoobar<
   @AutoMatter
   interface Fizz<K, V, M> extends Fuzz<M> {
     K k();
+
     V v();
   }
 }

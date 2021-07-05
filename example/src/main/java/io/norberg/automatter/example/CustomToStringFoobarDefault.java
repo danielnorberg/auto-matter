@@ -5,6 +5,7 @@ import io.norberg.automatter.AutoMatter;
 @AutoMatter
 public interface CustomToStringFoobarDefault {
   String foo();
+
   int bar();
 
   @AutoMatter.ToString
