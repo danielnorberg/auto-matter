@@ -426,7 +426,7 @@ interface Foobar {
 
 Or a `static` method:
 
-```
+```java
 @AutoMatter
 interface Foobar {
   String foo();
