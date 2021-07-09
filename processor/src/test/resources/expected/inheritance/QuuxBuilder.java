@@ -15,7 +15,7 @@ final class QuuxBuilder<T> {
   }
 
   private QuuxBuilder(QuuxBuilder<? extends T> v) {
-    this.Quux = v.Quux;
+    this.Quux = v.Quux();
   }
 
   public T Quux() {

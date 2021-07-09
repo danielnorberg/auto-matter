@@ -6,8 +6,8 @@ ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
 public final class JUTOptionalFieldsBuilder {
-
   private Optional<String> foo;
+
   private Optional<String> bar;
 
   public JUTOptionalFieldsBuilder() {
@@ -20,8 +20,8 @@ public final class JUTOptionalFieldsBuilder {
   }
 
   private JUTOptionalFieldsBuilder(JUTOptionalFieldsBuilder v) {
-    this.foo = v.foo;
-    this.bar = v.bar;
+    this.foo = v.foo();
+    this.bar = v.bar();
   }
 
   public Optional<String> foo() {
@@ -37,7 +37,7 @@ public final class JUTOptionalFieldsBuilder {
     if (foo == null) {
       throw new NullPointerException("foo");
     }
-    this.foo = (Optional<String>) foo;
+    this.foo = (Optional<String>)foo;
     return this;
   }
 
@@ -51,7 +51,7 @@ public final class JUTOptionalFieldsBuilder {
 
   @SuppressWarnings("unchecked")
   public JUTOptionalFieldsBuilder bar(Optional<? extends String> bar) {
-    this.bar = (Optional<String>) bar;
+    this.bar = (Optional<String>)bar;
     return this;
   }
 
@@ -67,14 +67,13 @@ public final class JUTOptionalFieldsBuilder {
     return new JUTOptionalFieldsBuilder(v);
   }
 
-  private static final class Value
-      implements JUTOptionalFields {
-
+  private static final class Value implements JUTOptionalFields {
     private final Optional<String> foo;
+
     private final Optional<String> bar;
 
     private Value(@AutoMatter.Field("foo") Optional<String> foo,
-                  @AutoMatter.Field("bar") Optional<String> bar) {
+        @AutoMatter.Field("bar") Optional<String> bar) {
       if (foo == null) {
         throw new NullPointerException("foo");
       }
@@ -106,16 +105,13 @@ public final class JUTOptionalFieldsBuilder {
       if (!(o instanceof JUTOptionalFields)) {
         return false;
       }
-
       final JUTOptionalFields that = (JUTOptionalFields) o;
-
       if (foo != null ? !foo.equals(that.foo()) : that.foo() != null) {
         return false;
       }
       if (bar != null ? !bar.equals(that.bar()) : that.bar() != null) {
         return false;
       }
-
       return true;
     }
 
@@ -131,9 +127,10 @@ public final class JUTOptionalFieldsBuilder {
     @Override
     public String toString() {
       return "JUTOptionalFields{" +
-             "foo=" + foo +
-             ", bar=" + bar +
-             '}';
+          "foo=" + foo +
+          ", bar=" + bar +
+          '}';
     }
   }
 }
+

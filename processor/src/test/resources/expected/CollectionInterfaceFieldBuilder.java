@@ -21,7 +21,7 @@ public final class CollectionInterfaceFieldBuilder {
   }
 
   private CollectionInterfaceFieldBuilder(CollectionInterfaceFieldBuilder v) {
-    this.strings = (v.strings == null) ? null : new ArrayList<String>(v.strings);
+    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
   }
 
   public Collection<String> strings() {
@@ -145,9 +145,8 @@ public final class CollectionInterfaceFieldBuilder {
     @Override
     public String toString() {
       return "CollectionInterfaceField{" +
-             "strings=" + strings +
-             '}';
+          "strings=" + strings +
+          '}';
     }
   }
 }
-

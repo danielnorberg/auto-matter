@@ -22,7 +22,7 @@ public final class GenericJUTOptionalNestedBuilder<T> {
   }
 
   private GenericJUTOptionalNestedBuilder(GenericJUTOptionalNestedBuilder<? extends T> v) {
-    @SuppressWarnings("unchecked") Optional<List<T>> _foo = (Optional<List<T>>) (Optional<? extends List<? extends T>>) v.foo;
+    @SuppressWarnings("unchecked") Optional<List<T>> _foo = (Optional<List<T>>) (Optional<? extends List<? extends T>>) v.foo();
     this.foo = _foo;
   }
 

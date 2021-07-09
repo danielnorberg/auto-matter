@@ -65,20 +65,32 @@ public final class GenericCollectionParentBuilder<T> {
   }
 
   private GenericCollectionParentBuilder(GenericCollectionParentBuilder<? extends T> v) {
-    this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
-    @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar;
+    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
-    this.oneIntegerBar = v.oneIntegerBar;
-    @SuppressWarnings("unchecked") Bar<Quux<T>> _oneParameterizedQuuxBar = (Bar<Quux<T>>) (Bar<? extends Quux<? extends T>>) v.oneParameterizedQuuxBar;
+    this.oneIntegerBar = v.oneIntegerBar();
+    @SuppressWarnings("unchecked") Bar<Quux<T>> _oneParameterizedQuuxBar = (Bar<Quux<T>>) (Bar<? extends Quux<? extends T>>) v.oneParameterizedQuuxBar();
     this.oneParameterizedQuuxBar = _oneParameterizedQuuxBar;
-    this.oneIntegerQuuxBar = v.oneIntegerQuuxBar;
-    @SuppressWarnings("unchecked") Quux<T> _oneParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.oneParameterizedQuux;
+    this.oneIntegerQuuxBar = v.oneIntegerQuuxBar();
+    @SuppressWarnings("unchecked") Quux<T> _oneParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.oneParameterizedQuux();
     this.oneParameterizedQuux = _oneParameterizedQuux;
-    @SuppressWarnings("unchecked") Bar<T> _secondParameterizedBar = (Bar<T>) (Bar<? extends T>) v.secondParameterizedBar;
+    @SuppressWarnings("unchecked") Bar<T> _secondParameterizedBar = (Bar<T>) (Bar<? extends T>) v.secondParameterizedBar();
     this.secondParameterizedBar = _secondParameterizedBar;
-    @SuppressWarnings("unchecked") Quux<T> _secondParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.secondParameterizedQuux;
+    @SuppressWarnings("unchecked") Quux<T> _secondParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.secondParameterizedQuux();
     this.secondParameterizedQuux = _secondParameterizedQuux;
-    this.moreFoos = (v.moreFoos == null) ? null : new ArrayList<T>(v.moreFoos);
+    this.moreFoos = (v.moreFoos() == null) ? null : new ArrayList<T>(v.moreFoos());
+  }
+
+  private GenericCollectionParentBuilder(GenericSuperParentBuilder<? extends T> v) {
+    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
+    this.oneParameterizedBar = _oneParameterizedBar;
+    this.oneIntegerBar = v.oneIntegerBar();
+    @SuppressWarnings("unchecked") Bar<Quux<T>> _oneParameterizedQuuxBar = (Bar<Quux<T>>) (Bar<? extends Quux<? extends T>>) v.oneParameterizedQuuxBar();
+    this.oneParameterizedQuuxBar = _oneParameterizedQuuxBar;
+    this.oneIntegerQuuxBar = v.oneIntegerQuuxBar();
+    @SuppressWarnings("unchecked") Quux<T> _oneParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.oneParameterizedQuux();
+    this.oneParameterizedQuux = _oneParameterizedQuux;
   }
 
   public List<T> foos() {
@@ -321,6 +333,11 @@ public final class GenericCollectionParentBuilder<T> {
 
   public static <T> GenericCollectionParentBuilder<T> from(
       GenericCollectionParentBuilder<? extends T> v) {
+    return new GenericCollectionParentBuilder<T>(v);
+  }
+
+  public static <T> GenericCollectionParentBuilder<T> from(
+      GenericSuperParentBuilder<? extends T> v) {
     return new GenericCollectionParentBuilder<T>(v);
   }
 

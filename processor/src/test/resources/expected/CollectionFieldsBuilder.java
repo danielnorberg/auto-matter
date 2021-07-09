@@ -56,13 +56,13 @@ public final class CollectionFieldsBuilder {
   }
 
   private CollectionFieldsBuilder(CollectionFieldsBuilder v) {
-    this.strings = (v.strings == null) ? null : new ArrayList<String>(v.strings);
-    this.integers = (v.integers == null) ? null : new HashMap<String, Integer>(v.integers);
-    this.sortedIntegers = (v.sortedIntegers == null) ? null : new TreeMap<String, Integer>(v.sortedIntegers);
-    this.navigableIntegers = (v.navigableIntegers == null) ? null : new TreeMap<String, Integer>(v.navigableIntegers);
-    this.numbers = (v.numbers == null) ? null : new HashSet<Long>(v.numbers);
-    this.sortedNumbers = (v.sortedNumbers == null) ? null : new TreeSet<Long>(v.sortedNumbers);
-    this.navigableNumbers = (v.navigableNumbers == null) ? null : new TreeSet<Long>(v.navigableNumbers);
+    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
+    this.integers = (v.integers() == null) ? null : new HashMap<String, Integer>(v.integers());
+    this.sortedIntegers = (v.sortedIntegers() == null) ? null : new TreeMap<String, Integer>(v.sortedIntegers());
+    this.navigableIntegers = (v.navigableIntegers() == null) ? null : new TreeMap<String, Integer>(v.navigableIntegers());
+    this.numbers = (v.numbers() == null) ? null : new HashSet<Long>(v.numbers());
+    this.sortedNumbers = (v.sortedNumbers() == null) ? null : new TreeSet<Long>(v.sortedNumbers());
+    this.navigableNumbers = (v.navigableNumbers() == null) ? null : new TreeSet<Long>(v.navigableNumbers());
   }
 
   public List<String> strings() {
@@ -181,7 +181,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3) {
+  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3,
+      Integer v3) {
     integers(k1, v1, k2, v2);
     if (k3 == null) {
       throw new NullPointerException("integers: k3");
@@ -193,7 +194,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4) {
+  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3,
+      Integer v3, String k4, Integer v4) {
     integers(k1, v1, k2, v2, k3, v3);
     if (k4 == null) {
       throw new NullPointerException("integers: k4");
@@ -205,7 +207,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
+  public CollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2, String k3,
+      Integer v3, String k4, Integer v4, String k5, Integer v5) {
     integers(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("integers: k5");
@@ -238,7 +241,8 @@ public final class CollectionFieldsBuilder {
     return sortedIntegers;
   }
 
-  public CollectionFieldsBuilder sortedIntegers(Map<? extends String, ? extends Integer> sortedIntegers) {
+  public CollectionFieldsBuilder sortedIntegers(
+      Map<? extends String, ? extends Integer> sortedIntegers) {
     if (sortedIntegers == null) {
       throw new NullPointerException("sortedIntegers");
     }
@@ -278,7 +282,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3) {
+  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3) {
     sortedIntegers(k1, v1, k2, v2);
     if (k3 == null) {
       throw new NullPointerException("sortedIntegers: k3");
@@ -290,7 +295,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4) {
+  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4) {
     sortedIntegers(k1, v1, k2, v2, k3, v3);
     if (k4 == null) {
       throw new NullPointerException("sortedIntegers: k4");
@@ -302,7 +308,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
+  public CollectionFieldsBuilder sortedIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
     sortedIntegers(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("sortedIntegers: k5");
@@ -335,7 +342,8 @@ public final class CollectionFieldsBuilder {
     return navigableIntegers;
   }
 
-  public CollectionFieldsBuilder navigableIntegers(Map<? extends String, ? extends Integer> navigableIntegers) {
+  public CollectionFieldsBuilder navigableIntegers(
+      Map<? extends String, ? extends Integer> navigableIntegers) {
     if (navigableIntegers == null) {
       throw new NullPointerException("navigableIntegers");
     }
@@ -375,7 +383,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3) {
+  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3) {
     navigableIntegers(k1, v1, k2, v2);
     if (k3 == null) {
       throw new NullPointerException("navigableIntegers: k3");
@@ -387,7 +396,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4) {
+  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4) {
     navigableIntegers(k1, v1, k2, v2, k3, v3);
     if (k4 == null) {
       throw new NullPointerException("navigableIntegers: k4");
@@ -399,7 +409,8 @@ public final class CollectionFieldsBuilder {
     return this;
   }
 
-  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2, String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
+  public CollectionFieldsBuilder navigableIntegers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
     navigableIntegers(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("navigableIntegers: k5");
@@ -666,7 +677,13 @@ public final class CollectionFieldsBuilder {
 
     private final NavigableSet<Long> navigableNumbers;
 
-    private Value(@AutoMatter.Field("strings") List<String> strings, @AutoMatter.Field("integers") Map<String, Integer> integers, @AutoMatter.Field("sortedIntegers") SortedMap<String, Integer> sortedIntegers, @AutoMatter.Field("navigableIntegers") NavigableMap<String, Integer> navigableIntegers, @AutoMatter.Field("numbers") Set<Long> numbers, @AutoMatter.Field("sortedNumbers") SortedSet<Long> sortedNumbers, @AutoMatter.Field("navigableNumbers") NavigableSet<Long> navigableNumbers) {
+    private Value(@AutoMatter.Field("strings") List<String> strings,
+        @AutoMatter.Field("integers") Map<String, Integer> integers,
+        @AutoMatter.Field("sortedIntegers") SortedMap<String, Integer> sortedIntegers,
+        @AutoMatter.Field("navigableIntegers") NavigableMap<String, Integer> navigableIntegers,
+        @AutoMatter.Field("numbers") Set<Long> numbers,
+        @AutoMatter.Field("sortedNumbers") SortedSet<Long> sortedNumbers,
+        @AutoMatter.Field("navigableNumbers") NavigableSet<Long> navigableNumbers) {
       this.strings = (strings != null) ? strings : Collections.<String>emptyList();
       this.integers = (integers != null) ? integers : Collections.<String, Integer>emptyMap();
       this.sortedIntegers = (sortedIntegers != null) ? sortedIntegers : Collections.<String, Integer>emptySortedMap();
@@ -772,14 +789,14 @@ public final class CollectionFieldsBuilder {
     @Override
     public String toString() {
       return "CollectionFields{" +
-             "strings=" + strings +
-             ", integers=" + integers +
-             ", sortedIntegers=" + sortedIntegers +
-             ", navigableIntegers=" + navigableIntegers +
-             ", numbers=" + numbers +
-             ", sortedNumbers=" + sortedNumbers +
-             ", navigableNumbers=" + navigableNumbers +
-             '}';
+          "strings=" + strings +
+          ", integers=" + integers +
+          ", sortedIntegers=" + sortedIntegers +
+          ", navigableIntegers=" + navigableIntegers +
+          ", numbers=" + numbers +
+          ", sortedNumbers=" + sortedNumbers +
+          ", navigableNumbers=" + navigableNumbers +
+          '}';
     }
   }
 }

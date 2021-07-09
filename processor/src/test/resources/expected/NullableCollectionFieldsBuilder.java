@@ -33,9 +33,9 @@ public final class NullableCollectionFieldsBuilder {
   }
 
   private NullableCollectionFieldsBuilder(NullableCollectionFieldsBuilder v) {
-    this.strings = (v.strings == null) ? null : new ArrayList<String>(v.strings);
-    this.integers = (v.integers == null) ? null : new HashMap<String, Integer>(v.integers);
-    this.numbers = (v.numbers == null) ? null : new HashSet<Long>(v.numbers);
+    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
+    this.integers = (v.integers() == null) ? null : new HashMap<String, Integer>(v.integers());
+    this.numbers = (v.numbers() == null) ? null : new HashSet<Long>(v.numbers());
   }
 
   public List<String> strings() {

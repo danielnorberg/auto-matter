@@ -254,7 +254,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (Descriptor superValueType : d.superValueTypes()) {
       builder.addMethod(copyValueConstructor(d, superValueType));
     }
-    builder.addMethod(copyBuilderConstructor(d));
+    builder.addMethod(copyBuilderConstructor(d, d));
+    for (Descriptor superValueType : d.superValueTypes()) {
+      builder.addMethod(copyBuilderConstructor(d, superValueType));
+    }
 
     for (MethodSpec accessor : accessors(d)) {
       builder.addMethod(accessor);
@@ -269,7 +272,10 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     for (Descriptor superValueType : d.superValueTypes()) {
       builder.addMethod(fromValue(d, superValueType));
     }
-    builder.addMethod(fromBuilder(d));
+    builder.addMethod(fromBuilder(d, d));
+    for (Descriptor superValueType : d.superValueTypes()) {
+      builder.addMethod(fromBuilder(d, superValueType));
+    }
 
     builder.addType(valueClass(d));
 
@@ -379,33 +385,33 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return false;
   }
 
-  private MethodSpec copyBuilderConstructor(final Descriptor d)
+  private MethodSpec copyBuilderConstructor(final Descriptor target, final Descriptor source)
       throws AutoMatterProcessorException {
     final MethodSpec.Builder constructor =
         MethodSpec.constructorBuilder()
             .addModifiers(PRIVATE)
-            .addParameter(upperBoundedBuilderType(d), "v");
+            .addParameter(upperBoundedBuilderType(source), "v");
 
-    for (ExecutableElement field : d.fields()) {
+    for (ExecutableElement field : source.fields()) {
       String fieldName = fieldName(field);
 
       final boolean isParameterized = isFieldTypeParameterized(field);
 
       if (isCollection(field) || isMap(field)) {
         if (isParameterized) {
-          final TypeMirror fieldType = d.fieldType(field);
+          final TypeMirror fieldType = target.fieldType(field);
           final TypeName ctorArgumentType = upperBoundedType(fieldType, 1);
           final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
             constructor.addStatement(
-                "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+                "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
                 fieldName,
                 fieldName,
-                collectionImplType(d, field),
+                collectionImplType(target, field),
                 fieldName);
           } else {
             constructor.addStatement(
-                "@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
+                "@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
                 ctorArgumentType,
                 fieldName,
                 ctorArgumentType,
@@ -415,23 +421,23 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                 "this.$N = (_$N == null) ? null : new $T(_$N)",
                 fieldName,
                 fieldName,
-                collectionImplType(d, field),
+                collectionImplType(target, field),
                 fieldName);
           }
         } else {
           constructor.addStatement(
-              "this.$N = (v.$N == null) ? null : new $T(v.$N)",
+              "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
               fieldName,
               fieldName,
-              collectionImplType(d, field),
+              collectionImplType(target, field),
               fieldName);
         }
       } else {
         if (isParameterized) {
-          final TypeMirror fieldType = d.fieldType(field);
+          final TypeMirror fieldType = source.fieldType(field);
           final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           constructor.addStatement(
-              "@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N",
+              "@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
               fieldType,
               fieldName,
               fieldType,
@@ -439,7 +445,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
               fieldName);
           constructor.addStatement("this.$N = _$N", fieldName, fieldName);
         } else {
-          constructor.addStatement("this.$N = v.$N", fieldName, fieldName);
+          constructor.addStatement("this.$N = v.$N()", fieldName, fieldName);
         }
       }
     }
@@ -959,13 +965,13 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         .build();
   }
 
-  private MethodSpec fromBuilder(final Descriptor d) {
+  private MethodSpec fromBuilder(final Descriptor target, final Descriptor source) {
     return MethodSpec.methodBuilder("from")
         .addModifiers(PUBLIC, STATIC)
-        .addTypeVariables(d.typeVariables())
-        .addParameter(upperBoundedBuilderType(d), "v")
-        .returns(builderType(d))
-        .addStatement("return new $T(v)", builderType(d))
+        .addTypeVariables(target.typeVariables())
+        .addParameter(upperBoundedBuilderType(source), "v")
+        .returns(builderType(target))
+        .addStatement("return new $T(v)", builderType(target))
         .build();
   }
 

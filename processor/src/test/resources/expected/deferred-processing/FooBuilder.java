@@ -15,7 +15,7 @@ public final class FooBuilder {
   }
 
   private FooBuilder(FooBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public BarBuilder foo() {

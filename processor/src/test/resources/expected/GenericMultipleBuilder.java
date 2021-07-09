@@ -28,11 +28,11 @@ public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Coll
   }
 
   private GenericMultipleBuilder(GenericMultipleBuilder<? extends T1, ? extends T2, ? extends T3, ? extends T4> v) {
-    this.field1 = v.field1;
-    this.field2 = v.field2;
-    this.field3 = v.field3;
-    this.field4 = v.field4;
-    this.plain = v.plain;
+    this.field1 = v.field1();
+    this.field2 = v.field2();
+    this.field3 = v.field3();
+    this.field4 = v.field4();
+    this.plain = v.plain();
   }
 
   public T1 field1() {

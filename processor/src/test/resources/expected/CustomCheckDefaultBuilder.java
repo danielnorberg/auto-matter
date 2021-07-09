@@ -15,7 +15,7 @@ public final class CustomCheckDefaultBuilder {
   }
 
   private CustomCheckDefaultBuilder(CustomCheckDefaultBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {
