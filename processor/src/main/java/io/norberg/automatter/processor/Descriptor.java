@@ -52,15 +52,22 @@ class Descriptor {
   private final String concreteBuilderName;
   private final String fullyQualifiedBuilderName;
   private final List<Descriptor> superValueTypes;
-  private boolean isGeneric;
+  private final boolean isGeneric;
+  private final ExecutableElement toString;
+  private final ExecutableElement check;
+  private final boolean isRecord;
   private boolean toBuilder;
-  private ExecutableElement toString;
-  private ExecutableElement check;
 
   static Descriptor of(final Element element, final Elements elements, final Types types)
       throws AutoMatterProcessorException {
-    if (!element.getKind().isInterface()) {
-      throw new AutoMatterProcessorException("@AutoMatter target must be an interface", element);
+    switch (element.getKind().toString()) {
+      case "INTERFACE":
+      case "ANNOTATION_TYPE":
+      case "RECORD":
+        break;
+      default:
+        throw new AutoMatterProcessorException(
+            "@AutoMatter target must be an interface or a record", element);
     }
     final DeclaredType valueType = (DeclaredType) element.asType();
     return new Descriptor(valueType, elements, types);
@@ -75,13 +82,7 @@ class Descriptor {
     this.isGeneric = !valueTypeArguments.isEmpty();
     this.packageName = elements.getPackageOf(valueTypeElement).getQualifiedName().toString();
     this.builderName = valueTypeElement.getSimpleName().toString() + "Builder";
-    final String typeParameterization =
-        isGeneric
-            ? "<"
-                + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(","))
-                + ">"
-            : "";
-    this.concreteBuilderName = builderName + typeParameterization;
+    this.concreteBuilderName = builderName + typeParameterization();
     this.fullyQualifiedBuilderName = fullyQualifedName(packageName, concreteBuilderName);
     this.fields = new ArrayList<>();
     this.fieldTypes = new LinkedHashMap<>();
@@ -89,7 +90,14 @@ class Descriptor {
     this.toString = findInstanceMethod(valueTypeElement, AutoMatter.ToString.class);
     this.check = findInstanceMethod(valueTypeElement, AutoMatter.Check.class);
     this.superValueTypes = enumerateSuperValueTypes(elements, types);
+    this.isRecord = valueTypeElement.getKind().toString().equals("RECORD");
     enumerateFields(types);
+  }
+
+  private String typeParameterization() {
+    return isGeneric
+        ? "<" + valueTypeArguments.stream().map(TypeMirror::toString).collect(joining(",")) + ">"
+        : "";
   }
 
   private List<Descriptor> enumerateSuperValueTypes(Elements elements, Types types) {
@@ -143,9 +151,16 @@ class Descriptor {
       if (isStaticOrDefaultOrPrivate(method)) {
         continue;
       }
-      if (method.getSimpleName().toString().equals("builder")) {
-        toBuilder = true;
-        continue;
+
+      final String name = method.getSimpleName().toString();
+      switch (name) {
+        case "equals":
+        case "toString":
+        case "hashCode":
+          continue;
+        case "builder":
+          toBuilder = true;
+          continue;
       }
 
       verifyResolved(method.getReturnType());
@@ -157,7 +172,7 @@ class Descriptor {
       final TypeMirror fieldType = methodType.getReturnType();
 
       // Resolve types
-      fieldTypes.put(method.getSimpleName().toString(), fieldType);
+      fieldTypes.put(name, fieldType);
     }
   }
 
@@ -281,6 +296,10 @@ class Descriptor {
       }
     }
     return variables.toArray(new TypeName[0]);
+  }
+
+  public boolean isRecord() {
+    return isRecord;
   }
 
   private static void verifyResolved(TypeMirror type) {
