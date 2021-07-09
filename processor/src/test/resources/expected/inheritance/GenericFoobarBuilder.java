@@ -28,10 +28,14 @@ final class GenericFoobarBuilder<T> {
   }
 
   private GenericFoobarBuilder(GenericFoobarBuilder<? extends T> v) {
-    this.foo = v.foo;
-    this.bar = v.bar;
-    this.Quux = v.Quux;
-    this.baz = v.baz;
+    this.foo = v.foo();
+    this.bar = v.bar();
+    this.Quux = v.Quux();
+    this.baz = v.baz();
+  }
+
+  private GenericFoobarBuilder(QuuxBuilder<? extends T> v) {
+    this.Quux = v.Quux();
   }
 
   public String foo() {
@@ -92,6 +96,10 @@ final class GenericFoobarBuilder<T> {
   }
 
   public static <T> GenericFoobarBuilder<T> from(GenericFoobarBuilder<? extends T> v) {
+    return new GenericFoobarBuilder<T>(v);
+  }
+
+  public static <T> GenericFoobarBuilder<T> from(QuuxBuilder<? extends T> v) {
     return new GenericFoobarBuilder<T>(v);
   }
 

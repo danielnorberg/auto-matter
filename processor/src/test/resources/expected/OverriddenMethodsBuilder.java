@@ -16,7 +16,7 @@ public final class OverriddenBaseMethodsBuilder {
   }
 
   private OverriddenBaseMethodsBuilder(OverriddenBaseMethodsBuilder v) {
-    this.baz = v.baz;
+    this.baz = v.baz();
   }
 
   public String baz() {

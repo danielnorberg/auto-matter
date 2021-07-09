@@ -15,7 +15,7 @@ public final class CustomToStringStaticBuilder {
   }
 
   private CustomToStringStaticBuilder(CustomToStringStaticBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {

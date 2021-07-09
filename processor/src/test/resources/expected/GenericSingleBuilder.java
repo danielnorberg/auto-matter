@@ -15,7 +15,7 @@ public final class GenericSingleBuilder<T> {
   }
 
   private GenericSingleBuilder(GenericSingleBuilder<? extends T> v) {
-    this.thing = v.thing;
+    this.thing = v.thing();
   }
 
   public T thing() {
@@ -47,7 +47,6 @@ public final class GenericSingleBuilder<T> {
   }
 
   private static final class Value<T> implements GenericSingle<T> {
-
     private final T thing;
 
     private Value(@AutoMatter.Field("thing") T thing) {
@@ -94,8 +93,8 @@ public final class GenericSingleBuilder<T> {
     @Override
     public String toString() {
       return "GenericSingle{" +
-      "thing=" + thing +
-      '}';
+          "thing=" + thing +
+          '}';
     }
   }
 }

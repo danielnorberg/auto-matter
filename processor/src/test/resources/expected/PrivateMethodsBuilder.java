@@ -16,7 +16,7 @@ public final class PrivateMethodsBuilder {
   }
 
   private PrivateMethodsBuilder(PrivateMethodsBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {

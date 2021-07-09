@@ -9,12 +9,16 @@ ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
 public final class GenericNestedBuilder<Q, W> {
-
   private GenericNested.Baz<GenericNested.Baz<Q>> baz2;
+
   private GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> baz3;
+
   private Map<Q, GenericNested.Baz<W>> mapBaz;
+
   private GenericNested.Quux<Q, GenericNested.Baz<W>> quuxBaz;
+
   private GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz;
+
   private GenericNested.Baz<GenericNested.Baz<Q>> bazBaz;
 
   public GenericNestedBuilder() {
@@ -36,17 +40,17 @@ public final class GenericNestedBuilder<Q, W> {
   }
 
   private GenericNestedBuilder(GenericNestedBuilder<? extends Q, ? extends W> v) {
-    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _baz2 = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.baz2;
+    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _baz2 = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.baz2();
     this.baz2 = _baz2;
-    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> _baz3 = (GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>>) v.baz3;
+    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> _baz3 = (GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>>) v.baz3();
     this.baz3 = _baz3;
-    @SuppressWarnings("unchecked") Map<? extends Q, ? extends GenericNested.Baz<W>> _mapBaz = (Map<? extends Q, ? extends GenericNested.Baz<W>>) (Map<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.mapBaz;
+    @SuppressWarnings("unchecked") Map<? extends Q, ? extends GenericNested.Baz<W>> _mapBaz = (Map<? extends Q, ? extends GenericNested.Baz<W>>) (Map<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.mapBaz();
     this.mapBaz = (_mapBaz == null) ? null : new HashMap<Q, GenericNested.Baz<W>>(_mapBaz);
-    @SuppressWarnings("unchecked") GenericNested.Quux<Q, GenericNested.Baz<W>> _quuxBaz = (GenericNested.Quux<Q, GenericNested.Baz<W>>) (GenericNested.Quux<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.quuxBaz;
+    @SuppressWarnings("unchecked") GenericNested.Quux<Q, GenericNested.Baz<W>> _quuxBaz = (GenericNested.Quux<Q, GenericNested.Baz<W>>) (GenericNested.Quux<? extends Q, ? extends GenericNested.Baz<? extends W>>) v.quuxBaz();
     this.quuxBaz = _quuxBaz;
-    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<? extends GenericNested.Quux<? extends String, ? extends Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz;
+    @SuppressWarnings("unchecked") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> _quuxQuuxBaz = (GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>>) (GenericNested.Quux<? extends GenericNested.Quux<? extends String, ? extends Integer>, ? extends GenericNested.Quux<? extends W, ? extends GenericNested.Baz<? extends Q>>>) v.quuxQuuxBaz();
     this.quuxQuuxBaz = _quuxQuuxBaz;
-    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _bazBaz = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.bazBaz;
+    @SuppressWarnings("unchecked") GenericNested.Baz<GenericNested.Baz<Q>> _bazBaz = (GenericNested.Baz<GenericNested.Baz<Q>>) (GenericNested.Baz<? extends GenericNested.Baz<? extends Q>>) v.bazBaz();
     this.bazBaz = _bazBaz;
   }
 
@@ -66,7 +70,8 @@ public final class GenericNestedBuilder<Q, W> {
     return baz3;
   }
 
-  public GenericNestedBuilder<Q, W> baz3(GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> baz3) {
+  public GenericNestedBuilder<Q, W> baz3(
+      GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> baz3) {
     if (baz3 == null) {
       throw new NullPointerException("baz3");
     }
@@ -81,7 +86,8 @@ public final class GenericNestedBuilder<Q, W> {
     return mapBaz;
   }
 
-  public GenericNestedBuilder<Q, W> mapBaz(Map<? extends Q, ? extends GenericNested.Baz<W>> mapBaz) {
+  public GenericNestedBuilder<Q, W> mapBaz(
+      Map<? extends Q, ? extends GenericNested.Baz<W>> mapBaz) {
     if (mapBaz == null) {
       throw new NullPointerException("mapBaz");
     }
@@ -109,7 +115,8 @@ public final class GenericNestedBuilder<Q, W> {
     return this;
   }
 
-  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2, GenericNested.Baz<W> v2) {
+  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2,
+      GenericNested.Baz<W> v2) {
     mapBaz(k1, v1);
     if (k2 == null) {
       throw new NullPointerException("mapBaz: k2");
@@ -121,7 +128,8 @@ public final class GenericNestedBuilder<Q, W> {
     return this;
   }
 
-  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2, GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3) {
+  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2,
+      GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3) {
     mapBaz(k1, v1, k2, v2);
     if (k3 == null) {
       throw new NullPointerException("mapBaz: k3");
@@ -133,7 +141,8 @@ public final class GenericNestedBuilder<Q, W> {
     return this;
   }
 
-  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2, GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3, Q k4, GenericNested.Baz<W> v4) {
+  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2,
+      GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3, Q k4, GenericNested.Baz<W> v4) {
     mapBaz(k1, v1, k2, v2, k3, v3);
     if (k4 == null) {
       throw new NullPointerException("mapBaz: k4");
@@ -145,7 +154,9 @@ public final class GenericNestedBuilder<Q, W> {
     return this;
   }
 
-  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2, GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3, Q k4, GenericNested.Baz<W> v4, Q k5, GenericNested.Baz<W> v5) {
+  public GenericNestedBuilder<Q, W> mapBaz(Q k1, GenericNested.Baz<W> v1, Q k2,
+      GenericNested.Baz<W> v2, Q k3, GenericNested.Baz<W> v3, Q k4, GenericNested.Baz<W> v4, Q k5,
+      GenericNested.Baz<W> v5) {
     mapBaz(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("mapBaz: k5");
@@ -169,11 +180,13 @@ public final class GenericNestedBuilder<Q, W> {
     return this;
   }
 
-  public GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz() {
+  public GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz(
+  ) {
     return quuxQuuxBaz;
   }
 
-  public GenericNestedBuilder<Q, W> quuxQuuxBaz(GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz) {
+  public GenericNestedBuilder<Q, W> quuxQuuxBaz(
+      GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz) {
     if (quuxQuuxBaz == null) {
       throw new NullPointerException("quuxQuuxBaz");
     }
@@ -206,7 +219,8 @@ public final class GenericNestedBuilder<Q, W> {
     return new GenericNestedBuilder<Q, W>(v);
   }
 
-  public static <Q, W> GenericNestedBuilder<Q, W> from(GenericNestedBuilder<? extends Q, ? extends W> v) {
+  public static <Q, W> GenericNestedBuilder<Q, W> from(
+      GenericNestedBuilder<? extends Q, ? extends W> v) {
     return new GenericNestedBuilder<Q, W>(v);
   }
 
@@ -223,7 +237,12 @@ public final class GenericNestedBuilder<Q, W> {
 
     private final GenericNested.Baz<GenericNested.Baz<Q>> bazBaz;
 
-    private Value(@AutoMatter.Field("baz2") GenericNested.Baz<GenericNested.Baz<Q>> baz2, @AutoMatter.Field("baz3") GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> baz3, @AutoMatter.Field("mapBaz") Map<Q, GenericNested.Baz<W>> mapBaz, @AutoMatter.Field("quuxBaz") GenericNested.Quux<Q, GenericNested.Baz<W>> quuxBaz, @AutoMatter.Field("quuxQuuxBaz") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz, @AutoMatter.Field("bazBaz") GenericNested.Baz<GenericNested.Baz<Q>> bazBaz) {
+    private Value(@AutoMatter.Field("baz2") GenericNested.Baz<GenericNested.Baz<Q>> baz2,
+        @AutoMatter.Field("baz3") GenericNested.Baz<GenericNested.Baz<GenericNested.Baz<Q>>> baz3,
+        @AutoMatter.Field("mapBaz") Map<Q, GenericNested.Baz<W>> mapBaz,
+        @AutoMatter.Field("quuxBaz") GenericNested.Quux<Q, GenericNested.Baz<W>> quuxBaz,
+        @AutoMatter.Field("quuxQuuxBaz") GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz,
+        @AutoMatter.Field("bazBaz") GenericNested.Baz<GenericNested.Baz<Q>> bazBaz) {
       if (baz2 == null) {
         throw new NullPointerException("baz2");
       }
@@ -273,7 +292,8 @@ public final class GenericNestedBuilder<Q, W> {
 
     @AutoMatter.Field
     @Override
-    public GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz() {
+    public GenericNested.Quux<GenericNested.Quux<String, Integer>, GenericNested.Quux<W, GenericNested.Baz<Q>>> quuxQuuxBaz(
+    ) {
       return quuxQuuxBaz;
     }
 
@@ -343,3 +363,4 @@ public final class GenericNestedBuilder<Q, W> {
           '}';
     }
   }
+}

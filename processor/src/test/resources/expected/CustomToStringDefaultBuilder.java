@@ -15,7 +15,7 @@ public final class CustomToStringDefaultBuilder {
   }
 
   private CustomToStringDefaultBuilder(CustomToStringDefaultBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {

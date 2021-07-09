@@ -20,8 +20,8 @@ public final class GuavaOptionalFieldsBuilder {
   }
 
   private GuavaOptionalFieldsBuilder(GuavaOptionalFieldsBuilder v) {
-    this.foo = v.foo;
-    this.bar = v.bar;
+    this.foo = v.foo();
+    this.bar = v.bar();
   }
 
   public Optional<String> foo() {

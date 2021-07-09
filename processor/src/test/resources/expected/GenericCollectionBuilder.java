@@ -27,9 +27,10 @@ public final class GenericCollectionBuilder<T, K, V> {
     this.bars = (_bars == null) ? null : new HashMap<K, V>(_bars);
   }
 
-  private GenericCollectionBuilder(GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
-    this.foos = (v.foos == null) ? null : new ArrayList<T>(v.foos);
-    this.bars = (v.bars == null) ? null : new HashMap<K, V>(v.bars);
+  private GenericCollectionBuilder(
+      GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
+    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    this.bars = (v.bars() == null) ? null : new HashMap<K, V>(v.bars());
   }
 
   public List<T> foos() {
@@ -172,7 +173,8 @@ public final class GenericCollectionBuilder<T, K, V> {
     return this;
   }
 
-  public GenericCollectionBuilder<T, K, V> bars(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+  public GenericCollectionBuilder<T, K, V> bars(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4,
+      K k5, V v5) {
     bars(k1, v1, k2, v2, k3, v3, k4, v4);
     if (k5 == null) {
       throw new NullPointerException("bars: k5");
@@ -208,11 +210,13 @@ public final class GenericCollectionBuilder<T, K, V> {
     return new Value<T, K, V>(_foos, _bars);
   }
 
-  public static <T, K, V> GenericCollectionBuilder<T, K, V> from(GenericCollection<? extends T, ? extends K, ? extends V> v) {
+  public static <T, K, V> GenericCollectionBuilder<T, K, V> from(
+      GenericCollection<? extends T, ? extends K, ? extends V> v) {
     return new GenericCollectionBuilder<T, K, V>(v);
   }
 
-  public static <T, K, V> GenericCollectionBuilder<T, K, V> from(GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
+  public static <T, K, V> GenericCollectionBuilder<T, K, V> from(
+      GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
     return new GenericCollectionBuilder<T, K, V>(v);
   }
 
@@ -221,7 +225,8 @@ public final class GenericCollectionBuilder<T, K, V> {
 
     private final Map<K, V> bars;
 
-    private Value(@AutoMatter.Field("foos") List<T> foos, @AutoMatter.Field("bars") Map<K, V> bars) {
+    private Value(@AutoMatter.Field("foos") List<T> foos,
+        @AutoMatter.Field("bars") Map<K, V> bars) {
       this.foos = (foos != null) ? foos : Collections.<T>emptyList();
       this.bars = (bars != null) ? bars : Collections.<K, V>emptyMap();
     }
@@ -273,9 +278,9 @@ public final class GenericCollectionBuilder<T, K, V> {
     @Override
     public String toString() {
       return "GenericCollection{" +
-             "foos=" + foos +
-             ", bars=" + bars +
-             '}';
+          "foos=" + foos +
+          ", bars=" + bars +
+          '}';
     }
   }
 }

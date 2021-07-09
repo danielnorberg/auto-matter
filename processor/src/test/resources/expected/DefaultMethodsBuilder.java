@@ -16,7 +16,7 @@ public final class DefaultMethodsBuilder {
   }
 
   private DefaultMethodsBuilder(DefaultMethodsBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {

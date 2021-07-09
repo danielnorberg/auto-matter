@@ -15,7 +15,7 @@ public final class CustomCheckStaticBuilder {
   }
 
   private CustomCheckStaticBuilder(CustomCheckStaticBuilder v) {
-    this.foo = v.foo;
+    this.foo = v.foo();
   }
 
   public String foo() {

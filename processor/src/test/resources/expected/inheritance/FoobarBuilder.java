@@ -28,10 +28,14 @@ final class FoobarBuilder {
   }
 
   private FoobarBuilder(FoobarBuilder v) {
-    this.foo = v.foo;
-    this.bar = v.bar;
-    this.Quux = v.Quux;
-    this.baz = v.baz;
+    this.foo = v.foo();
+    this.bar = v.bar();
+    this.Quux = v.Quux();
+    this.baz = v.baz();
+  }
+
+  private FoobarBuilder(QuuxBuilder<? extends Float> v) {
+    this.Quux = v.Quux();
   }
 
   public String foo() {
@@ -92,6 +96,10 @@ final class FoobarBuilder {
   }
 
   public static FoobarBuilder from(FoobarBuilder v) {
+    return new FoobarBuilder(v);
+  }
+
+  public static FoobarBuilder from(QuuxBuilder<? extends Float> v) {
     return new FoobarBuilder(v);
   }
 

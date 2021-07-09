@@ -6,16 +6,24 @@ ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
 public final class FooBuilder {
-
   private boolean aBoolean;
+
   private byte aByte;
+
   private short aShort;
+
   private int aInt;
+
   private long aLong;
+
   private char aChar;
+
   private float aFloat;
+
   private double aDouble;
+
   private Object object;
+
   private Object[] array;
 
   public FooBuilder() {
@@ -35,16 +43,16 @@ public final class FooBuilder {
   }
 
   private FooBuilder(FooBuilder v) {
-    this.aBoolean = v.aBoolean;
-    this.aByte = v.aByte;
-    this.aShort = v.aShort;
-    this.aInt = v.aInt;
-    this.aLong = v.aLong;
-    this.aChar = v.aChar;
-    this.aFloat = v.aFloat;
-    this.aDouble = v.aDouble;
-    this.object = v.object;
-    this.array = v.array;
+    this.aBoolean = v.aBoolean();
+    this.aByte = v.aByte();
+    this.aShort = v.aShort();
+    this.aInt = v.aInt();
+    this.aLong = v.aLong();
+    this.aChar = v.aChar();
+    this.aFloat = v.aFloat();
+    this.aDouble = v.aDouble();
+    this.object = v.object();
+    this.array = v.array();
   }
 
   public boolean aBoolean() {
@@ -148,17 +156,7 @@ public final class FooBuilder {
   }
 
   public Foo build() {
-    return new Value(
-        aBoolean,
-        aByte,
-        aShort,
-        aInt,
-        aLong,
-        aChar,
-        aFloat,
-        aDouble,
-        object,
-        array);
+    return new Value(aBoolean, aByte, aShort, aInt, aLong, aChar, aFloat, aDouble, object, array);
   }
 
   public static FooBuilder from(Foo v) {
@@ -169,32 +167,33 @@ public final class FooBuilder {
     return new FooBuilder(v);
   }
 
-  private static final class Value
-      implements Foo {
-
+  private static final class Value implements Foo {
     private final boolean aBoolean;
+
     private final byte aByte;
+
     private final short aShort;
+
     private final int aInt;
+
     private final long aLong;
+
     private final char aChar;
+
     private final float aFloat;
+
     private final double aDouble;
+
     private final Object object;
+
     private final Object[] array;
 
-    private Value(
-        @AutoMatter.Field("aBoolean") boolean aBoolean,
-        @AutoMatter.Field("aByte") byte aByte,
-        @AutoMatter.Field("aShort") short aShort,
-        @AutoMatter.Field("aInt") int aInt,
-        @AutoMatter.Field("aLong") long aLong,
-        @AutoMatter.Field("aChar") char aChar,
-        @AutoMatter.Field("aFloat") float aFloat,
-        @AutoMatter.Field("aDouble") double aDouble,
-        @AutoMatter.Field("object") Object object,
-        @AutoMatter.Field("array") Object[] array
-    ) {
+    private Value(@AutoMatter.Field("aBoolean") boolean aBoolean,
+        @AutoMatter.Field("aByte") byte aByte, @AutoMatter.Field("aShort") short aShort,
+        @AutoMatter.Field("aInt") int aInt, @AutoMatter.Field("aLong") long aLong,
+        @AutoMatter.Field("aChar") char aChar, @AutoMatter.Field("aFloat") float aFloat,
+        @AutoMatter.Field("aDouble") double aDouble, @AutoMatter.Field("object") Object object,
+        @AutoMatter.Field("array") Object[] array) {
       if (object == null) {
         throw new NullPointerException("object");
       }
@@ -286,9 +285,7 @@ public final class FooBuilder {
       if (!(o instanceof Foo)) {
         return false;
       }
-
       final Foo that = (Foo) o;
-
       if (aBoolean != that.aBoolean()) {
         return false;
       }
@@ -319,7 +316,6 @@ public final class FooBuilder {
       if (!Arrays.equals(array, that.array())) {
         return false;
       }
-
       return true;
     }
 
@@ -327,7 +323,6 @@ public final class FooBuilder {
     public int hashCode() {
       int result = 1;
       long temp;
-
       result = 31 * result + (this.aBoolean ? 1231 : 1237);
       result = 31 * result + (int) this.aByte;
       result = 31 * result + (int) this.aShort;
@@ -345,17 +340,17 @@ public final class FooBuilder {
     @Override
     public String toString() {
       return "Foo{" +
-             "aBoolean=" + aBoolean +
-             ", aByte=" + aByte +
-             ", aShort=" + aShort +
-             ", aInt=" + aInt +
-             ", aLong=" + aLong +
-             ", aChar=" + aChar +
-             ", aFloat=" + aFloat +
-             ", aDouble=" + aDouble +
-             ", object=" + object +
-             ", array=" + Arrays.toString(array) +
-             '}';
+          "aBoolean=" + aBoolean +
+          ", aByte=" + aByte +
+          ", aShort=" + aShort +
+          ", aInt=" + aInt +
+          ", aLong=" + aLong +
+          ", aChar=" + aChar +
+          ", aFloat=" + aFloat +
+          ", aDouble=" + aDouble +
+          ", object=" + object +
+          ", array=" + Arrays.toString(array) +
+          '}';
     }
   }
 }

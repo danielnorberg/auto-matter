@@ -23,10 +23,10 @@ public final class NullableFieldsBuilder {
   }
 
   private NullableFieldsBuilder(NullableFieldsBuilder v) {
-    this.nullableFoo = v.nullableFoo;
-    this.customNullableBar = v.customNullableBar;
-    this.nonNullQuux = v.nonNullQuux;
-    this.nonNullPrimitive = v.nonNullPrimitive;
+    this.nullableFoo = v.nullableFoo();
+    this.customNullableBar = v.customNullableBar();
+    this.nonNullQuux = v.nonNullQuux();
+    this.nonNullPrimitive = v.nonNullPrimitive();
   }
 
   public String nullableFoo() {
