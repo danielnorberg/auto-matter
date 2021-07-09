@@ -51,6 +51,20 @@ public class InheritanceExample {
     Corge corgeFromFoo = CorgeBuilder.from(foo).baz(17).corge("hello world").build();
     System.out.println(corgeFromFoo);
 
+    // Create builder and value from inherited super type builder
+    Baz bazFromFooBuilder = BazBuilder.from(FooBuilder.from(foo)).bar(123).baz(456).foot(3).build();
+    System.out.println(bazFromFooBuilder);
+
+    // Create generic builder and value from inherited direct super type builder
+    Quux<Integer> quuxFromFooBuilder =
+        QuuxBuilder.from(FooBuilder.from(foo)).foo("hello world").foot(42).build();
+    System.out.println(quuxFromFooBuilder);
+
+    // Create generic builder and value from inherited transitive super type builder
+    Corge corgeFromFooBuilder =
+        CorgeBuilder.from(FooBuilder.from(foo)).baz(17).corge("hello world").build();
+    System.out.println(corgeFromFooBuilder);
+
     // Create generic builder and value from inheriting sub type
     Foo<Integer> fooFromQuux = FooBuilder.from(quuxFromFoo).build();
     System.out.println(fooFromQuux);

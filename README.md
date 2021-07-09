@@ -357,6 +357,20 @@ Quux quux = QuuxBuilder.from(fooFromBaz)
     .build();
 ```
 
+A builder can also be created by copying values from the builder of an inherited (super) type:
+
+```java
+FooBuilder fooBuilder = new FooBuilder()
+    .foo("hello");
+
+// Copy from supertype builder. Will only have some fields
+// populated, the remaining fields must be explicitly set.        
+Baz bazFromFooBuilder = BazBuilder.from(fooBuilder)
+    .bar(17)
+    .baz(4711)
+    .build();
+```
+
 ### Customizing `toString`
 
 The AutoMatter-generated `toString` method can be overriden by annotating a method with `@AutoMatter.ToString`.
