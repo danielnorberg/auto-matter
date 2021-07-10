@@ -76,9 +76,41 @@ builders. For greater flexibility and more features, consider using [Immutables]
 Features
 --------
 
+### Records
+
+AutoMatter will generate builders for [Records](https://openjdk.java.net/jeps/359) when using JDK
+17+.  
+
+```java
+@AutoMatter
+record Foobar(int a, String b) {}
+  
+var foobar = RecordFoobarBuilder.builder()
+    .a(1)
+    .b("2")
+    .build();
+```
+
+This can be especially useful when working with complex records with multiple fields. The named
+setters of the builder can help avoid parameter ordering mistakes when fields have the same type.
+
+```java
+@AutoMatter
+record ComplexFoobar(String foo, String bar, String baz, String quux, String corge) {}
+
+var foobar = ComplexFoobarBuilder.builder()
+    .foo("foo")
+    .bar("bar")
+    .baz("baz")
+    .quux("quux")
+    .corge("corge")
+    .build();
+```
+
+
 ### Jackson JSON Support
 
-*Note: Requires Jackson 2.4.0+*
+*Note*: Requires Jackson 2.4.0+. For [Records](#records) support Jackson 2.12.3+ is required.
 
 ```xml
 <dependency>
