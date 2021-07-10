@@ -11,6 +11,11 @@
 
   <artifactId>auto-matter-record-test</artifactId>
 
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <profiles>
     <profile>
       <id>jdk16-</id>
@@ -38,15 +43,9 @@
       <activation>
         <jdk>[17,)</jdk>
       </activation>
-      <properties>
-        <maven.compiler.release>17</maven.compiler.release>
-      </properties>
     </profile>
   </profiles>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
   <dependencies>
     <dependency>
