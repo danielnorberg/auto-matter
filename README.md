@@ -13,11 +13,16 @@ Usage
 ### In `Foobar.java`
 
 ```java
+// Interface style
 @AutoMatter
 public interface Foobar {
   String foo();
   int bar();
 }
+
+// Record style
+@AutoMatter
+record Foobar(String foo, int bar) {}
 ```
 
 ### In `Application.java`
@@ -73,13 +78,16 @@ possible of the scaffolding needed in a straightforward manner. As such, it migh
 enough for all use cases. For example, it is not possible to add your own methods to the generated
 builders. For greater flexibility and more features, consider using [Immutables](https://immutables.github.io/) or [AutoValue](https://github.com/google/auto/tree/master/value).
 
+For many simple use cases plain [Records](https://openjdk.java.net/jeps/359) (JDK 17+) are likely
+sufficient.
+
 Features
 --------
 
 ### Records
 
 AutoMatter will generate builders for [Records](https://openjdk.java.net/jeps/359) when using JDK
-17+.  
+17+. Record builders also have a `builder` factory method.  
 
 ```java
 @AutoMatter
@@ -110,7 +118,8 @@ var foobar = ComplexFoobarBuilder.builder()
 
 ### Jackson JSON Support
 
-*Note*: Requires Jackson 2.4.0+. For [Records](#records) support Jackson 2.12.3+ is required.
+*Note*: Requires Jackson 2.4.0+. 
+
 
 ```xml
 <dependency>
@@ -133,6 +142,9 @@ String json = mapper.writeValueAsString(foobar);
 
 Foobar parsed = mapper.readValue(json, Foobar.class);
 ```
+
+*Note*: When using [Records](#records), the `auto-matter-jackson` dependency and
+the `AutoMatterModule` is not needed as Jackson supports Records natively since version 2.12.3.
 
 ### Gson Support
 
