@@ -9,7 +9,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -263,7 +262,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       builder.addMethod(accessor);
     }
 
-    if (d.hasToBuilder()) {
+    if (d.isRecord()) {
+      builder.addMethod(builderFactory(d));
+    } else if (d.hasToBuilder()) {
       builder.addMethod(toBuilder(d));
     }
 
@@ -277,9 +278,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       builder.addMethod(fromBuilder(d, superValueType));
     }
 
-    builder.addType(valueClass(d));
+    if (!d.isRecord()) {
+      builder.addType(valueClass(d));
+    }
 
     return builder.build();
+  }
+
+  private MethodSpec builderFactory(Descriptor d) {
+    return MethodSpec.methodBuilder("builder")
+        .addModifiers(PUBLIC, STATIC)
+        .addTypeVariables(d.typeVariables())
+        .returns(builderType(d))
+        .addStatement("return new $T()", builderType(d))
+        .build();
   }
 
   private TypeElement generatedAnnotationType() {
@@ -1332,11 +1344,21 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private TypeName valueImplType(final Descriptor d) {
-    final ClassName raw = rawValueImplType(d);
+    final ClassName raw = valueImplClass(d);
     if (!d.isGeneric()) {
       return raw;
     }
     return ParameterizedTypeName.get(raw, d.typeArguments());
+  }
+
+  private ClassName valueImplClass(Descriptor d) {
+    final ClassName raw;
+    if (d.isRecord()) {
+      raw = rawValueType(d);
+    } else {
+      raw = rawValueImplType(d);
+    }
+    return raw;
   }
 
   private ClassName rawValueImplType(final Descriptor d) {
