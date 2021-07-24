@@ -3,13 +3,9 @@ package io.norberg.automatter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 public class RecordTest {
-
-  private static final ObjectMapper mapper = new ObjectMapper();
 
   @AutoMatter
   public record Foobar(int a, String b) {}
@@ -50,13 +46,5 @@ public class RecordTest {
             .build();
     var rebuilt = ComplexFoobarBuilder.from(foobar).build();
     assertThat(foobar, is(rebuilt));
-  }
-
-  @Test
-  public void testJackson() throws JsonProcessingException {
-    var foobar = FoobarBuilder.builder().a(1).b("2").build();
-    var json = mapper.writeValueAsString(foobar);
-    var deserialized = mapper.readValue(json, Foobar.class);
-    assertThat(foobar, is(deserialized));
   }
 }
