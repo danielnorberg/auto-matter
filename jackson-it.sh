@@ -8,7 +8,9 @@ function lookup_jackson_versions0() {
          select(.major >= 2 and .minor >= 4)] |
          sort_by([.major, .minor, .v]) |
          .[].v' |
-  grep -v '2.4.0-rc'
+  grep -v rc |       # omit rc versions
+  grep -v pr |       # omit pr versions
+  grep -v -E '\d{8}' # omit "snapshot" (?) versions
 }
 
 function lookup_jackson_versions() {
