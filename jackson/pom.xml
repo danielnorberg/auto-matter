@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <jackson.databind.version>2.12.4</jackson.databind.version>
+    <automatter.jackson.databind.version>2.12.4</automatter.jackson.databind.version>
   </properties>
 
   <artifactId>auto-matter-jackson</artifactId>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.databind.version}</version>
+      <version>${automatter.jackson.databind.version}</version>
     </dependency>
 
     <!--test dependencies-->

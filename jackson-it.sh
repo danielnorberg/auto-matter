@@ -1,14 +1,16 @@
 #!/bin/bash -e
 
 function lookup_jackson_versions0() {
-  curl -v -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=100&wt=json' |
+  curl -v -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=1000&wt=json' |
   jq -r '[.response.docs | .[].v |
          {p: split("."), v:.} |
          {major:.p[0] | tonumber, minor: .p[1] | tonumber, v:.v} |
          select(.major >= 2 and .minor >= 4)] |
          sort_by([.major, .minor, .v]) |
          .[].v' |
-  grep -v '2.4.0-rc'
+  grep -v rc |       # omit rc versions
+  grep -v pr |       # omit pr versions
+  grep -v -E '\d{8}' # omit "snapshot" (?) versions
 }
 
 function lookup_jackson_versions() {
@@ -45,7 +47,7 @@ for v in ${split_versions}; do
   echo "Testing Jackson $v"
   echo "========================================================================"
   set -x
-  mvn -nsu -B -Djackson.version="$v" -pl jackson surefire:test
+  mvn -nsu -B -Dautomatter.jackson.databind.version="$v" -pl jackson surefire:test
   set +x
 done
 
