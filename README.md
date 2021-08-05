@@ -408,6 +408,40 @@ interface Foobar {
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
 
+### Hide a field's value in `toString`
+
+There are cases that a field's value is too sensitive to reveal in `toString`, for example a password or
+token. To hide the actual value in `toString`, annotate a method with `@AutoMatter.Sensitive` optionally
+with a customized value.
+
+Given:
+
+```java
+@AutoMatter
+public interface SensitiveFields {
+  String userName();
+
+  @AutoMatter.Sensitive
+  String password();
+
+  @AutoMatter.Sensitive(value = "....")
+  String token();
+}
+```
+
+The generated `toString` method will be like:
+
+```java
+@Override
+public String toString() {
+  return "SensitiveFields{" +
+         "userName=" + userName +
+         ", password=****" +
+         ", token=...." +
+         '}';
+}
+```
+
 ### Verify complex type constraints
 
 Sometimes it is desirable to only allow certain combinations of the values of
