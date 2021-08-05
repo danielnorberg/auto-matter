@@ -9,7 +9,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -1248,7 +1247,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         toString.addCode(
             "\"$L$L=\" + $T.toString($L) +\n", comma, name, ClassName.get(Arrays.class), name);
       } else {
-        toString.addCode("\"$L$L=\" + $L +\n", comma, name, name);
+        final AutoMatter.Sensitive sensitive = field.getAnnotation(AutoMatter.Sensitive.class);
+        if (sensitive != null) {
+          toString.addCode("\"$L$L=$L\" +\n", comma, name, sensitive.value());
+        } else {
+          toString.addCode("\"$L$L=\" + $L +\n", comma, name, name);
+        }
       }
     }
 

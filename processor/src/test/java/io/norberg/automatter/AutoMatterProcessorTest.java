@@ -498,6 +498,18 @@ public class AutoMatterProcessorTest {
         .generatesSources(expectedSource("expected/CustomCheckDefaultBuilder.java"));
   }
 
+  @Test
+  public void testSensitiveFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/SensitiveFields.java");
+    assert_()
+        .about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/SensitiveFieldsBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
