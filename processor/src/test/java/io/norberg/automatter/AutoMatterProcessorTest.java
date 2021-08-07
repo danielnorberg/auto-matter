@@ -499,15 +499,15 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
-  public void testSensitiveFields() {
-    final JavaFileObject source = JavaFileObjects.forResource("good/SensitiveFields.java");
+  public void testRedactedFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/RedactedFields.java");
     assert_()
         .about(javaSource())
         .that(source)
         .processedWith(new AutoMatterProcessor())
         .compilesWithoutError()
         .and()
-        .generatesSources(expectedSource("expected/SensitiveFieldsBuilder.java"));
+        .generatesSources(expectedSource("expected/RedactedFieldsBuilder.java"));
   }
 
   private boolean isJava8() {

@@ -1,14 +1,15 @@
 package io.norberg.automatter.example;
 
 import io.norberg.automatter.AutoMatter;
+import io.norberg.automatter.AutoMatter.Redacted;
 
 @AutoMatter
-public interface SensitiveFields {
+public interface RedactedFields {
   String userName();
 
-  @AutoMatter.Sensitive
+  @Redacted
   String password();
 
-  @AutoMatter.Sensitive(value = "....")
+  @Redacted(value = "....")
   String token();
 }

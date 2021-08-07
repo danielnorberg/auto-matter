@@ -408,23 +408,23 @@ interface Foobar {
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
 
-### Hide a field's value in `toString`
+### Redact a field's value in `toString`
 
 There are cases that a field's value is too sensitive to reveal in `toString`, for example a password or
-token. To hide the actual value in `toString`, annotate a method with `@AutoMatter.Sensitive` optionally
+token. To redact the actual value in `toString`, annotate a method with `@AutoMatter.Redacted` optionally
 with a customized value.
 
 Given:
 
 ```java
 @AutoMatter
-public interface SensitiveFields {
+public interface RedactedFields {
   String userName();
 
-  @AutoMatter.Sensitive
+  @AutoMatter.Redacted
   String password();
 
-  @AutoMatter.Sensitive(value = "....")
+  @AutoMatter.Redacted(value = "....")
   String token();
 }
 ```
@@ -434,7 +434,7 @@ The generated `toString` method will be like:
 ```java
 @Override
 public String toString() {
-  return "SensitiveFields{" +
+  return "RedactedFields{" +
          "userName=" + userName +
          ", password=****" +
          ", token=...." +

@@ -29,7 +29,7 @@ public @interface AutoMatter {
 
   @Target(METHOD)
   @Retention(RUNTIME)
-  @interface Sensitive {
+  @interface Redacted {
 
     String value() default "****";
   }

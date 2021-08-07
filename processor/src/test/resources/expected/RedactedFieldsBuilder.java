@@ -4,7 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
-public final class SensitiveFieldsBuilder {
+public final class RedactedFieldsBuilder {
 
   private String userName;
   
@@ -12,16 +12,16 @@ public final class SensitiveFieldsBuilder {
   
   private String token;
 
-  public SensitiveFieldsBuilder() {
+  public RedactedFieldsBuilder() {
   }
 
-  private SensitiveFieldsBuilder(SensitiveFields v) {
+  private RedactedFieldsBuilder(RedactedFields v) {
     this.userName = v.userName();
     this.password = v.password();
     this.token = v.token();
   }
 
-  private SensitiveFieldsBuilder(SensitiveFieldsBuilder v) {
+  private RedactedFieldsBuilder(RedactedFieldsBuilder v) {
     this.userName = v.userName();
     this.password = v.password();
     this.token = v.token();
@@ -31,7 +31,7 @@ public final class SensitiveFieldsBuilder {
     return userName;
   }
 
-  public SensitiveFieldsBuilder userName(String userName) {
+  public RedactedFieldsBuilder userName(String userName) {
     if (userName == null) {
       throw new NullPointerException("userName");
     }
@@ -43,7 +43,7 @@ public final class SensitiveFieldsBuilder {
     return password;
   }
 
-  public SensitiveFieldsBuilder password(String password) {
+  public RedactedFieldsBuilder password(String password) {
     if (password == null) {
       throw new NullPointerException("password");
     }
@@ -55,7 +55,7 @@ public final class SensitiveFieldsBuilder {
     return token;
   }
 
-  public SensitiveFieldsBuilder token(String token) {
+  public RedactedFieldsBuilder token(String token) {
     if (token == null) {
       throw new NullPointerException("token");
     }
@@ -63,19 +63,19 @@ public final class SensitiveFieldsBuilder {
     return this;
   }
 
-  public SensitiveFields build() {
+  public RedactedFields build() {
     return new Value(userName, password, token);
   }
 
-  public static SensitiveFieldsBuilder from(SensitiveFields v) {
-    return new SensitiveFieldsBuilder(v);
+  public static RedactedFieldsBuilder from(RedactedFields v) {
+    return new RedactedFieldsBuilder(v);
   }
 
-  public static SensitiveFieldsBuilder from(SensitiveFieldsBuilder v) {
-    return new SensitiveFieldsBuilder(v);
+  public static RedactedFieldsBuilder from(RedactedFieldsBuilder v) {
+    return new RedactedFieldsBuilder(v);
   }
 
-  private static final class Value implements SensitiveFields {
+  private static final class Value implements RedactedFields {
 
     private final String userName;
 
@@ -118,8 +118,8 @@ public final class SensitiveFieldsBuilder {
       return token;
     }
 
-    public SensitiveFieldsBuilder builder() {
-      return new SensitiveFieldsBuilder(this);
+    public RedactedFieldsBuilder builder() {
+      return new RedactedFieldsBuilder(this);
     }
 
     @Override
@@ -127,11 +127,11 @@ public final class SensitiveFieldsBuilder {
       if (this == o) {
         return true;
       }
-      if (!(o instanceof SensitiveFields)) {
+      if (!(o instanceof RedactedFields)) {
         return false;
       }
 
-      final SensitiveFields that = (SensitiveFields) o;
+      final RedactedFields that = (RedactedFields) o;
 
       if (userName != null ? !userName.equals(that.userName()) : that.userName() != null) {
         return false;
@@ -159,7 +159,7 @@ public final class SensitiveFieldsBuilder {
 
     @Override
     public String toString() {
-      return "SensitiveFields{" +
+      return "RedactedFields{" +
              "userName=" + userName +
              ", password=****" +
              ", token=...." +
