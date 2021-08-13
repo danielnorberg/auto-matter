@@ -52,8 +52,11 @@ class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {
   public JavaType refineSerializationType(
       final MapperConfig<?> config, final Annotated a, final JavaType baseType)
       throws JsonMappingException {
-    if (baseType.isInterface() && a.hasAnnotation(AutoMatter.class)) {
-      return typeCache.resolveValueType(baseType.getRawClass());
+    final Class<?> rawClass = baseType.getRawClass();
+
+    // Refine only if baseType is explicitly annotated with @AutoMatter
+    if (rawClass.isAnnotationPresent(AutoMatter.class)) {
+      return typeCache.resolveValueType(rawClass);
     }
     return super.refineSerializationType(config, a, baseType);
   }
