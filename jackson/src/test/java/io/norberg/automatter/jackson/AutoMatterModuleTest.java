@@ -38,6 +38,13 @@ public class AutoMatterModuleTest {
   }
 
   @Test
+  public void explicitRootType() throws IOException {
+    final String json = mapper.writerFor(Foo.class).writeValueAsString(FOO);
+    final Foo parsed = mapper.readValue(json, Foo.class);
+    assertThat(parsed, is(FOO));
+  }
+
+  @Test
   public void testInner() throws IOException {
     final String json = mapper.writeValueAsString(BAR);
     final WithInner.Bar parsed = mapper.readValue(json, WithInner.Bar.class);
