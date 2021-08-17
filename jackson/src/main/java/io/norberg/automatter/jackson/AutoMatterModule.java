@@ -9,7 +9,8 @@ public class AutoMatterModule extends SimpleModule {
   @Override
   public void setupModule(final SetupContext context) {
     super.setupModule(context);
-    context.addAbstractTypeResolver(new AutoMatterResolver());
-    context.appendAnnotationIntrospector(new AutoMatterAnnotationIntrospector());
+    final ValueTypeCache typeCache = new ValueTypeCache(context.getTypeFactory());
+    context.addAbstractTypeResolver(new AutoMatterResolver(typeCache));
+    context.appendAnnotationIntrospector(new AutoMatterAnnotationIntrospector(typeCache));
   }
 }
