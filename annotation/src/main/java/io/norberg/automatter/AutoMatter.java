@@ -26,4 +26,11 @@ public @interface AutoMatter {
   @Target(METHOD)
   @Retention(RUNTIME)
   @interface Check {}
+
+  @Target(METHOD)
+  @Retention(RUNTIME)
+  @interface Redacted {
+
+    String value() default "****";
+  }
 }

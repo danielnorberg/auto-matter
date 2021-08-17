@@ -9,7 +9,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
-import static javax.lang.model.type.TypeKind.TYPEVAR;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -27,6 +26,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import io.norberg.automatter.AutoMatter;
+import io.norberg.automatter.AutoMatter.Redacted;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1248,7 +1248,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         toString.addCode(
             "\"$L$L=\" + $T.toString($L) +\n", comma, name, ClassName.get(Arrays.class), name);
       } else {
-        toString.addCode("\"$L$L=\" + $L +\n", comma, name, name);
+        final Redacted redacted = field.getAnnotation(Redacted.class);
+        if (redacted != null) {
+          toString.addCode("\"$L$L=$L\" +\n", comma, name, redacted.value());
+        } else {
+          toString.addCode("\"$L$L=\" + $L +\n", comma, name, name);
+        }
       }
     }
 
