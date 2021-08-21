@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/openjdk:11.0.10
+      - image: cimg/openjdk:11.0.12
     steps:
       - checkout
       # Install JDK installation script
@@ -28,7 +28,7 @@ jobs:
 
   test-release:
     docker:
-      - image: cimg/openjdk:11.0.10
+      - image: cimg/openjdk:11.0.12
     steps:
       - checkout
       - restore_cache:
@@ -44,7 +44,7 @@ jobs:
       jdk:
         type: string
     docker:
-      - image: cimg/openjdk:11.0.10
+      - image: cimg/openjdk:11.0.12
     steps:
       - attach_workspace:
           at: .
@@ -68,7 +68,7 @@ jobs:
   jackson-it:
     parallelism: 4
     docker:
-      - image: cimg/openjdk:11.0.10
+      - image: cimg/openjdk:11.0.12
     steps:
       - attach_workspace:
           at: .
@@ -107,7 +107,7 @@ workflows:
       - test-jdk:
           requires: [build]
           name: 17 - OpenJDK - GPL
-          jdk: source install-jdk.sh --url https://download.java.net/java/early_access/jdk17/29/GPL/openjdk-17-ea+29_linux-x64_bin.tar.gz
+          jdk: source install-jdk.sh --url https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/openjdk-17_linux-x64_bin.tar.gz
 
       - test-jdk:
           requires: [build]

@@ -44,7 +44,7 @@ out.println("foobar: " + foobar);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.17.0</version>
+  <version>0.19.0</version>
   <scope>provided</scope>
 </dependency>
 ```
@@ -125,7 +125,7 @@ var foobar = ComplexFoobarBuilder.builder()
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-jackson</artifactId>
-  <version>0.17.0</version>
+  <version>0.19.0</version>
 </dependency>
 ```
 
@@ -152,7 +152,7 @@ the `AutoMatterModule` is not needed as Jackson supports Records natively since 
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-gson</artifactId>
-  <version>0.17.0</version>
+  <version>0.19.0</version>
 </dependency>
 ```
 
@@ -451,6 +451,40 @@ interface Foobar {
 
 Note that in the case of a default method, the method name cannot be `toString` as default methods are not
 allowed to override methods from `java.lang.Object`.
+
+### Redact a field's value in `toString`
+
+There are cases that a field's value is too sensitive to reveal in `toString`, for example a password or
+token. To redact the actual value in `toString`, annotate a method with `@AutoMatter.Redacted` optionally
+with a customized value.
+
+Given:
+
+```java
+@AutoMatter
+public interface RedactedFields {
+  String userName();
+
+  @AutoMatter.Redacted
+  String password();
+
+  @AutoMatter.Redacted(value = "....")
+  String token();
+}
+```
+
+The generated `toString` method will be like:
+
+```java
+@Override
+public String toString() {
+  return "RedactedFields{" +
+         "userName=" + userName +
+         ", password=****" +
+         ", token=...." +
+         '}';
+}
+```
 
 ### Verify complex type constraints
 

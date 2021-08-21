@@ -7,7 +7,7 @@
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.18.1-SNAPSHOT</version>
+  <version>0.19.1-SNAPSHOT</version>
   <name>auto-matter-parent</name>
   <url>https://github.com/danielnorberg/auto-matter</url>
   <description>
@@ -140,7 +140,7 @@
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
-        <version>2.8.7</version>
+        <version>2.8.8</version>
       </dependency>
 
       <!--conflict resolution-->
@@ -167,17 +167,17 @@
       <dependency>
         <groupId>com.google.auto</groupId>
         <artifactId>auto-common</artifactId>
-        <version>1.1</version>
+        <version>1.1.2</version>
       </dependency>
       <dependency>
         <groupId>com.google.errorprone</groupId>
         <artifactId>error_prone_annotations</artifactId>
-        <version>2.7.1</version>
+        <version>2.9.0</version>
       </dependency>
       <dependency>
         <groupId>org.checkerframework</groupId>
         <artifactId>checker-qual</artifactId>
-        <version>3.15.0</version>
+        <version>3.17.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -263,19 +263,19 @@
           <dependency>
             <groupId>org.apache.maven.scm</groupId>
             <artifactId>maven-scm-provider-gitexe</artifactId>
-            <version>1.11.2</version>
+            <version>1.11.3</version>
           </dependency>
           <dependency>
             <groupId>org.apache.maven.scm</groupId>
             <artifactId>maven-scm-api</artifactId>
-            <version>1.11.2</version>
+            <version>1.11.3</version>
           </dependency>
         </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M3</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>enforce</id>

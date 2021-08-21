@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_T
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -33,6 +34,16 @@ public class AutoMatterModuleTest {
   @Test
   public void testDefault() throws IOException {
     final String json = mapper.writeValueAsString(FOO);
+    final Foo parsed = mapper.readValue(json, Foo.class);
+    assertThat(parsed, is(FOO));
+  }
+
+  @Test
+  public void explicitRootType() throws IOException {
+    final Version jacksonVersion = mapper.version();
+    Assume.assumeTrue(
+        jacksonVersion.getMajorVersion() >= 2 && jacksonVersion.getMinorVersion() >= 7);
+    final String json = mapper.writerFor(Foo.class).writeValueAsString(FOO);
     final Foo parsed = mapper.readValue(json, Foo.class);
     assertThat(parsed, is(FOO));
   }
