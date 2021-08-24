@@ -892,6 +892,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     MethodSpec.Builder build =
         MethodSpec.methodBuilder("build").addModifiers(PUBLIC).returns(valueType(d));
 
+    // Do null checks in the build method for records.
+    // Interface style types perform null checking in the constructor.
+    if (d.isRecord()) {
+      assertFieldsNotNull(d, build);
+    }
+
     final List<String> parameters = new ArrayList<>();
     for (ExecutableElement field : d.fields()) {
       final String fieldName = fieldName(field);
@@ -1016,11 +1022,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec valueConstructor(final Descriptor d) {
     MethodSpec.Builder constructor = MethodSpec.constructorBuilder().addModifiers(PRIVATE);
 
-    for (ExecutableElement field : d.fields()) {
-      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
-        assertNotNull(constructor, fieldName(field));
-      }
-    }
+    assertFieldsNotNull(d, constructor);
 
     for (ExecutableElement field : d.fields()) {
       String fieldName = fieldName(field);
@@ -1072,6 +1074,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             });
 
     return constructor.build();
+  }
+
+  private void assertFieldsNotNull(Descriptor d, Builder constructor) {
+    for (ExecutableElement field : d.fields()) {
+      if (shouldEnforceNonNull(field) && !isCollection(field) && !isMap(field)) {
+        assertNotNull(constructor, fieldName(field));
+      }
+    }
   }
 
   private MethodSpec valueGetter(final Descriptor d, final ExecutableElement field) {
