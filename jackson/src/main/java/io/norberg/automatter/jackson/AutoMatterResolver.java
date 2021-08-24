@@ -23,15 +23,19 @@ class AutoMatterResolver extends AbstractTypeResolver {
     return resolveAbstractType0(config, typeDesc.getBeanClass());
   }
 
-  private JavaType resolveAbstractType0(
-      final DeserializationConfig config, final Class<?> rawClass) {
-    final AutoMatter annotation = rawClass.getAnnotation(AutoMatter.class);
+  private JavaType resolveAbstractType0(final DeserializationConfig config, final Class<?> cls) {
+    if (!cls.isInterface()) {
+      // Only resolve interface style @AutoMatter types.
+      return null;
+    }
+
+    final AutoMatter annotation = cls.getAnnotation(AutoMatter.class);
     if (annotation == null) {
       // This was not an @AutoMatter type.
       return null;
     }
 
     // Resolve from cache.
-    return typeCache.resolveValueType(rawClass);
+    return typeCache.resolveValueType(cls);
   }
 }

@@ -41,6 +41,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>8</maven.compiler.release>
+    <automatter.jackson.databind.version>2.12.4</automatter.jackson.databind.version>
   </properties>
 
   <profiles>

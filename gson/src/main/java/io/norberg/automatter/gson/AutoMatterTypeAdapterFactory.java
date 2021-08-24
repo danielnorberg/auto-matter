@@ -32,6 +32,11 @@ public class AutoMatterTypeAdapterFactory implements TypeAdapterFactory {
     final AutoMatter annotation = type.getRawType().getAnnotation(AutoMatter.class);
 
     if (annotation != null) {
+      if (!type.getRawType().isInterface()) {
+        // Only handle interface style @AutoMatter types.
+        return null;
+      }
+
       // We are now the proud owners of an AutoMatter annotated interface.
 
       // Return the cached type, if present.

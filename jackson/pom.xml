@@ -7,10 +7,6 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <automatter.jackson.databind.version>2.12.4</automatter.jackson.databind.version>
-  </properties>
-
   <artifactId>auto-matter-jackson</artifactId>
 
   <dependencies>
