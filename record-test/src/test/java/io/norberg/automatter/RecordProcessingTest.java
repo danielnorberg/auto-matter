@@ -20,7 +20,6 @@ public class RecordProcessingTest {
         .compilesWithoutError()
         .and()
         .generatesSources(JavaFileObjects.forResource("expected/FoobarRecordBuilder.java"));
-
   }
 
   @Test
