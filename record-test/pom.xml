@@ -99,11 +99,5 @@
       <artifactId>compile-testing</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.soabase.record-builder</groupId>
-      <artifactId>record-builder-core</artifactId>
-      <version>26</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 </project>
