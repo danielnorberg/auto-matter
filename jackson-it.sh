@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 function lookup_jackson_versions0() {
-  curl -v -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=1000&wt=json' |
+  curl -v -L -s 'http://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=1000&wt=json' |
   jq -r '[.response.docs | .[].v |
          {p: split("."), v:.} |
          {major:.p[0] | tonumber, minor: .p[1] | tonumber, v:.v} |
