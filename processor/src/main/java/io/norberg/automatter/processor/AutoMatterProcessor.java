@@ -418,8 +418,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
             constructor.addStatement(
-                "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
-                fieldName,
+                "this.$N = new $T(v.$N())",
                 fieldName,
                 collectionImplType(target, field),
                 fieldName);
@@ -432,19 +431,11 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                 upperBoundedFieldType,
                 fieldName);
             constructor.addStatement(
-                "this.$N = (_$N == null) ? null : new $T(_$N)",
-                fieldName,
-                fieldName,
-                collectionImplType(target, field),
-                fieldName);
+                "this.$N = new $T(_$N)", fieldName, collectionImplType(target, field), fieldName);
           }
         } else {
           constructor.addStatement(
-              "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
-              fieldName,
-              fieldName,
-              collectionImplType(target, field),
-              fieldName);
+              "this.$N = new $T(v.$N())", fieldName, collectionImplType(target, field), fieldName);
         }
       } else {
         if (isParameterized) {
