@@ -149,8 +149,6 @@ public final class RedactedFieldsBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
-
       result = 31 * result + (this.userName != null ? this.userName.hashCode() : 0);
       result = 31 * result + (this.password != null ? this.password.hashCode() : 0);
       result = 31 * result + (this.token != null ? this.token.hashCode() : 0);

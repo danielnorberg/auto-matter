@@ -775,7 +775,6 @@ public final class CollectionFieldsBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.strings != null ? this.strings.hashCode() : 0);
       result = 31 * result + (this.integers != null ? this.integers.hashCode() : 0);
       result = 31 * result + (this.sortedIntegers != null ? this.sortedIntegers.hashCode() : 0);

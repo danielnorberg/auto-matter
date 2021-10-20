@@ -80,7 +80,6 @@ final class QuuxBuilder<T> {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.Quux != null ? this.Quux.hashCode() : 0);
       return result;
     }

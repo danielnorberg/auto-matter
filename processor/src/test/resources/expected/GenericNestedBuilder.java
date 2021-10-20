@@ -341,7 +341,6 @@ public final class GenericNestedBuilder<Q, W> {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.baz2 != null ? this.baz2.hashCode() : 0);
       result = 31 * result + (this.baz3 != null ? this.baz3.hashCode() : 0);
       result = 31 * result + (this.mapBaz != null ? this.mapBaz.hashCode() : 0);

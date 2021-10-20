@@ -296,7 +296,6 @@ public final class NullableCollectionFieldsBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.strings != null ? this.strings.hashCode() : 0);
       result = 31 * result + (this.integers != null ? this.integers.hashCode() : 0);
       result = 31 * result + (this.numbers != null ? this.numbers.hashCode() : 0);

@@ -210,7 +210,6 @@ public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Coll
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.field1 != null ? this.field1.hashCode() : 0);
       result = 31 * result + (this.field2 != null ? this.field2.hashCode() : 0);
       result = 31 * result + (this.field3 != null ? this.field3.hashCode() : 0);

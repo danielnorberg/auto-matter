@@ -501,7 +501,6 @@ public final class GenericCollectionParentBuilder<T> {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.foos != null ? this.foos.hashCode() : 0);
       result = 31 * result + (this.oneParameterizedBar != null ? this.oneParameterizedBar.hashCode() : 0);
       result = 31 * result + (this.oneIntegerBar != null ? this.oneIntegerBar.hashCode() : 0);

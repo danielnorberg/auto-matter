@@ -85,8 +85,6 @@ public final class OverriddenBaseMethodsBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
-
       result = 31 * result + (this.baz != null ? this.baz.hashCode() : 0);
       return result;
     }

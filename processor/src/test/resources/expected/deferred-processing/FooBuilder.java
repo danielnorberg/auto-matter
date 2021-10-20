@@ -80,7 +80,6 @@ public final class FooBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.foo != null ? this.foo.hashCode() : 0);
       return result;
     }
