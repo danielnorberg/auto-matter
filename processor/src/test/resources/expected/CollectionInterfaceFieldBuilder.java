@@ -137,7 +137,6 @@ public final class CollectionInterfaceFieldBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       result = 31 * result + (this.strings != null ? this.strings.hashCode() : 0);
       return result;
     }

@@ -9,6 +9,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.lang.model.type.TypeKind.ARRAY;
 import static javax.lang.model.type.TypeKind.DECLARED;
+import static javax.lang.model.type.TypeKind.DOUBLE;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.auto.service.AutoService;
@@ -1180,8 +1181,16 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             .addAnnotation(Override.class)
             .addModifiers(PUBLIC)
             .returns(TypeName.INT)
-            .addStatement("int result = 1")
-            .addStatement("long temp");
+            .addStatement("int result = 1");
+
+    boolean needsTemp =
+        d.fields().stream()
+            .map(ExecutableElement::getReturnType)
+            .map(TypeMirror::getKind)
+            .anyMatch(DOUBLE::equals);
+    if (needsTemp) {
+      hashcode.addStatement("long temp");
+    }
 
     for (ExecutableElement field : d.fields()) {
       final String name = "this." + fieldName(field);

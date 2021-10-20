@@ -51,7 +51,6 @@ final class NestedPackageLocalFoobarBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       return result;
     }
 

@@ -49,7 +49,6 @@ public final class NestedFoobarBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       return result;
     }
 

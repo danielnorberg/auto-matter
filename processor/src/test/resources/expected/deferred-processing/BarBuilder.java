@@ -47,7 +47,6 @@ public final class BarBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
       return result;
     }
 

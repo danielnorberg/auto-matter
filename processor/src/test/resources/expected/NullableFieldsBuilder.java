@@ -165,8 +165,6 @@ public final class NullableFieldsBuilder {
     @Override
     public int hashCode() {
       int result = 1;
-      long temp;
-
       result = 31 * result + (this.nullableFoo != null ? this.nullableFoo.hashCode() : 0);
       result = 31 * result + (this.customNullableBar != null ? this.customNullableBar.hashCode() : 0);
       result = 31 * result + (this.nonNullQuux != null ? this.nonNullQuux.hashCode() : 0);
