@@ -28,6 +28,7 @@ final class PackageLocalBuilder {
     return new PackageLocalBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements PackageLocal {
 

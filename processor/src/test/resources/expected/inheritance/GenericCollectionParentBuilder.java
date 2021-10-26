@@ -342,6 +342,7 @@ public final class GenericCollectionParentBuilder<T> {
     return new GenericCollectionParentBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericCollectionParent<T> {
     private final List<T> foos;
 

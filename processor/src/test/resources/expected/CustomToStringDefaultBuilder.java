@@ -43,6 +43,7 @@ public final class CustomToStringDefaultBuilder {
     return new CustomToStringDefaultBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CustomToStringDefault {
     private final String foo;
 

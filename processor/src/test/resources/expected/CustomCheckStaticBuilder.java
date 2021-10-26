@@ -43,6 +43,7 @@ public final class CustomCheckStaticBuilder {
     return new CustomCheckStaticBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CustomCheckStatic {
     private final String foo;
 

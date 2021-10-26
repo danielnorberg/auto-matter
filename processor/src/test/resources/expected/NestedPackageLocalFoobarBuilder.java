@@ -28,6 +28,7 @@ final class NestedPackageLocalFoobarBuilder {
     return new NestedPackageLocalFoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements NestedPackageLocal.NestedPackageLocalFoobar {
 

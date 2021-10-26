@@ -76,6 +76,7 @@ public final class RedactedFieldsBuilder {
     return new RedactedFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements RedactedFields {
 
     private final String userName;

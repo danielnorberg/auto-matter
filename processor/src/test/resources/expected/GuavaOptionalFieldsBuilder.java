@@ -68,6 +68,7 @@ public final class GuavaOptionalFieldsBuilder {
     return new GuavaOptionalFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements GuavaOptionalFields {
 

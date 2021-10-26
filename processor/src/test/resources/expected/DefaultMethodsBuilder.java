@@ -44,6 +44,7 @@ public final class DefaultMethodsBuilder {
     return new DefaultMethodsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements DefaultMethods {
 
     private final String foo;

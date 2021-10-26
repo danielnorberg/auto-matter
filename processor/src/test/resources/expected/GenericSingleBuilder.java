@@ -47,6 +47,7 @@ public final class GenericSingleBuilder<T> {
     return new GenericSingleBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericSingle<T> {
     private final T thing;
 

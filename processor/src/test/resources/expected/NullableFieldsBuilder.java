@@ -85,6 +85,7 @@ public final class NullableFieldsBuilder {
     return new NullableFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements NullableFields {
 

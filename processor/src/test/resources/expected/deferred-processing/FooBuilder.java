@@ -43,6 +43,7 @@ public final class FooBuilder {
     return new FooBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Foo {
     private final BarBuilder foo;
 

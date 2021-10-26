@@ -233,6 +233,7 @@ public final class NullableCollectionFieldsBuilder {
     return new NullableCollectionFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements NullableCollectionFields {
 

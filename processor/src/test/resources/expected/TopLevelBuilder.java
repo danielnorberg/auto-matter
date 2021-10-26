@@ -26,6 +26,7 @@ public final class TopLevelBuilder {
     return new TopLevelBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements TopLevel {
 

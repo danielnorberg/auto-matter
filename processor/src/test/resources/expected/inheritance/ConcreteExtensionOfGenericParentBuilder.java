@@ -410,6 +410,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     return new ConcreteExtensionOfGenericParentBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements ConcreteExtensionOfGenericParent {
     private final List<Integer> foos;
 

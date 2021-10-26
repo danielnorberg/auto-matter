@@ -43,6 +43,7 @@ public final class CustomToStringStaticBuilder {
     return new CustomToStringStaticBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CustomToStringStatic {
     private final String foo;
 

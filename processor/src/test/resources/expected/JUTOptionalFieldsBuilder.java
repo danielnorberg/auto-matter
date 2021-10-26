@@ -68,6 +68,7 @@ public final class JUTOptionalFieldsBuilder {
     return new JUTOptionalFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements JUTOptionalFields {
     private final Optional<String> foo;
 

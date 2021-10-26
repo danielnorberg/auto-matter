@@ -104,6 +104,7 @@ final class FoobarBuilder {
     return new FoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Foobar {
     private final String foo;
 

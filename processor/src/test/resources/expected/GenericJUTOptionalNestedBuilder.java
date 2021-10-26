@@ -56,6 +56,7 @@ public final class GenericJUTOptionalNestedBuilder<T> {
     return new GenericJUTOptionalNestedBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T>
       implements GenericJUTOptionalNested<T> {
 

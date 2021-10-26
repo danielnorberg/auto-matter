@@ -76,6 +76,7 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
     return new GenericGuavaOptionalFieldsBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericGuavaOptionalFields<T> {
     private final Optional<T> foo;
 

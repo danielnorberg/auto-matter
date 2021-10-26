@@ -663,6 +663,7 @@ public final class CollectionFieldsBuilder {
     return new CollectionFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CollectionFields {
     private final List<String> strings;
 

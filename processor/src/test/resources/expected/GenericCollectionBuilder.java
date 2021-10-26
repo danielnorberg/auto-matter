@@ -221,6 +221,7 @@ public final class GenericCollectionBuilder<T, K, V> {
     return new GenericCollectionBuilder<T, K, V>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T, K, V> implements GenericCollection<T, K, V> {
     private final List<T> foos;
 

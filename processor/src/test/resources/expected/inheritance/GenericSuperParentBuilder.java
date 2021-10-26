@@ -195,6 +195,7 @@ public final class GenericSuperParentBuilder<T> {
     return new GenericSuperParentBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericSuperParent<T> {
     private final List<T> foos;
 

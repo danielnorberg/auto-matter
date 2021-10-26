@@ -44,6 +44,7 @@ public final class OverriddenBaseMethodsBuilder {
     return new OverriddenBaseMethodsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements OverriddenBaseMethods {
 
     private final String baz;

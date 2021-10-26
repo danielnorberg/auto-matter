@@ -27,6 +27,7 @@ public final class BarBuilder {
     return new BarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Bar {
     private Value() {
     }

@@ -103,6 +103,7 @@ public final class CollectionInterfaceFieldBuilder {
     return new CollectionInterfaceFieldBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CollectionInterfaceField {
     private final Collection<String> strings;
 

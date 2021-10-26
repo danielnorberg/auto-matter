@@ -26,6 +26,7 @@ public final class NestedFoobarBuilder {
     return new NestedFoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements Nested.NestedFoobar {
 

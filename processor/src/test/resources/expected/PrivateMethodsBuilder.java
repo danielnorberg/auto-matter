@@ -44,6 +44,7 @@ public final class PrivateMethodsBuilder {
     return new PrivateMethodsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements PrivateMethods {
 
     private final String foo;

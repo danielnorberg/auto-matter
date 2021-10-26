@@ -43,6 +43,7 @@ final class QuuxBuilder<T> {
     return new QuuxBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements Quux<T> {
     private final T Quux;
 

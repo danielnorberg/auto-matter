@@ -74,6 +74,7 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
     return new GenericJUTOptionalFieldsBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T>
       implements GenericJUTOptionalFields<T> {
 
