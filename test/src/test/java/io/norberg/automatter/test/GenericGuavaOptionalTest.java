@@ -1,9 +1,10 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
+import io.norberg.automatter.AutoMatter;
 import org.junit.Test;
 
 public class GenericGuavaOptionalTest {

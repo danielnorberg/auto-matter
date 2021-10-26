@@ -33,4 +33,11 @@ public @interface AutoMatter {
 
     String value() default "****";
   }
+
+  @Target(TYPE)
+  @Retention(RUNTIME)
+  @interface Generated {
+
+    String value() default "****";
+  }
 }

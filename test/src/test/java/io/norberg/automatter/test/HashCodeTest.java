@@ -1,4 +1,4 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static java.lang.Math.E;
 import static java.util.Arrays.asList;

@@ -1,9 +1,10 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import io.norberg.automatter.AutoMatter;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;

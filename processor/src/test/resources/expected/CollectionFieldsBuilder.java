@@ -20,6 +20,7 @@ import java.util.TreeSet;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class CollectionFieldsBuilder {
   private List<String> strings;
 

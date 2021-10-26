@@ -5,6 +5,7 @@ import java.util.Date;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class NullableFieldsBuilder {
 
   private String nullableFoo;

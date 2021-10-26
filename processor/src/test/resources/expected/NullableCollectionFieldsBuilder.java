@@ -14,6 +14,7 @@ import java.util.Set;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class NullableCollectionFieldsBuilder {
 
   private List<String> strings;

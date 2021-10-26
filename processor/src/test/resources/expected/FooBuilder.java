@@ -5,6 +5,7 @@ import java.util.Arrays;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class FooBuilder {
   private boolean aBoolean;
 

@@ -1,4 +1,4 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.norberg.automatter.AutoMatter;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;

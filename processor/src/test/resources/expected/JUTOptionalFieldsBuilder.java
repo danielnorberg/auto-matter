@@ -5,6 +5,7 @@ import java.util.Optional;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class JUTOptionalFieldsBuilder {
   private Optional<String> foo;
 

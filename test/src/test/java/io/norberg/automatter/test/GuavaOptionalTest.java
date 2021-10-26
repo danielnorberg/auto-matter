@@ -1,4 +1,4 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import io.norberg.automatter.AutoMatter;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.junit.Before;

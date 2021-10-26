@@ -5,6 +5,7 @@ import java.util.Collection;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Collection<T2>, T4 extends Iterable<T2> & Comparable<T4>> {
   private T1 field1;
 

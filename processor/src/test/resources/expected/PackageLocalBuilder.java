@@ -1,8 +1,10 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 final class PackageLocalBuilder {
 
   public PackageLocalBuilder() {

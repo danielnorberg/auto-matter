@@ -12,6 +12,7 @@ import java.util.Map;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericCollectionBuilder<T, K, V> {
   private List<T> foos;
 
