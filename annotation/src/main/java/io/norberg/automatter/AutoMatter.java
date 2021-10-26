@@ -36,8 +36,5 @@ public @interface AutoMatter {
 
   @Target(TYPE)
   @Retention(RUNTIME)
-  @interface Generated {
-
-    String value() default "****";
-  }
+  @interface Generated {}
 }
