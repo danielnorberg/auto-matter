@@ -5,6 +5,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GuavaOptionalFieldsBuilder {
 
   private Optional<String> foo;
@@ -67,6 +68,7 @@ public final class GuavaOptionalFieldsBuilder {
     return new GuavaOptionalFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements GuavaOptionalFields {
 

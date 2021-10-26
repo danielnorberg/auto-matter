@@ -7,6 +7,7 @@ ${GENERATED_IMPORT}
 
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericJUTOptionalFieldsBuilder<T> {
 
   private Optional<T> foo;
@@ -73,6 +74,7 @@ public final class GenericJUTOptionalFieldsBuilder<T> {
     return new GenericJUTOptionalFieldsBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T>
       implements GenericJUTOptionalFields<T> {
 

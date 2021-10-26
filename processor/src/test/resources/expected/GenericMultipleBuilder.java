@@ -5,6 +5,7 @@ import java.util.Collection;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Collection<T2>, T4 extends Iterable<T2> & Comparable<T4>> {
   private T1 field1;
 
@@ -111,6 +112,7 @@ public final class GenericMultipleBuilder<T1, T2 extends Number, T3 extends Coll
     return new GenericMultipleBuilder<T1, T2, T3, T4>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T1, T2 extends Number, T3 extends Collection<T2>, T4 extends Iterable<T2> & Comparable<T4>> implements GenericMultiple<T1, T2, T3, T4> {
     private final T1 field1;
 

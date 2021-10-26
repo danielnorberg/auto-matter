@@ -1,8 +1,10 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class BarBuilder {
   public BarBuilder() {
   }
@@ -25,6 +27,7 @@ public final class BarBuilder {
     return new BarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Bar {
     private Value() {
     }

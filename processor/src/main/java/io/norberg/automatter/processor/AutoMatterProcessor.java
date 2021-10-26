@@ -242,6 +242,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       builder.addAnnotation(generatedAnnotation);
     }
 
+    builder.addAnnotation(AnnotationSpec.builder(AutoMatter.Generated.class).build());
+
     if (d.isPublic()) {
       builder.addModifiers(PUBLIC);
     }
@@ -1000,7 +1002,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
         TypeSpec.classBuilder("Value")
             .addTypeVariables(d.typeVariables())
             .addModifiers(PRIVATE, STATIC, FINAL)
-            .addSuperinterface(valueType(d));
+            .addSuperinterface(valueType(d))
+            .addAnnotation(AnnotationSpec.builder(AutoMatter.Generated.class).build());
 
     for (ExecutableElement field : d.fields()) {
       value.addField(

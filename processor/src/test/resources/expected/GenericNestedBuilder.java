@@ -8,6 +8,7 @@ ${GENERATED_IMPORT}
 
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericNestedBuilder<Q, W> {
   private GenericNested.Baz<GenericNested.Baz<Q>> baz2;
 
@@ -224,6 +225,7 @@ public final class GenericNestedBuilder<Q, W> {
     return new GenericNestedBuilder<Q, W>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<Q, W> implements GenericNested<Q, W> {
     private final GenericNested.Baz<GenericNested.Baz<Q>> baz2;
 

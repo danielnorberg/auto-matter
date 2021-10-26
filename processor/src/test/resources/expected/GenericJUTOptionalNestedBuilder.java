@@ -8,6 +8,7 @@ ${GENERATED_IMPORT}
 
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericJUTOptionalNestedBuilder<T> {
 
   private Optional<List<T>> foo;
@@ -55,6 +56,7 @@ public final class GenericJUTOptionalNestedBuilder<T> {
     return new GenericJUTOptionalNestedBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T>
       implements GenericJUTOptionalNested<T> {
 

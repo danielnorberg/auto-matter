@@ -1,8 +1,10 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 final class NestedPackageLocalFoobarBuilder {
 
   public NestedPackageLocalFoobarBuilder() {
@@ -26,6 +28,7 @@ final class NestedPackageLocalFoobarBuilder {
     return new NestedPackageLocalFoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements NestedPackageLocal.NestedPackageLocalFoobar {
 

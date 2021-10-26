@@ -10,6 +10,7 @@ import java.util.List;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class ConcreteExtensionOfGenericParentBuilder {
   private List<Integer> foos;
 
@@ -409,6 +410,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     return new ConcreteExtensionOfGenericParentBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements ConcreteExtensionOfGenericParent {
     private final List<Integer> foos;
 

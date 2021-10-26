@@ -10,6 +10,7 @@ import java.util.List;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericSuperParentBuilder<T> {
   private List<T> foos;
 
@@ -194,6 +195,7 @@ public final class GenericSuperParentBuilder<T> {
     return new GenericSuperParentBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericSuperParent<T> {
     private final List<T> foos;
 
