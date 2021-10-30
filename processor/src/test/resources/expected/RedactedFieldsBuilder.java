@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class RedactedFieldsBuilder {
 
   private String userName;
@@ -75,6 +76,7 @@ public final class RedactedFieldsBuilder {
     return new RedactedFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements RedactedFields {
 
     private final String userName;

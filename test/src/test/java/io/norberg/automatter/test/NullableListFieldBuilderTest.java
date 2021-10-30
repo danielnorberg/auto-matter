@@ -1,9 +1,10 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+import io.norberg.automatter.AutoMatter;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.junit.Before;

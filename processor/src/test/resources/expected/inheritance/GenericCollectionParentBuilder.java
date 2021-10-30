@@ -10,6 +10,7 @@ import java.util.List;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericCollectionParentBuilder<T> {
   private List<T> foos;
 
@@ -341,6 +342,7 @@ public final class GenericCollectionParentBuilder<T> {
     return new GenericCollectionParentBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericCollectionParent<T> {
     private final List<T> foos;
 

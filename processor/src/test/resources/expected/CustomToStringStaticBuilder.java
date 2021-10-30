@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class CustomToStringStaticBuilder {
   private String foo;
 
@@ -42,6 +43,7 @@ public final class CustomToStringStaticBuilder {
     return new CustomToStringStaticBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CustomToStringStatic {
     private final String foo;
 

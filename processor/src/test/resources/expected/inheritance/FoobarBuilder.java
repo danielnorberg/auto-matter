@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 final class FoobarBuilder {
   private String foo;
 
@@ -103,6 +104,7 @@ final class FoobarBuilder {
     return new FoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Foobar {
     private final String foo;
 

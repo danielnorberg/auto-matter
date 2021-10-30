@@ -7,6 +7,7 @@ ${GENERATED_IMPORT}
 
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class GenericGuavaOptionalFieldsBuilder<T> {
   private Optional<T> foo;
 
@@ -75,6 +76,7 @@ public final class GenericGuavaOptionalFieldsBuilder<T> {
     return new GenericGuavaOptionalFieldsBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements GenericGuavaOptionalFields<T> {
     private final Optional<T> foo;
 

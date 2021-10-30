@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class PrivateMethodsBuilder {
 
   private String foo;
@@ -43,6 +44,7 @@ public final class PrivateMethodsBuilder {
     return new PrivateMethodsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements PrivateMethods {
 
     private final String foo;

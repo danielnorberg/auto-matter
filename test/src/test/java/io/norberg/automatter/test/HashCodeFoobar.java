@@ -1,5 +1,6 @@
-package io.norberg.automatter;
+package io.norberg.automatter.test;
 
+import io.norberg.automatter.AutoMatter;
 import java.util.List;
 
 @AutoMatter

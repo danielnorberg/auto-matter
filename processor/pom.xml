@@ -4,11 +4,24 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>0.20.1-SNAPSHOT</version>
+    <version>0.21.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>auto-matter</artifactId>
   <packaging>jar</packaging>
+
+  <properties>
+    <!-- surefire -->
+    <!-- https://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html -->
+    <argLine>
+      -XX:+IgnoreUnrecognizedVMOptions
+      --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+      --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+      --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+      --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+      --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+    </argLine>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -65,18 +78,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <argLine>
-            -XX:+IgnoreUnrecognizedVMOptions
-            --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
-            --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
-            --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
-            --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
-            --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
-          </argLine>
-        </configuration>
       </plugin>
-
     </plugins>
   </build>
 </project>

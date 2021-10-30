@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class CustomCheckStaticBuilder {
   private String foo;
 
@@ -42,6 +43,7 @@ public final class CustomCheckStaticBuilder {
     return new CustomCheckStaticBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CustomCheckStatic {
     private final String foo;
 

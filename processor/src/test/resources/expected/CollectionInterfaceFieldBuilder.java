@@ -9,6 +9,7 @@ import java.util.Iterator;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class CollectionInterfaceFieldBuilder {
   private Collection<String> strings;
 
@@ -102,6 +103,7 @@ public final class CollectionInterfaceFieldBuilder {
     return new CollectionInterfaceFieldBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements CollectionInterfaceField {
     private final Collection<String> strings;
 

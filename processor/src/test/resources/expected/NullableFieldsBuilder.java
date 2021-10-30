@@ -5,6 +5,7 @@ import java.util.Date;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class NullableFieldsBuilder {
 
   private String nullableFoo;
@@ -84,6 +85,7 @@ public final class NullableFieldsBuilder {
     return new NullableFieldsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements NullableFields {
 

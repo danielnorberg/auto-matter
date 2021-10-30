@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class OverriddenBaseMethodsBuilder {
 
   private String baz;
@@ -43,6 +44,7 @@ public final class OverriddenBaseMethodsBuilder {
     return new OverriddenBaseMethodsBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements OverriddenBaseMethods {
 
     private final String baz;

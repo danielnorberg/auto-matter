@@ -5,6 +5,7 @@ import java.util.Arrays;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class FooBuilder {
   private boolean aBoolean;
 
@@ -167,6 +168,7 @@ public final class FooBuilder {
     return new FooBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value implements Foo {
     private final boolean aBoolean;
 

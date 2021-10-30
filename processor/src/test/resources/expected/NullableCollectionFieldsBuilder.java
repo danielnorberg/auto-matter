@@ -14,6 +14,7 @@ import java.util.Set;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class NullableCollectionFieldsBuilder {
   private List<String> strings;
 
@@ -227,7 +228,10 @@ public final class NullableCollectionFieldsBuilder {
     return new NullableCollectionFieldsBuilder(v);
   }
 
-  private static final class Value implements NullableCollectionFields {
+  @AutoMatter.Generated
+  private static final class Value
+      implements NullableCollectionFields {
+
     private final List<String> strings;
 
     private final Map<String, Integer> integers;

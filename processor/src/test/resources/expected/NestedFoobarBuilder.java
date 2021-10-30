@@ -1,6 +1,8 @@
+import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class NestedFoobarBuilder {
 
   public NestedFoobarBuilder() {
@@ -24,6 +26,7 @@ public final class NestedFoobarBuilder {
     return new NestedFoobarBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements Nested.NestedFoobar {
 

@@ -1,6 +1,8 @@
+import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 public final class TopLevelBuilder {
 
   public TopLevelBuilder() {
@@ -24,6 +26,7 @@ public final class TopLevelBuilder {
     return new TopLevelBuilder(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value
       implements TopLevel {
 

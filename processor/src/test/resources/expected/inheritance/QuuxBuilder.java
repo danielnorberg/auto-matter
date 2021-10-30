@@ -4,6 +4,7 @@ import io.norberg.automatter.AutoMatter;
 ${GENERATED_IMPORT}
 
 ${GENERATED_ANNOTATION}
+@AutoMatter.Generated
 final class QuuxBuilder<T> {
   private T Quux;
 
@@ -42,6 +43,7 @@ final class QuuxBuilder<T> {
     return new QuuxBuilder<T>(v);
   }
 
+  @AutoMatter.Generated
   private static final class Value<T> implements Quux<T> {
     private final T Quux;
 
