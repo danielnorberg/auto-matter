@@ -40,7 +40,7 @@ public final class GenericSuperParentBuilder<T> {
   }
 
   private GenericSuperParentBuilder(GenericSuperParentBuilder<? extends T> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    this.foos = new ArrayList<T>(v.foos());
     @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();
