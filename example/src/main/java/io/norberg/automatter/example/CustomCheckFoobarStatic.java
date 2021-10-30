@@ -10,6 +10,8 @@ public interface CustomCheckFoobarStatic {
 
   @AutoMatter.Check
   static void check(CustomCheckFoobarStatic v) {
-    assert v.foo().length() < v.bar() : "bar needs to be greater than length of foo";
+    if (v.foo().length() >= v.bar()) {
+      throw new IllegalStateException("bar needs to be greater than length of foo");
+    }
   }
 }

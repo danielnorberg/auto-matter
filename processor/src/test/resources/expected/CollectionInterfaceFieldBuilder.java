@@ -22,7 +22,7 @@ public final class CollectionInterfaceFieldBuilder {
   }
 
   private CollectionInterfaceFieldBuilder(CollectionInterfaceFieldBuilder v) {
-    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
+    this.strings = new ArrayList<String>(v.strings());
   }
 
   public Collection<String> strings() {

@@ -57,13 +57,13 @@ public final class CollectionFieldsBuilder {
   }
 
   private CollectionFieldsBuilder(CollectionFieldsBuilder v) {
-    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
-    this.integers = (v.integers() == null) ? null : new HashMap<String, Integer>(v.integers());
-    this.sortedIntegers = (v.sortedIntegers() == null) ? null : new TreeMap<String, Integer>(v.sortedIntegers());
-    this.navigableIntegers = (v.navigableIntegers() == null) ? null : new TreeMap<String, Integer>(v.navigableIntegers());
-    this.numbers = (v.numbers() == null) ? null : new HashSet<Long>(v.numbers());
-    this.sortedNumbers = (v.sortedNumbers() == null) ? null : new TreeSet<Long>(v.sortedNumbers());
-    this.navigableNumbers = (v.navigableNumbers() == null) ? null : new TreeSet<Long>(v.navigableNumbers());
+    this.strings = new ArrayList<String>(v.strings());
+    this.integers = new HashMap<String, Integer>(v.integers());
+    this.sortedIntegers = new TreeMap<String, Integer>(v.sortedIntegers());
+    this.navigableIntegers = new TreeMap<String, Integer>(v.navigableIntegers());
+    this.numbers = new HashSet<Long>(v.numbers());
+    this.sortedNumbers = new TreeSet<Long>(v.sortedNumbers());
+    this.navigableNumbers = new TreeSet<Long>(v.navigableNumbers());
   }
 
   public List<String> strings() {

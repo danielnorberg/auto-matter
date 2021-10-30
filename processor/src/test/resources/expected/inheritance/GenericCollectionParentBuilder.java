@@ -66,7 +66,7 @@ public final class GenericCollectionParentBuilder<T> {
   }
 
   private GenericCollectionParentBuilder(GenericCollectionParentBuilder<? extends T> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    this.foos = new ArrayList<T>(v.foos());
     @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();
@@ -79,11 +79,11 @@ public final class GenericCollectionParentBuilder<T> {
     this.secondParameterizedBar = _secondParameterizedBar;
     @SuppressWarnings("unchecked") Quux<T> _secondParameterizedQuux = (Quux<T>) (Quux<? extends T>) v.secondParameterizedQuux();
     this.secondParameterizedQuux = _secondParameterizedQuux;
-    this.moreFoos = (v.moreFoos() == null) ? null : new ArrayList<T>(v.moreFoos());
+    this.moreFoos = new ArrayList<T>(v.moreFoos());
   }
 
   private GenericCollectionParentBuilder(GenericSuperParentBuilder<? extends T> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
+    this.foos = new ArrayList<T>(v.foos());
     @SuppressWarnings("unchecked") Bar<T> _oneParameterizedBar = (Bar<T>) (Bar<? extends T>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();

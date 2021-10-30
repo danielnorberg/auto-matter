@@ -16,9 +16,10 @@ ${GENERATED_IMPORT}
 ${GENERATED_ANNOTATION}
 @AutoMatter.Generated
 public final class NullableCollectionFieldsBuilder {
-
   private List<String> strings;
-  private Map<String,Integer> integers;
+
+  private Map<String, Integer> integers;
+
   private Set<Long> numbers;
 
   public NullableCollectionFieldsBuilder() {
@@ -34,9 +35,9 @@ public final class NullableCollectionFieldsBuilder {
   }
 
   private NullableCollectionFieldsBuilder(NullableCollectionFieldsBuilder v) {
-    this.strings = (v.strings() == null) ? null : new ArrayList<String>(v.strings());
-    this.integers = (v.integers() == null) ? null : new HashMap<String, Integer>(v.integers());
-    this.numbers = (v.numbers() == null) ? null : new HashSet<Long>(v.numbers());
+    this.strings = new ArrayList<String>(v.strings());
+    this.integers = new HashMap<String, Integer>(v.integers());
+    this.numbers = new HashSet<Long>(v.numbers());
   }
 
   public List<String> strings() {
@@ -98,54 +99,48 @@ public final class NullableCollectionFieldsBuilder {
     return this;
   }
 
-  public Map<String,Integer> integers() {
+  public Map<String, Integer> integers() {
     return integers;
   }
 
-  public NullableCollectionFieldsBuilder integers(Map<? extends String,? extends Integer> integers) {
+  public NullableCollectionFieldsBuilder integers(
+      Map<? extends String, ? extends Integer> integers) {
     if (integers == null) {
       this.integers = null;
       return this;
     }
-    this.integers = new HashMap<String,Integer>(integers);
+    this.integers = new HashMap<String, Integer>(integers);
     return this;
   }
 
   public NullableCollectionFieldsBuilder integers(String k1, Integer v1) {
-    integers = new HashMap<String,Integer>();
+    integers = new HashMap<String, Integer>();
     integers.put(k1, v1);
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integers(String k1, Integer v1,
-                                          String k2, Integer v2) {
+  public NullableCollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2) {
     integers(k1, v1);
     integers.put(k2, v2);
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integers(String k1, Integer v1,
-                                          String k2, Integer v2,
-                                          String k3, Integer v3) {
+  public NullableCollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3) {
     integers(k1, v1, k2, v2);
     integers.put(k3, v3);
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integers(String k1, Integer v1,
-                                          String k2, Integer v2,
-                                          String k3, Integer v3,
-                                          String k4, Integer v4) {
+  public NullableCollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4) {
     integers(k1, v1, k2, v2, k3, v3);
     integers.put(k4, v4);
     return this;
   }
 
-  public NullableCollectionFieldsBuilder integers(String k1, Integer v1,
-                                          String k2, Integer v2,
-                                          String k3, Integer v3,
-                                          String k4, Integer v4,
-                                          String k5, Integer v5) {
+  public NullableCollectionFieldsBuilder integers(String k1, Integer v1, String k2, Integer v2,
+      String k3, Integer v3, String k4, Integer v4, String k5, Integer v5) {
     integers(k1, v1, k2, v2, k3, v3, k4, v4);
     integers.put(k5, v5);
     return this;
@@ -153,7 +148,7 @@ public final class NullableCollectionFieldsBuilder {
 
   public NullableCollectionFieldsBuilder putInteger(String key, Integer value) {
     if (this.integers == null) {
-      this.integers = new HashMap<String,Integer>();
+      this.integers = new HashMap<String, Integer>();
     }
     integers.put(key, value);
     return this;
@@ -238,12 +233,14 @@ public final class NullableCollectionFieldsBuilder {
       implements NullableCollectionFields {
 
     private final List<String> strings;
-    private final Map<String,Integer> integers;
+
+    private final Map<String, Integer> integers;
+
     private final Set<Long> numbers;
 
     private Value(@AutoMatter.Field("strings") List<String> strings,
-                  @AutoMatter.Field("integers") Map<String,Integer> integers,
-                  @AutoMatter.Field("numbers") Set<Long> numbers) {
+        @AutoMatter.Field("integers") Map<String, Integer> integers,
+        @AutoMatter.Field("numbers") Set<Long> numbers) {
       this.strings = strings;
       this.integers = integers;
       this.numbers = numbers;
@@ -257,7 +254,7 @@ public final class NullableCollectionFieldsBuilder {
 
     @AutoMatter.Field
     @Override
-    public Map<String,Integer> integers() {
+    public Map<String, Integer> integers() {
       return integers;
     }
 
@@ -279,9 +276,7 @@ public final class NullableCollectionFieldsBuilder {
       if (!(o instanceof NullableCollectionFields)) {
         return false;
       }
-
       final NullableCollectionFields that = (NullableCollectionFields) o;
-
       if (strings != null ? !strings.equals(that.strings()) : that.strings() != null) {
         return false;
       }
@@ -291,7 +286,6 @@ public final class NullableCollectionFieldsBuilder {
       if (numbers != null ? !numbers.equals(that.numbers()) : that.numbers() != null) {
         return false;
       }
-
       return true;
     }
 
@@ -307,10 +301,10 @@ public final class NullableCollectionFieldsBuilder {
     @Override
     public String toString() {
       return "NullableCollectionFields{" +
-             "strings=" + strings +
-             ", integers=" + integers +
-             ", numbers=" + numbers +
-             '}';
+          "strings=" + strings +
+          ", integers=" + integers +
+          ", numbers=" + numbers +
+          '}';
     }
   }
 }

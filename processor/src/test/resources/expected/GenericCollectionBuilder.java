@@ -30,8 +30,8 @@ public final class GenericCollectionBuilder<T, K, V> {
 
   private GenericCollectionBuilder(
       GenericCollectionBuilder<? extends T, ? extends K, ? extends V> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<T>(v.foos());
-    this.bars = (v.bars() == null) ? null : new HashMap<K, V>(v.bars());
+    this.foos = new ArrayList<T>(v.foos());
+    this.bars = new HashMap<K, V>(v.bars());
   }
 
   public List<T> foos() {

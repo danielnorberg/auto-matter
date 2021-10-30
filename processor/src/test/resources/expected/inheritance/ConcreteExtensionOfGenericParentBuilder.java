@@ -88,7 +88,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
   }
 
   private ConcreteExtensionOfGenericParentBuilder(ConcreteExtensionOfGenericParentBuilder v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<Integer>(v.foos());
+    this.foos = new ArrayList<Integer>(v.foos());
     @SuppressWarnings("unchecked") Bar<Integer> _oneParameterizedBar = (Bar<Integer>) (Bar<? extends Integer>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();
@@ -101,12 +101,12 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     this.secondParameterizedBar = _secondParameterizedBar;
     @SuppressWarnings("unchecked") Quux<Integer> _secondParameterizedQuux = (Quux<Integer>) (Quux<? extends Integer>) v.secondParameterizedQuux();
     this.secondParameterizedQuux = _secondParameterizedQuux;
-    this.moreFoos = (v.moreFoos() == null) ? null : new ArrayList<Integer>(v.moreFoos());
+    this.moreFoos = new ArrayList<Integer>(v.moreFoos());
     this.oneFoo = v.oneFoo();
   }
 
   private ConcreteExtensionOfGenericParentBuilder(GenericSuperParentBuilder<? extends Integer> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<Integer>(v.foos());
+    this.foos = new ArrayList<Integer>(v.foos());
     @SuppressWarnings("unchecked") Bar<Integer> _oneParameterizedBar = (Bar<Integer>) (Bar<? extends Integer>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();
@@ -119,7 +119,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
 
   private ConcreteExtensionOfGenericParentBuilder(
       GenericCollectionParentBuilder<? extends Integer> v) {
-    this.foos = (v.foos() == null) ? null : new ArrayList<Integer>(v.foos());
+    this.foos = new ArrayList<Integer>(v.foos());
     @SuppressWarnings("unchecked") Bar<Integer> _oneParameterizedBar = (Bar<Integer>) (Bar<? extends Integer>) v.oneParameterizedBar();
     this.oneParameterizedBar = _oneParameterizedBar;
     this.oneIntegerBar = v.oneIntegerBar();
@@ -132,7 +132,7 @@ public final class ConcreteExtensionOfGenericParentBuilder {
     this.secondParameterizedBar = _secondParameterizedBar;
     @SuppressWarnings("unchecked") Quux<Integer> _secondParameterizedQuux = (Quux<Integer>) (Quux<? extends Integer>) v.secondParameterizedQuux();
     this.secondParameterizedQuux = _secondParameterizedQuux;
-    this.moreFoos = (v.moreFoos() == null) ? null : new ArrayList<Integer>(v.moreFoos());
+    this.moreFoos = new ArrayList<Integer>(v.moreFoos());
   }
 
   public List<Integer> foos() {
