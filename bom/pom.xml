@@ -4,12 +4,12 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-project</artifactId>
-    <version>0.22.0</version>
+    <version>0.22.1-SNAPSHOT</version>
     <relativePath>../project/pom.xml</relativePath>
   </parent>
 
   <artifactId>auto-matter-bom</artifactId>
-  <version>0.22.0</version>
+  <version>0.22.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <dependencyManagement>
