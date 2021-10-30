@@ -103,6 +103,7 @@
     <module>all</module>
     <module>test</module>
     <module>record-test</module>
+    <module>bom</module>
   </modules>
 
   <distributionManagement>
