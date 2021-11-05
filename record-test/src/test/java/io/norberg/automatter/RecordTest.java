@@ -18,8 +18,8 @@ import org.junit.Test;
 
 public class RecordTest {
 
-  private static final ObjectMapper jackson = new ObjectMapper()
-      .registerModule(new AutoMatterModule());
+  private static final ObjectMapper jackson =
+      new ObjectMapper().registerModule(new AutoMatterModule());
 
   private static final Gson gson =
       new GsonBuilder().registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory()).create();
@@ -32,12 +32,7 @@ public class RecordTest {
 
   @AutoMatter
   public record ComplexFoobar(
-      String foo,
-      String bar,
-      String baz,
-      String quux,
-      String corge,
-      List<String> strings) {}
+      String foo, String bar, String baz, String quux, String corge, List<String> strings) {}
 
   @AutoMatter
   public record NullableRecord(@Nullable String foo, String bar) {}
