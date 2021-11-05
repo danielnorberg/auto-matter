@@ -18,18 +18,9 @@
 
   <profiles>
     <profile>
-      <id>jdk9+</id>
+      <id>error-prone-jdk9-16</id>
       <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <properties>
-        <maven.compiler.release>8</maven.compiler.release>
-      </properties>
-    </profile>
-    <profile>
-      <id>jdk16-</id>
-      <activation>
-        <jdk>(,17)</jdk>
+        <jdk>[9,17)</jdk>
       </activation>
       <build>
         <plugins>

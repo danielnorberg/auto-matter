@@ -1,8 +1,10 @@
 package foo;
 
+import io.norberg.automatter.AutoMatter;
 import javax.annotation.processing.Generated;
 
 @Generated("io.norberg.automatter.processor.AutoMatterProcessor")
+@AutoMatter.Generated
 public final class BazRecordBuilder {
   private int a;
 
