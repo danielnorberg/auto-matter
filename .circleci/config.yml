@@ -47,8 +47,6 @@ jobs:
             mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
           fi
 
-      - run: mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
-
   test-jdk:
     parameters:
       jdk:
