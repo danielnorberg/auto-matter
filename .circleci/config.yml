@@ -12,13 +12,13 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
-      - run: mvn -B -V dependency:go-offline
+      - run: ./mvnw -B -V dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
       # Build and install artifacts
-      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      - run: ./mvnw -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - persist_to_workspace:
           root: .
           paths:
@@ -34,8 +34,8 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
-      - run: mvn -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-      - run: mvn -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+      - run: ./mvnw -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+      - run: ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
 
   test-jdk:
     parameters:
@@ -52,14 +52,14 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
       # Install artifacts without re-compiling
-      - run: mvn -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
+      - run: ./mvnw -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
       # Excercise the JDK 11 built annotation processor using the selected JDK:
       # 1. Run all tests
-      - run: mvn -B -V surefire:test
+      - run: ./mvnw -B -V surefire:test
       # 2. Compile examples
-      - run: mvn -B -V clean test -pl example -Dfmt.skip=true
+      - run: ./mvnw -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
-      - run: mvn -B -V clean test -pl test -Dfmt.skip=true
+      - run: ./mvnw -B -V clean test -pl test -Dfmt.skip=true
 
   jackson-it:
     parallelism: 4
@@ -75,7 +75,7 @@ jobs:
             - maven-repo-v1-
       - run:
           name: Install artifacts
-          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+          command: ./mvnw -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - run:
           name: Test Jackson Versions
           command: ./jackson-it.sh
