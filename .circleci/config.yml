@@ -91,16 +91,36 @@ workflows:
       - test-jdk:
           requires: [build]
           name: 8 - AdoptOpenJDK
-          jdk: cimg/openjdk:8.0.302
+          jdk: "cimg/openjdk:8.0.302"
       - test-jdk:
           requires: [build]
           name: 11 - AdoptOpenJDK
-          jdk: cimg/openjdk:11.0.12
+          jdk: "cimg/openjdk:11.0.12"
       - test-jdk:
           requires: [build]
           name: 15 - AdoptOpenJDK
-          jdk: cimg/openjdk:15.0.2
+          jdk: "cimg/openjdk:15.0.2"
+      - test-jdk:
+          requires: [build]
+          name: 11 - Amazon Corretto
+          jdk: "amazoncorretto:11"
       - test-jdk:
           requires: [build]
           name: 17 - AdoptOpenJDK
-          jdk: cimg/openjdk:17.0.0
+          jdk: "cimg/openjdk:17.0.0"
+      - test-jdk:
+          requires: [build]
+          name: 11 - Azul Zulu
+          jdk: "azul/zulu-openjdk:11"
+      - test-jdk:
+          requires: [build]
+          name: 17 - Amazon Corretto
+          jdk: "amazoncorretto:17"
+      - test-jdk:
+          requires: [build]
+          name: 11 - GraalVM CE
+          jdk: "ghcr.io/graalvm/graalvm-ce:java11-21"
+      - test-jdk:
+          requires: [build]
+          name: 17 - Azul Zulu
+          jdk: "ghcr.io/graalvm/graalvm-ce:java17-21"
