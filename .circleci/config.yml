@@ -9,14 +9,14 @@ jobs:
       # Cache deps
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v2-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v2-{{ .Branch }}-
+            - maven-repo-v2-
       - run: ./mvnw -B -V dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
-          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+          key: maven-repo-v2-{{ .Branch }}-{{ checksum "pom.xml" }}
       # Build and install artifacts
       - run: ./mvnw -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - persist_to_workspace:
@@ -31,9 +31,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v2-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v2-{{ .Branch }}-
+            - maven-repo-v2-
       - run: |
           export PROJECT_VERSION=$(mvn -q \
             -Dexec.executable=echo \
@@ -58,9 +58,9 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v2-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v2-{{ .Branch }}-
+            - maven-repo-v2-
       # Install artifacts without re-compiling
       - run: ./mvnw -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
       # Excercise the JDK 11 built annotation processor using the selected JDK:
@@ -80,9 +80,9 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v2-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v2-{{ .Branch }}-
+            - maven-repo-v2-
       - run:
           name: Install artifacts
           command: ./mvnw -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
