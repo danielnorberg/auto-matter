@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       # Install JDK installation script
-      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh -v
       # Cache deps
       - restore_cache:
           keys:
