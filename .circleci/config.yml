@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       # Install JDK installation script
-      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh -v
+      - run: wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
       # Cache deps
       - restore_cache:
           keys:
@@ -95,38 +95,38 @@ workflows:
       - test-jdk:
           requires: [build]
           name: 8 - OpenJDK - GPL
-          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
+          jdk: source install-jdk.sh -v --url 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u282b08.tar.gz'
       - test-jdk:
           requires: [build]
           name: 11 - OpenJDK - GPL
-          jdk: source install-jdk.sh -F 11
+          jdk: source install-jdk.sh -v -F 11
       - test-jdk:
           requires: [build]
           name: 15 - OpenJDK - GPL
-          jdk: source install-jdk.sh -F 15
+          jdk: source install-jdk.sh -v -F 15
       - test-jdk:
           requires: [build]
           name: 17 - OpenJDK - GPL
-          jdk: source install-jdk.sh -F 17
+          jdk: source install-jdk.sh -v -F 17
 
       - test-jdk:
           requires: [build]
           name: 11 - adoptopenjdk + Hotspot
-          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
+          jdk: source install-jdk.sh -v --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz'
       - test-jdk:
           requires: [build]
           name: 11 - adoptopenjdk + OpenJ9
-          jdk: source install-jdk.sh --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
+          jdk: source install-jdk.sh -v --url 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9_openj9-0.24.0/OpenJDK11U-jdk_x64_linux_openj9_11.0.10_9_openj9-0.24.0.tar.gz'
 
       - test-jdk:
           requires: [build]
           name: graalvm-ce-java11-linux-amd64-21.0.0.2
-          jdk: source install-jdk.sh --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
+          jdk: source install-jdk.sh -v --url https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz
       - test-jdk:
           requires: [build]
           name: zulu11.45.27-ca-jdk11.0.10
-          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
+          jdk: source install-jdk.sh -v --url https://cdn.azul.com/zulu/bin/zulu11.45.27-ca-jdk11.0.10-linux_x64.tar.gz
       - test-jdk:
           requires: [build]
           name: zulu15.29.15-ca-jdk15.0.2
-          jdk: source install-jdk.sh --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
+          jdk: source install-jdk.sh -v --url https://cdn.azul.com/zulu/bin/zulu15.29.15-ca-jdk15.0.2-linux_x64.tar.gz
