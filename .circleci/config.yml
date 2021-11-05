@@ -12,7 +12,7 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
-      - run: mvn dependency:go-offline
+      - run: mvn -B -V dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
@@ -43,8 +43,8 @@ jobs:
           if [[ ! "$PROJECT_VERSION" =~ "SNAPSHOT" ]]; then
             echo "Omitting release test for non-SNAPSHOT version build: $PROJECT_VERSION"
           else
-            mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-            mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+            mvn -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+            mvn -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
           fi
 
   test-jdk:
@@ -65,11 +65,11 @@ jobs:
       - run: mvn -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
       # Excercise the JDK 11 built annotation processor using the selected JDK:
       # 1. Run all tests
-      - run: mvn -B surefire:test
+      - run: mvn -B -V surefire:test
       # 2. Compile examples
-      - run: mvn -B clean test -pl example -Dfmt.skip=true
+      - run: mvn -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
-      - run: mvn -B clean test -pl test -Dfmt.skip=true
+      - run: mvn -B -V clean test -pl test -Dfmt.skip=true
 
   jackson-it:
     parallelism: 4
