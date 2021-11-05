@@ -41,6 +41,10 @@
       <activation>
         <jdk>[17,)</jdk>
       </activation>
+      <properties>
+        <!-- surefire -->
+        <argLine>--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</argLine>
+      </properties>
     </profile>
   </profiles>
 
