@@ -1,7 +1,7 @@
 package io.norberg.automatter.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import io.norberg.automatter.AutoMatter;
@@ -22,7 +22,7 @@ public class GenericsTest {
   }
 
   @Test
-  public void test_T1_Number_T2_ListOfInteger() throws Exception {
+  public void test_T1_Number_T2_ListOfInteger() {
     final Number value1 = 17;
     final List<Integer> value2 = ImmutableList.of(1, 2, 3);
 
@@ -48,7 +48,7 @@ public class GenericsTest {
     final List<? extends Integer> field2 = foobar.field2();
     final List<? extends Number> field2b = foobar.field2();
     assertThat(field1, is(value1));
-    assertThat(field1b, is((Object) value1));
+    assertThat(field1b, is(value1));
     assertThat(field2, Matchers.<List<? extends Integer>>is(value2));
     assertThat(field2b, Matchers.<List<? extends Number>>is(value2));
 
@@ -179,7 +179,7 @@ public class GenericsTest {
     final List<? extends Number> builderField2 = builder.field2();
     final List<? extends Serializable> builderField2b = builder.field2();
     assertThat(builderField1, is(value1));
-    assertThat(builderField1b, is((Object) value1));
+    assertThat(builderField1b, is(value1));
     assertThat(builderField2, Matchers.<List<? extends Number>>is((value2)));
     assertThat(builderField2b, Matchers.<List<? extends Serializable>>is((value2)));
 
@@ -190,7 +190,7 @@ public class GenericsTest {
     final List<? extends Number> field2 = foobar.field2();
     final List<? extends Serializable> field2b = foobar.field2();
     assertThat(field1, is(value1));
-    assertThat(field1b, is((Object) value1));
+    assertThat(field1b, is(value1));
     assertThat(field2, Matchers.<List<? extends Number>>is(value2));
     assertThat(field2b, Matchers.<List<? extends Serializable>>is(value2));
 

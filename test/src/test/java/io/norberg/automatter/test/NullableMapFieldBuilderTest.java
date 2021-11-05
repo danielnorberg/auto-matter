@@ -1,8 +1,8 @@
 package io.norberg.automatter.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import io.norberg.automatter.AutoMatter;

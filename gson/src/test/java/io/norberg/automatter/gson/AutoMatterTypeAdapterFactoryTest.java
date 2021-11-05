@@ -1,12 +1,11 @@
 package io.norberg.automatter.gson;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,20 +27,20 @@ public class AutoMatterTypeAdapterFactoryTest {
   }
 
   @Test
-  public void testJson() throws IOException {
+  public void testJson() {
     final String json = gson.toJson(FOO);
     final Foo parsed = gson.fromJson(json, Foo.class);
     assertThat(parsed, is(FOO));
   }
 
   @Test
-  public void testSerializedName() throws IOException {
+  public void testSerializedName() {
     final String json = gson.toJson(BAR); // isPrivate -> private
     assertThat(json, is("{\"a\":17,\"b\":\"foobar\",\"private\":true}"));
   }
 
   @Test
-  public void testSerializedNameWithUnderscorePolicy() throws IOException {
+  public void testSerializedNameWithUnderscorePolicy() {
     gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new AutoMatterTypeAdapterFactory())
@@ -56,7 +55,7 @@ public class AutoMatterTypeAdapterFactoryTest {
   }
 
   @Test
-  public void testNesting() throws IOException {
+  public void testNesting() {
     final String json = gson.toJson(nestedGson);
     assertThat(gson.fromJson(json, NestedGson.class), is(nestedGson));
   }
