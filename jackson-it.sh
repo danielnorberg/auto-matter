@@ -47,7 +47,7 @@ for v in ${split_versions}; do
   echo "Testing Jackson $v"
   echo "========================================================================"
   set -x
-  mvn -nsu -B -Dautomatter.jackson.databind.version="$v" -pl jackson surefire:test
+  mvn -nsu -B -V -Dautomatter.jackson.databind.version="$v" -pl jackson surefire:test
   set +x
 done
 
