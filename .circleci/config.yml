@@ -17,8 +17,8 @@ jobs:
           paths:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-      # Install artifacts
-      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true      
+      # Build and install artifacts
+      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - persist_to_workspace:
           root: .
           paths:
@@ -52,14 +52,14 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
       # Install artifacts without re-compiling
-      - run: mvn -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true
-      # Using the selected JDK and the openjdk11 built annotation processor:
+      - run: mvn -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
+      # Excercise the JDK 11 built annotation processor using the selected JDK:
       # 1. Run all tests
       - run: mvn -B surefire:test
       # 2. Compile examples
-      - run: mvn -B clean test -pl example
+      - run: mvn -B clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
-      - run: mvn -B clean test -pl test
+      - run: mvn -B clean test -pl test -Dfmt.skip=true
 
   jackson-it:
     parallelism: 4
