@@ -51,6 +51,8 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
+      # Install artifacts
+      - run: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       # Using the selected JDK and the openjdk11 built annotation processor:
       # 1. Run all tests
       - run: mvn -B surefire:test
