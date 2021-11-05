@@ -298,9 +298,7 @@ fi
 
 # Provide a "standardized" way to retrieve the CLI args that will
 # work with both Windows and non-Windows executions.
-# XXX: https://issues.jenkins.io/browse/JENKINS-47890
-# XXX: https://github.com/eclipse/che/issues/13926
-MAVEN_CMD_LINE_ARGS="$MVNW_MAVEN_CONFIG $@"
+MAVEN_CMD_LINE_ARGS="$MAVEN_CONFIG $@"
 export MAVEN_CMD_LINE_ARGS
 
 WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
@@ -309,4 +307,4 @@ exec "$JAVACMD" \
   $MAVEN_OPTS \
   -classpath "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar" \
   "-Dmaven.home=${M2_HOME}" "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
-  ${WRAPPER_LAUNCHER} $MVNW_MAVEN_CONFIG "$@"
+  ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
