@@ -41,7 +41,7 @@ jobs:
             --non-recursive \
             exec:exec)
           if [[ ! "$PROJECT_VERSION" =~ "SNAPSHOT" ]]; then
-            echo "Omitting release test for non-SNAPSHOT version build"
+            echo "Omitting release test for non-SNAPSHOT version build: $PROJECT_VERSION"
           else
             mvn -B -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
             mvn -B -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
