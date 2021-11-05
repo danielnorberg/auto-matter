@@ -9,16 +9,17 @@ jobs:
       # Cache deps
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
-      - run: mvn -B -V dependency:go-offline
+            - maven-repo-v3-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v3-{{ .Branch }}-
+            - maven-repo-v3-
+      - run: ./mvnw -B -V dependency:go-offline
+      - run: ./mvnw -B -V clean package -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - save_cache:
           paths:
             - ~/.m2
-          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+          key: maven-repo-v3-{{ .Branch }}-{{ checksum "pom.xml" }}
       # Build and install artifacts
-      - run: mvn -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+      - run: ./mvnw -B -V clean install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - persist_to_workspace:
           root: .
           paths:
@@ -31,9 +32,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v3-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v3-{{ .Branch }}-
+            - maven-repo-v3-
       - run: |
           export PROJECT_VERSION=$(mvn -q \
             -Dexec.executable=echo \
@@ -43,8 +44,8 @@ jobs:
           if [[ ! "$PROJECT_VERSION" =~ "SNAPSHOT" ]]; then
             echo "Omitting release test for non-SNAPSHOT version build: $PROJECT_VERSION"
           else
-            mvn -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-            mvn -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+            ./mvnw -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+            ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
           fi
 
   test-jdk:
@@ -58,18 +59,18 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v3-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v3-{{ .Branch }}-
+            - maven-repo-v3-
       # Install artifacts without re-compiling
-      - run: mvn -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
+      - run: ./mvnw -B -V install -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.main.skip=true -Dmaven.test.skip=true -Dfmt.skip=true
       # Excercise the JDK 11 built annotation processor using the selected JDK:
       # 1. Run all tests
-      - run: mvn -B -V surefire:test
+      - run: ./mvnw -B -V surefire:test
       # 2. Compile examples
-      - run: mvn -B -V clean test -pl example -Dfmt.skip=true
+      - run: ./mvnw -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
-      - run: mvn -B -V clean test -pl test -Dfmt.skip=true
+      - run: ./mvnw -B -V clean test -pl test -Dfmt.skip=true
 
   jackson-it:
     parallelism: 4
@@ -80,12 +81,12 @@ jobs:
           at: .
       - restore_cache:
           keys:
-            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-            - maven-repo-v1-{{ .Branch }}-
-            - maven-repo-v1-
+            - maven-repo-v3-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v3-{{ .Branch }}-
+            - maven-repo-v3-
       - run:
           name: Install artifacts
-          command: mvn -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
+          command: ./mvnw -B -V install -DskipTests -Dgpg.skip=true -Dmaven.javadoc.skip=true
       - run:
           name: Test Jackson Versions
           command: ./jackson-it.sh
@@ -101,16 +102,44 @@ workflows:
       - test-jdk:
           requires: [build]
           name: 8 - AdoptOpenJDK
-          jdk: cimg/openjdk:8.0.302
+          jdk: "cimg/openjdk:8.0.302"
       - test-jdk:
           requires: [build]
           name: 11 - AdoptOpenJDK
-          jdk: cimg/openjdk:11.0.12
+          jdk: "cimg/openjdk:11.0.12"
       - test-jdk:
           requires: [build]
           name: 15 - AdoptOpenJDK
-          jdk: cimg/openjdk:15.0.2
+          jdk: "cimg/openjdk:15.0.2"
       - test-jdk:
           requires: [build]
           name: 17 - AdoptOpenJDK
-          jdk: cimg/openjdk:17.0.0
+          jdk: "cimg/openjdk:17.0.0"
+
+# TODO: work around MAVEN_CONFIG clobber
+#      - test-jdk:
+#          requires: [build]
+#          name: 11 - Amazon Corretto
+#          jdk: "maven:3.8.3-amazoncorretto-11"
+#      - test-jdk:
+#          requires: [build]
+#          name: 17 - Amazon Corretto
+#          jdk: "maven:3.8.3-amazoncorretto-17"
+
+      - test-jdk:
+          requires: [build]
+          name: 11 - Azul Zulu
+          jdk: "azul/zulu-openjdk:11"
+      - test-jdk:
+          requires: [build]
+          name: 17 - Azul Zulu
+          jdk: "azul/zulu-openjdk:17"
+
+      - test-jdk:
+          requires: [build]
+          name: 11 - GraalVM CE
+          jdk: "ghcr.io/graalvm/graalvm-ce:java11-21"
+      - test-jdk:
+          requires: [build]
+          name: 17 - GraalVM CE
+          jdk: "ghcr.io/graalvm/graalvm-ce:java17-21"
