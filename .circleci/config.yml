@@ -34,8 +34,18 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
-      - run: ./mvnw -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
-      - run: ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+      - run: |
+          export PROJECT_VERSION=$(mvn -q \
+            -Dexec.executable=echo \
+            -Dexec.args='${project.version}' \
+            --non-recursive \
+            exec:exec)
+          if [[ ! "$PROJECT_VERSION" =~ "SNAPSHOT" ]]; then
+            echo "Omitting release test for non-SNAPSHOT version build: $PROJECT_VERSION"
+          else
+            ./mvnw -B -V -DdryRun=true release:prepare -Darguments="-Dgpg.skip=true -DskipTests"
+            ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
+          fi
 
   test-jdk:
     parameters:
