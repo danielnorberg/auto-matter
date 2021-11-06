@@ -48,21 +48,8 @@ jobs:
             ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
           fi
 
-  test-jdk:
-    parameters:
-      jdk:
-        type: string
-      resource_class: 
-        type: string
-        default: medium
-    docker:
-      - image: << parameters.jdk >>
-    resource_class: << parameters.resource_class >>
-    environment:
-      # Neutralize the MAVEN_CONFIG env set in maven images
-      # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
-      MAVEN_CONFIG: ""
-    steps:
+  test-jdk-template:
+    steps: &test-jdk-steps
       - attach_workspace:
           at: .
       - restore_cache:
@@ -79,6 +66,31 @@ jobs:
       - run: ./mvnw -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
       - run: ./mvnw -B -V clean test -pl test -Dfmt.skip=true
+
+  # amd64 / x86-64
+  test-jdk:
+    parameters:
+      jdk:
+        type: string
+    docker:
+      - image: << parameters.jdk >>
+    environment:
+      # Neutralize the MAVEN_CONFIG env set in maven images
+      # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
+      MAVEN_CONFIG: ""
+    steps: *test-jdk-steps
+
+  # aarch64 / arm64
+  test-jdk-aarch46:
+    machine:
+      image: ubuntu-2004:202107-02
+    resource_class: arm.medium
+    pre-steps:
+      - run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -qq openjdk-11-jdk
+    steps: *test-jdk-steps
 
   jackson-it:
     parallelism: 4
@@ -124,16 +136,14 @@ workflows:
           name: 17 - Adoptium
           jdk: "cimg/openjdk:17.0.0"
 
-      - test-jdk:
+      - test-jdk-aarch64:
           requires: [build]
           name: 11 - Adoptium - Aarch64
           jdk: "openjdk:11"
-          resource_class: arm.medium
-      - test-jdk:
+      - test-jdk-aarch64:
           requires: [build]
           name: 17 - Adoptium - Aarch64
           jdk: "openjdk:17"
-          resource_class: arm.medium
 
       - test-jdk:
           requires: [build]
