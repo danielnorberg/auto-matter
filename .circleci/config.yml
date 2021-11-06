@@ -140,7 +140,9 @@ workflows:
             - run: |
                 export DEBIAN_FRONTEND=noninteractive
                 sudo -E apt-get update
-                sudo -E apt-get install -qq openjdk-11-jdk
+                sudo -E apt-get install -qq openjdk-11-jdk-headless
+                sudo update-alternatives --auto java
+                sudo update-alternatives --auto javac
       - test-jdk-aarch64:
           requires: [build]
           name: 17 - Adoptium - Aarch64
@@ -148,8 +150,9 @@ workflows:
             - run: |
                 export DEBIAN_FRONTEND=noninteractive
                 sudo -E apt-get update
-                sudo -E apt-get install -qq openjdk-17-jdk
-
+                sudo -E apt-get install -qq openjdk-17-jdk-headless
+                sudo update-alternatives --auto java
+                sudo update-alternatives --auto javac
       - test-jdk:
           requires: [build]
           name: 8 - Amazon Corretto
