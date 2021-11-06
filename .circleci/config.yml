@@ -54,6 +54,10 @@ jobs:
         type: string
     docker:
       - image: << parameters.jdk >>
+    environment:
+      # Neutralize the MAVEN_CONFIG env set in maven images
+      # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
+      MAVEN_CONFIG: ""
     steps:
       - attach_workspace:
           at: .
@@ -116,15 +120,18 @@ workflows:
           name: 17 - AdoptOpenJDK
           jdk: "cimg/openjdk:17.0.0"
 
-# TODO: work around MAVEN_CONFIG clobber
-#      - test-jdk:
-#          requires: [build]
-#          name: 11 - Amazon Corretto
-#          jdk: "maven:3.8.3-amazoncorretto-11"
-#      - test-jdk:
-#          requires: [build]
-#          name: 17 - Amazon Corretto
-#          jdk: "maven:3.8.3-amazoncorretto-17"
+      - test-jdk:
+          requires: [build]
+          name: 8 - Amazon Corretto
+          jdk: "maven:3.8.3-amazoncorretto-8"
+      - test-jdk:
+          requires: [build]
+          name: 11 - Amazon Corretto
+          jdk: "maven:3.8.3-amazoncorretto-11"
+      - test-jdk:
+          requires: [build]
+          name: 17 - Amazon Corretto
+          jdk: "maven:3.8.3-amazoncorretto-17"
 
       - test-jdk:
           requires: [build]
