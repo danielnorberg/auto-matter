@@ -83,7 +83,7 @@ jobs:
     steps: *test-jdk-steps
 
   # aarch64 / arm64
-  test-jdk-aarch46:
+  test-jdk-aarch64:
     machine:
       image: ubuntu-2004:202107-02
     resource_class: arm.medium
