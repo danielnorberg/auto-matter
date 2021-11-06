@@ -122,6 +122,10 @@ workflows:
 
       - test-jdk:
           requires: [build]
+          name: 8 - Amazon Corretto
+          jdk: "maven:3.8.3-amazoncorretto-8"
+      - test-jdk:
+          requires: [build]
           name: 11 - Amazon Corretto
           jdk: "maven:3.8.3-amazoncorretto-11"
       - test-jdk:
