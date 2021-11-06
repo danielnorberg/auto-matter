@@ -52,8 +52,12 @@ jobs:
     parameters:
       jdk:
         type: string
+      resource_class: 
+        type: string
+        default: medium
     docker:
       - image: << parameters.jdk >>
+    resource_class: << parameters.resource_class >>
     environment:
       # Neutralize the MAVEN_CONFIG env set in maven images
       # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
@@ -105,20 +109,31 @@ workflows:
           requires: [build]
       - test-jdk:
           requires: [build]
-          name: 8 - AdoptOpenJDK
+          name: 8 - Adoptium
           jdk: "cimg/openjdk:8.0.302"
       - test-jdk:
           requires: [build]
-          name: 11 - AdoptOpenJDK
+          name: 11 - Adoptium
           jdk: "cimg/openjdk:11.0.12"
       - test-jdk:
           requires: [build]
-          name: 15 - AdoptOpenJDK
+          name: 15 - Adoptium
           jdk: "cimg/openjdk:15.0.2"
       - test-jdk:
           requires: [build]
-          name: 17 - AdoptOpenJDK
+          name: 17 - Adoptium
           jdk: "cimg/openjdk:17.0.0"
+
+      - test-jdk:
+          requires: [build]
+          name: 11 - Adoptium - Aarch64
+          jdk: "openjdk:11"
+          resource_class: arm.medium
+      - test-jdk:
+          requires: [build]
+          name: 17 - Adoptium - Aarch64
+          jdk: "openjdk:17"
+          resource_class: arm.medium
 
       - test-jdk:
           requires: [build]
