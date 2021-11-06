@@ -49,7 +49,8 @@ jobs:
           fi
 
   test-jdk-template:
-    docker:      
+    docker:
+      - image: dummy      
     steps: &test-jdk-steps
       - attach_workspace:
           at: .
