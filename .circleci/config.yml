@@ -139,16 +139,16 @@ workflows:
           pre-steps:
             - run: |
                 export DEBIAN_FRONTEND=noninteractive
-                apt-get update
-                apt-get install -qq openjdk-11-jdk
+                sudo -E apt-get update
+                sudo -E apt-get install -qq openjdk-11-jdk
       - test-jdk-aarch64:
           requires: [build]
           name: 17 - Adoptium - Aarch64
           pre-steps:
             - run: |
                 export DEBIAN_FRONTEND=noninteractive
-                apt-get update
-                apt-get install -qq openjdk-17-jdk
+                sudo -E apt-get update
+                sudo -E apt-get install -qq openjdk-17-jdk
 
       - test-jdk:
           requires: [build]
