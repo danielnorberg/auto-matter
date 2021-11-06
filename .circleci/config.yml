@@ -85,11 +85,6 @@ jobs:
     machine:
       image: ubuntu-2004:202107-02
     resource_class: arm.medium
-    pre-steps:
-      - run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -qq openjdk-11-jdk
     steps: *test-jdk-steps
 
   jackson-it:
@@ -139,11 +134,19 @@ workflows:
       - test-jdk-aarch64:
           requires: [build]
           name: 11 - Adoptium - Aarch64
-          jdk: "openjdk:11"
+          pre-steps:
+            - run: |
+                export DEBIAN_FRONTEND=noninteractive
+                apt-get update
+                apt-get install -qq openjdk-11-jdk
       - test-jdk-aarch64:
           requires: [build]
           name: 17 - Adoptium - Aarch64
-          jdk: "openjdk:17"
+          pre-steps:
+            - run: |
+                export DEBIAN_FRONTEND=noninteractive
+                apt-get update
+                apt-get install -qq openjdk-17-jdk
 
       - test-jdk:
           requires: [build]
