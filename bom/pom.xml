@@ -21,11 +21,6 @@
       </dependency>
       <dependency>
         <groupId>io.norberg</groupId>
-        <artifactId>auto-matter-all</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.norberg</groupId>
         <artifactId>auto-matter-annotation</artifactId>
         <version>${project.version}</version>
       </dependency>
