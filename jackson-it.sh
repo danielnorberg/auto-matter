@@ -11,7 +11,7 @@ function lookup_jackson_versions0() {
          .[].v' |
   grep -v rc |       # omit rc versions
   grep -v pr |       # omit pr versions
-  grep -v -E '\d{8}' # omit "snapshot" (?) versions
+  grep -v -E '[[:digit:]]{8}' # omit "snapshot" (?) versions
 }
 
 function lookup_jackson_versions() {
