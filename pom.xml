@@ -8,26 +8,6 @@
   <version>0.23.1-SNAPSHOT</version>
   <name>auto-matter-parent</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
-    <automatter.jackson.bom.version>2.13.0</automatter.jackson.bom.version>
-    <auto-service.version>1.0.1</auto-service.version>
-  </properties>
-
-  <modules>
-    <module>dependencies</module>
-    <module>annotation</module>
-    <module>processor</module>
-    <module>jackson</module>
-    <module>gson</module>
-    <module>example</module>
-    <module>test</module>
-    <module>record-test</module>
-    <module>bom</module>
-  </modules>
-
   <url>https://github.com/danielnorberg/auto-matter</url>
   <description>
     A small library for generating value classes and builders from value types defined as minimal
@@ -56,6 +36,26 @@
       <name>Daniel Norberg</name>
     </developer>
   </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <automatter.jackson.bom.version>2.13.0</automatter.jackson.bom.version>
+    <auto-service.version>1.0.1</auto-service.version>
+  </properties>
+
+  <modules>
+    <module>dependencies</module>
+    <module>annotation</module>
+    <module>processor</module>
+    <module>jackson</module>
+    <module>gson</module>
+    <module>example</module>
+    <module>test</module>
+    <module>record-test</module>
+    <module>bom</module>
+  </modules>
 
   <profiles>
     <profile>
