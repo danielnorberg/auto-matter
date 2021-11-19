@@ -43,8 +43,7 @@
     </dependency>
     <dependency>
       <groupId>com.google.auto.service</groupId>
-      <artifactId>auto-service</artifactId>
-      <optional>true</optional>
+      <artifactId>auto-service-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>com.squareup</groupId>
@@ -55,14 +54,18 @@
       <artifactId>modeshape-common</artifactId>
     </dependency>
 
-    <!--build deps-->
+    <!--test deps-->
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>1.1.3</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <optional>true</optional>
+      <scope>test</scope>
     </dependency>
-
-    <!--test deps-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -77,6 +80,18 @@
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>com.google.auto.service</groupId>
+              <artifactId>auto-service</artifactId>
+              <version>${auto-service.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>

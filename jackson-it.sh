@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
 function lookup_jackson_versions0() {
-  curl -v -L -s 'https://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson.core%22+AND+a:%22jackson-databind%22&core=gav&rows=1000&wt=json' |
+  # TODO: paginate
+  curl -v -L -s "https://search.maven.org/solrsearch/select?q=g:%22com.fasterxml.jackson%22+AND+a:%22jackson-bom%22&core=gav&start=0&rows=100&wt=json" |
   jq -r '[.response.docs | .[].v |
          {p: split("."), v:.} |
          {major:.p[0] | tonumber, minor: .p[1] | tonumber, v:.v} |
@@ -47,7 +48,7 @@ for v in ${split_versions}; do
   echo "Testing Jackson $v"
   echo "========================================================================"
   set -x
-  ./mvnw -nsu -B -V -Dautomatter.jackson.databind.version="$v" -pl jackson surefire:test
+  ./mvnw -nsu -B -V -Dautomatter.jackson.bom.version="$v" -pl jackson surefire:test
   set +x
 done
 
