@@ -4,11 +4,11 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>0.23.1-SNAPSHOT</version>
+    <version>0.24.0</version>
   </parent>
 
   <artifactId>auto-matter-bom</artifactId>
-  <version>0.23.1-SNAPSHOT</version>
+  <version>0.24.0</version>
   <packaging>pom</packaging>
 
   <dependencyManagement>
