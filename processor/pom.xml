@@ -49,16 +49,6 @@
       <groupId>com.squareup</groupId>
       <artifactId>javapoet</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.modeshape</groupId>
-      <artifactId>modeshape-common</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>com.h2database</groupId>
-          <artifactId>h2</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
 
     <!--test deps-->
     <dependency>
