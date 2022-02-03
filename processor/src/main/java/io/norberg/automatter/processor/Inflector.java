@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /*
-Copied from https://github.com/ModeShape/modeshape/blob/master/modeshape-common/src/main/java/org/modeshape/common/text/Inflector.java
+Copied from https://github.com/ModeShape/modeshape/blob/67abd7a23d1f9a63c398115d9d6e88aae4767856/modeshape-common/src/main/java/org/modeshape/common/text/Inflector.java
  */
 
 /**
