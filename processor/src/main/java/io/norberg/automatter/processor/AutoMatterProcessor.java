@@ -60,7 +60,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import org.modeshape.common.text.Inflector;
 
 /**
  * An annotation processor that takes a value type defined as an interface with getter methods and
