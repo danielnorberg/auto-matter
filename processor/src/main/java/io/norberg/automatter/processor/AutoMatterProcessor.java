@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -325,7 +326,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     final MethodSpec.Builder constructor =
         MethodSpec.constructorBuilder().addModifiers(PRIVATE).addParameter(valueType, "v");
 
-    for (ExecutableElement field : source.fields()) {
+    final List<ExecutableElement> fields = commonFields(source, target);
+
+    for (ExecutableElement field : fields) {
       String fieldName = fieldName(field);
 
       final boolean isParameterized = isFieldTypeParameterized(field);
@@ -407,7 +410,9 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             .addModifiers(PRIVATE)
             .addParameter(upperBoundedBuilderType(source), "v");
 
-    for (ExecutableElement field : source.fields()) {
+    final List<ExecutableElement> fields = commonFields(target, source);
+
+    for (ExecutableElement field : fields) {
       String fieldName = fieldName(field);
 
       final boolean isParameterized = isFieldTypeParameterized(field);
@@ -457,6 +462,12 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     }
 
     return constructor.build();
+  }
+
+  private List<ExecutableElement> commonFields(Descriptor source, Descriptor target) {
+    return source.fields().stream()
+        .filter(f -> target.hasField(f.getSimpleName().toString()))
+        .collect(Collectors.toList());
   }
 
   private Set<MethodSpec> accessors(final Descriptor d) throws AutoMatterProcessorException {

@@ -267,6 +267,10 @@ class Descriptor {
     return fieldTypes.get(field.getSimpleName().toString());
   }
 
+  boolean hasField(String name) {
+    return fieldTypes.containsKey(name);
+  }
+
   boolean hasToBuilder() {
     return this.toBuilder;
   }
