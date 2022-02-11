@@ -510,6 +510,22 @@ public class AutoMatterProcessorTest {
         .generatesSources(expectedSource("expected/RedactedFieldsBuilder.java"));
   }
 
+  @Test
+  public void testDefaultMethodOverrideInheritance() {
+    assert_()
+        .about(javaSources())
+        .that(
+            ImmutableSet.of(
+                JavaFileObjects.forResource("good/inheritance/DefaultMethodOverrideSuperType.java"),
+                JavaFileObjects.forResource("good/inheritance/DefaultMethodOverrideSubType.java")))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(
+            expectedSource("expected/inheritance/DefaultMethodOverrideSubTypeBuilder.java"),
+            expectedSource("expected/inheritance/DefaultMethodOverrideSuperTypeBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");
