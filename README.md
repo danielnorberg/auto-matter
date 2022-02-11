@@ -44,7 +44,7 @@ out.println("foobar: " + foobar);
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter</artifactId>
-  <version>0.19.0</version>
+  <version>0.25.1</version>
   <scope>provided</scope>
 </dependency>
 ```
@@ -125,7 +125,7 @@ var foobar = ComplexFoobarBuilder.builder()
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-jackson</artifactId>
-  <version>0.19.0</version>
+  <version>0.25.1</version>
 </dependency>
 ```
 
@@ -152,7 +152,7 @@ the `AutoMatterModule` is not needed as Jackson supports Records natively since 
 <dependency>
   <groupId>io.norberg</groupId>
   <artifactId>auto-matter-gson</artifactId>
-  <version>0.19.0</version>
+  <version>0.25.1</version>
 </dependency>
 ```
 
