@@ -5,12 +5,12 @@
   <parent>
     <groupId>io.norberg</groupId>
     <artifactId>auto-matter-parent</artifactId>
-    <version>0.25.1</version>
+    <version>0.25.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>auto-matter-dependencies</artifactId>
   <packaging>pom</packaging>
-  <version>0.25.1</version>
+  <version>0.25.2-SNAPSHOT</version>
 
   <dependencyManagement>
     <dependencies>
