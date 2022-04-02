@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.norberg</groupId>
@@ -131,7 +133,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -224,7 +226,7 @@
             <id>enforce</id>
             <configuration>
               <rules>
-                <requireUpperBoundDeps />
+                <requireUpperBoundDeps/>
               </rules>
             </configuration>
             <goals>
@@ -309,6 +311,12 @@
               <failOnWarning>true</failOnWarning>
               <ignoreNonCompile>true</ignoreNonCompile>
               <outputXML>true</outputXML>
+              <!-- https://issues.apache.org/jira/browse/MDEP-753 -->
+              <!-- https://issues.apache.org/jira/browse/MDEP-791 -->
+              <ignoredNonTestScopedDependencies>
+                <dependency>com.fasterxml.jackson.core:jackson-core</dependency>
+                <dependency>com.fasterxml.jackson.core:jackson-annotations</dependency>
+              </ignoredNonTestScopedDependencies>
             </configuration>
           </execution>
         </executions>
