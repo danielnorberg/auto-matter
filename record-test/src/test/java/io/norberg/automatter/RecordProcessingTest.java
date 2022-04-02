@@ -23,6 +23,19 @@ public class RecordProcessingTest {
   }
 
   @Test
+  public void testRecordWithMethod() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/FoobarRecordWithMethod.java");
+    assert_()
+        .about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(
+            JavaFileObjects.forResource("expected/FoobarRecordWithMethodBuilder.java"));
+  }
+
+  @Test
   public void testNestedRecord() {
     final JavaFileObject source = JavaFileObjects.forResource("good/BazRecordContainer.java");
     assert_()
