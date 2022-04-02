@@ -10,13 +10,17 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import io.norberg.automatter.AutoMatter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -56,6 +60,7 @@ class Descriptor {
   private final ExecutableElement toString;
   private final ExecutableElement check;
   private final boolean isRecord;
+  private final Set<String> recordFields;
   private boolean toBuilder;
 
   static Descriptor of(final Element element, final Elements elements, final Types types)
@@ -91,6 +96,7 @@ class Descriptor {
     this.check = findInstanceMethod(valueTypeElement, AutoMatter.Check.class);
     this.superValueTypes = enumerateSuperValueTypes(elements, types);
     this.isRecord = valueTypeElement.getKind().toString().equals("RECORD");
+    this.recordFields = recordFields();
     enumerateFields(types);
   }
 
@@ -163,6 +169,10 @@ class Descriptor {
           continue;
       }
 
+      if (isRecord && !isRecordField(method)) {
+        continue;
+      }
+
       verifyResolved(method.getReturnType());
 
       fields.add(method);
@@ -173,6 +183,35 @@ class Descriptor {
 
       // Resolve types
       fieldTypes.put(name, fieldType);
+    }
+  }
+
+  private boolean isRecordField(ExecutableElement method) {
+    return method.getParameters().isEmpty()
+        && recordFields.contains(method.getSimpleName().toString());
+  }
+
+  private Set<String> recordFields() {
+    return recordComponents().stream()
+        .map(Element::getSimpleName)
+        .map(Object::toString)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Element> recordComponents() {
+    if (!isRecord) {
+      return Collections.emptyList();
+    }
+    try {
+      return (List<Element>)
+          Arrays.stream(TypeElement.class.getDeclaredMethods())
+              .filter(m -> m.getName().equals("getRecordComponents"))
+              .findFirst()
+              .orElseThrow(AssertionError::new)
+              .invoke(valueTypeElement);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
     }
   }
 
