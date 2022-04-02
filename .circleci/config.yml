@@ -74,7 +74,7 @@ jobs:
       # 2. Compile examples
       - run: ./mvnw -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
-      - run: ./mvnw -B -V clean test -pl test -Dfmt.skip=true
+      - run: ./mvnw -B -V clean test -pl test,record-test -Dfmt.skip=true
 
   jackson-it:
     parallelism: 4
