@@ -19,6 +19,8 @@ public class AutoMatterModuleTest {
 
   static final Foo FOO = new FooBuilder().a(17).b("foobar").aCamelCaseField(true).build();
   static final GenericFoo GENERIC_FOO = new GenericFooBuilder<Foo>().a(FOO).build();
+  static final GenericFoo NESTED_GENERIC_FOO =
+      new GenericFooBuilder<GenericFoo<Foo>>().a(GENERIC_FOO).build();
 
   static final WithInner.Bar BAR = new BarBuilder().a(17).b("foobar").aCamelCaseField(true).build();
 
@@ -122,5 +124,17 @@ public class AutoMatterModuleTest {
     final String json = mapper.writeValueAsString(GENERIC_FOO);
     final GenericFoo<Foo> parsed = mapper.readValue(json, new TypeReference<GenericFoo<Foo>>() {});
     assertThat(parsed, is(GENERIC_FOO));
+  }
+
+  @Test
+  public void testNestedGeneric() throws JsonProcessingException {
+    final String json = mapper.writeValueAsString(NESTED_GENERIC_FOO);
+    final GenericFoo<GenericFoo<Foo>> parsed =
+        mapper.readValue(json, new TypeReference<GenericFoo<GenericFoo<Foo>>>() {});
+    assertThat(parsed, is(NESTED_GENERIC_FOO));
+
+    final GenericFoo<GenericFoo<Foo>> parsed2 =
+        mapper.readValue(json, new TypeReference<GenericFoo<GenericFoo<Foo>>>() {});
+    assertThat(parsed2, is(NESTED_GENERIC_FOO));
   }
 }
