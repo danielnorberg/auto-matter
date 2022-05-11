@@ -132,9 +132,5 @@ public class AutoMatterModuleTest {
     final GenericFoo<GenericFoo<Foo>> parsed =
         mapper.readValue(json, new TypeReference<GenericFoo<GenericFoo<Foo>>>() {});
     assertThat(parsed, is(NESTED_GENERIC_FOO));
-
-    final GenericFoo<GenericFoo<Foo>> parsed2 =
-        mapper.readValue(json, new TypeReference<GenericFoo<GenericFoo<Foo>>>() {});
-    assertThat(parsed2, is(NESTED_GENERIC_FOO));
   }
 }
