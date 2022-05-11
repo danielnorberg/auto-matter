@@ -4,7 +4,9 @@ import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_T
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -16,6 +18,7 @@ import org.junit.Test;
 public class AutoMatterModuleTest {
 
   static final Foo FOO = new FooBuilder().a(17).b("foobar").aCamelCaseField(true).build();
+  static final GenericFoo GENERIC_FOO = new GenericFooBuilder<Foo>().a(FOO).build();
 
   static final WithInner.Bar BAR = new BarBuilder().a(17).b("foobar").aCamelCaseField(true).build();
 
@@ -112,5 +115,12 @@ public class AutoMatterModuleTest {
     assertThat(parsed.list().isEmpty(), is(true));
     assertThat(parsed.set().isEmpty(), is(true));
     assertThat(parsed.map().isEmpty(), is(true));
+  }
+
+  @Test
+  public void testGeneric() throws JsonProcessingException {
+    final String json = mapper.writeValueAsString(GENERIC_FOO);
+    final GenericFoo<Foo> parsed = mapper.readValue(json, new TypeReference<GenericFoo<Foo>>() {});
+    assertThat(parsed, is(GENERIC_FOO));
   }
 }
