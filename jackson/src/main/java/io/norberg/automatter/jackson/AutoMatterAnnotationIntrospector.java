@@ -56,7 +56,7 @@ class AutoMatterAnnotationIntrospector extends NopAnnotationIntrospector {
 
     // Refine only if baseType is an interface explicitly annotated with @AutoMatter
     if (cls.isInterface() && cls.isAnnotationPresent(AutoMatter.class)) {
-      return typeCache.resolveValueType(cls);
+      return typeCache.resolveValueType(baseType);
     }
     return super.refineSerializationType(config, a, baseType);
   }

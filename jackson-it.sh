@@ -6,7 +6,7 @@ function lookup_jackson_versions0() {
   jq -r '[.response.docs | .[].v |
          {p: split("."), v:.} |
          {major:.p[0] | tonumber, minor: .p[1] | tonumber, v:.v} |
-         select(.major >= 2 and .minor >= 4)] |
+         select(.major >= 2 and .minor >= 7)] |
          sort_by([.major, .minor, .v]) |
          .[].v' |
   grep -v rc |       # omit rc versions
