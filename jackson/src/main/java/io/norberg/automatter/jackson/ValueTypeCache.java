@@ -37,7 +37,9 @@ class ValueTypeCache {
 
     final JavaType materialized;
     if (type.hasGenericTypes()) {
-      materialized = typeFactory.constructParametricType(cls, type.getBindings());
+      materialized =
+          typeFactory.constructParametricType(
+              cls, type.getBindings().getTypeParameters().toArray(new JavaType[0]));
     } else {
       materialized = typeFactory.constructType(cls);
     }
