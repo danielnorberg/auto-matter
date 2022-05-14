@@ -41,7 +41,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
-    <automatter.jackson.bom.version>2.13.2.1</automatter.jackson.bom.version>
+    <automatter.jackson.bom.version>2.13.3</automatter.jackson.bom.version>
     <auto-service.version>1.0.1</auto-service.version>
   </properties>
 
