@@ -416,6 +416,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
       String fieldName = fieldName(field);
 
       final boolean isParameterized = isFieldTypeParameterized(field);
+      final boolean isNullable = isNullableAnnotated(field);
 
       if (isCollection(field) || isMap(field)) {
         if (isParameterized) {
@@ -423,11 +424,20 @@ public final class AutoMatterProcessor extends AbstractProcessor {
           final TypeName ctorArgumentType = upperBoundedType(fieldType, 1);
           final TypeName upperBoundedFieldType = upperBoundedType(fieldType);
           if (upperBoundedFieldType.equals(ctorArgumentType)) {
-            constructor.addStatement(
-                "this.$N = new $T(v.$N())",
-                fieldName,
-                collectionImplType(target, field),
-                fieldName);
+            if (isNullable) {
+              constructor.addStatement(
+                  "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
+                  fieldName,
+                  fieldName,
+                  collectionImplType(target, field),
+                  fieldName);
+            } else {
+              constructor.addStatement(
+                  "this.$N = new $T(v.$N())",
+                  fieldName,
+                  collectionImplType(target, field),
+                  fieldName);
+            }
           } else {
             constructor.addStatement(
                 "@SuppressWarnings(\"unchecked\") $T _$N = ($T) ($T) v.$N()",
@@ -436,12 +446,33 @@ public final class AutoMatterProcessor extends AbstractProcessor {
                 ctorArgumentType,
                 upperBoundedFieldType,
                 fieldName);
-            constructor.addStatement(
-                "this.$N = new $T(_$N)", fieldName, collectionImplType(target, field), fieldName);
+            if (isNullable) {
+              constructor.addStatement(
+                  "this.$N = (_$N == null) ? null : new $T(_$N)",
+                  fieldName,
+                  fieldName,
+                  collectionImplType(target, field),
+                  fieldName);
+            } else {
+              constructor.addStatement(
+                  "this.$N = new $T(_$N)", fieldName, collectionImplType(target, field), fieldName);
+            }
           }
         } else {
-          constructor.addStatement(
-              "this.$N = new $T(v.$N())", fieldName, collectionImplType(target, field), fieldName);
+          if (isNullable) {
+            constructor.addStatement(
+                "this.$N = (v.$N() == null) ? null : new $T(v.$N())",
+                fieldName,
+                fieldName,
+                collectionImplType(target, field),
+                fieldName);
+          } else {
+            constructor.addStatement(
+                "this.$N = new $T(v.$N())",
+                fieldName,
+                collectionImplType(target, field),
+                fieldName);
+          }
         }
       } else {
         if (isParameterized) {
