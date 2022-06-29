@@ -74,4 +74,11 @@ public class NullableListFieldBuilderTest {
     assertThat(apples.size(), is(1));
     assertThat(apples.get(0), is(nullValue()));
   }
+
+  @Test
+  public void testBuilderCopyingWithNullList() {
+    final NullableListsBuilder copiedBuilder = new NullableListsBuilder().from(builder);
+    final NullableLists listsFromCopied = copiedBuilder.build();
+    assertThat(listsFromCopied.apples(), is(nullValue()));
+  }
 }
