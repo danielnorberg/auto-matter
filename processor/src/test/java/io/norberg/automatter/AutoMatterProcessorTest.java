@@ -435,6 +435,22 @@ public class AutoMatterProcessorTest {
   }
 
   @Test
+  public void testOtherPackageNestedInheritance() {
+    assert_()
+        .about(javaSources())
+        .that(
+            ImmutableSet.of(
+                JavaFileObjects.forResource("good/inheritance/OtherPackage.java"),
+                JavaFileObjects.forResource("good/inheritance/InheritingPackage.java")))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(
+            expectedSource("expected/inheritance/OtherPackageNestedInterfaceBuilder.java"),
+            expectedSource("expected/inheritance/InheritingPackageBuilder.java"));
+  }
+
+  @Test
   public void testDeferredProcessing() {
     assert_()
         .about(javaSources())
