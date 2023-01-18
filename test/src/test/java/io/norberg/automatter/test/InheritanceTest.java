@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 import io.norberg.automatter.AutoMatter;
-import io.norberg.automatter.other.InheritenceR1;
 import java.util.List;
 import org.junit.Test;
 
@@ -35,11 +34,6 @@ public class InheritanceTest {
   @AutoMatter
   interface InheritanceCorge extends InheritanceQuux<Integer> {
     int corge();
-  }
-
-  @AutoMatter
-  interface InheritenceR extends InheritenceR1.InheritenceR2 {
-    String callR();
   }
 
   @Test

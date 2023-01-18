@@ -6,6 +6,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import io.norberg.automatter.AutoMatter;
@@ -282,8 +283,12 @@ class Descriptor {
     return this.builderName;
   }
 
-  String valueTypeName() {
-    return this.valueTypeName;
+  ClassName valueTypeName() {
+    return ClassName.get(this.valueTypeElement);
+  }
+
+  String simpleValueTypeName() {
+    return String.join(".", valueTypeName().simpleNames());
   }
 
   boolean isPublic() {

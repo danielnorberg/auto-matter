@@ -1103,7 +1103,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             checkMethod -> {
               if (checkMethod.getModifiers().contains(STATIC)) {
                 constructor.addCode(
-                    "$L.$N(this);\n", d.valueTypeName(), checkMethod.getSimpleName());
+                    "$L.$N(this);\n", d.simpleValueTypeName(), checkMethod.getSimpleName());
               } else if (checkMethod.getModifiers().contains(DEFAULT)) {
                 constructor.addCode("$N();\n", checkMethod.getSimpleName());
               }
@@ -1290,7 +1290,8 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             .addModifiers(PUBLIC)
             .returns(ClassName.get(String.class));
     if (toStringMethod.getModifiers().contains(STATIC)) {
-      toString.addCode("return $L.$N(this);\n", d.valueTypeName(), toStringMethod.getSimpleName());
+      toString.addCode(
+          "return $L.$N(this);\n", d.simpleValueTypeName(), toStringMethod.getSimpleName());
     } else if (toStringMethod.getModifiers().contains(DEFAULT)) {
       toString.addCode("return $N();\n", toStringMethod.getSimpleName());
     }
@@ -1304,7 +1305,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
             .addModifiers(PUBLIC)
             .returns(ClassName.get(String.class));
 
-    toString.addCode("return \"$L{\" +\n", d.valueTypeName());
+    toString.addCode("return \"$L{\" +\n", d.simpleValueTypeName());
 
     for (int i = 0; i < d.fields().size(); i++) {
       final ExecutableElement field = d.fields().get(i);
@@ -1367,14 +1368,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private ClassName rawValueType(final Descriptor d) {
-    if (d.valueTypeName().contains(".")) {
-      String[] simpleName = d.valueTypeName().split("\\.");
-      String[] remainderSimpleName =
-          Arrays.copyOfRange(simpleName, 1, simpleName.length, String[].class);
-      return ClassName.get(d.packageName(), simpleName[0], remainderSimpleName);
-    } else {
-      return ClassName.get(d.packageName(), d.valueTypeName());
-    }
+    return d.valueTypeName();
   }
 
   private TypeName unboundedValueType(final Descriptor d) {
