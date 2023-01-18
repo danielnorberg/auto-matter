@@ -1367,7 +1367,14 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private ClassName rawValueType(final Descriptor d) {
-    return ClassName.get(d.packageName(), d.valueTypeName());
+    if (d.valueTypeName().contains(".")) {
+      String[] simpleName = d.valueTypeName().split("\\.");
+      String[] remainderSimpleName =
+          Arrays.copyOfRange(simpleName, 1, simpleName.length, String[].class);
+      return ClassName.get(d.packageName(), simpleName[0], remainderSimpleName);
+    } else {
+      return ClassName.get(d.packageName(), d.valueTypeName());
+    }
   }
 
   private TypeName unboundedValueType(final Descriptor d) {
