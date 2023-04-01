@@ -233,7 +233,8 @@ class Descriptor {
     }
   }
 
-  private static void enumerateEnclosedMethods(TypeElement element, Map<String, ExecutableElement> methods) {
+  private static void enumerateEnclosedMethods(
+      TypeElement element, Map<String, ExecutableElement> methods) {
     for (final Element member : element.getEnclosedElements()) {
       if (member.getKind() != ElementKind.METHOD) {
         continue;
@@ -242,7 +243,8 @@ class Descriptor {
     }
   }
 
-  private void enumerateInheritedMethods(TypeElement element, Map<String, ExecutableElement> methods) {
+  private void enumerateInheritedMethods(
+      TypeElement element, Map<String, ExecutableElement> methods) {
     for (final TypeMirror interfaceType : element.getInterfaces()) {
       final TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceType).asElement();
       enumerateMethods(interfaceElement, methods);
