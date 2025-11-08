@@ -542,6 +542,32 @@ public class AutoMatterProcessorTest {
             expectedSource("expected/inheritance/DefaultMethodOverrideSuperTypeBuilder.java"));
   }
 
+  @Test
+  public void testJSpecifyFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/JSpecifyFields.java");
+    assert_()
+        .about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/JSpecifyFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testJSpecifyNullMarkedFields() {
+    assert_()
+        .about(javaSources())
+        .that(
+            ImmutableSet.of(
+                JavaFileObjects.forResource("good/jspecify/JSpecifyNullMarkedFields.java"),
+                JavaFileObjects.forResource("good/jspecify/package-info.java")))
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/JSpecifyNullMarkedFieldsBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");

@@ -1666,11 +1666,22 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private AnnotationMirror nullableAnnotation(final ExecutableElement field) {
+    // Check for @Nullable on the method itself (for METHOD-targeted annotations like
+    // javax.annotation.Nullable)
     for (AnnotationMirror annotation : field.getAnnotationMirrors()) {
       if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
         return annotation;
       }
     }
+
+    // Check for @Nullable on the return type (for TYPE_USE annotations like JSpecify's @Nullable)
+    final TypeMirror returnType = field.getReturnType();
+    for (AnnotationMirror annotation : returnType.getAnnotationMirrors()) {
+      if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
+        return annotation;
+      }
+    }
+
     return null;
   }
 

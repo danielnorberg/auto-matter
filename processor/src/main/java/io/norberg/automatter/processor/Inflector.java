@@ -89,6 +89,7 @@ class Inflector {
 
   private LinkedList<Rule> plurals = new LinkedList<Rule>();
   private LinkedList<Rule> singulars = new LinkedList<Rule>();
+
   /**
    * The lowercase words that are to be excluded and not processed. This map can be modified by the
    * users via {@link #getUncountables()}.
