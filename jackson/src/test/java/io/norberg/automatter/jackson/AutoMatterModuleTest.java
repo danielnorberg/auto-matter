@@ -1,6 +1,5 @@
 package io.norberg.automatter.jackson;
 
-import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -9,7 +8,7 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import java.io.IOException;
 import org.junit.Assume;
 import org.junit.Before;
@@ -67,10 +66,9 @@ public class AutoMatterModuleTest {
     assertThat(parsed, is(PUBLIC_BAR));
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testUnderScoreNamingStrategy() throws IOException {
-    mapper.setPropertyNamingStrategy(CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     final String json = mapper.writeValueAsString(FOO);
     final JsonNode tree = mapper.readTree(json);
     assertThat(tree.has("a_camel_case_field"), is(true));
@@ -82,7 +80,7 @@ public class AutoMatterModuleTest {
   public void testSnakeCaseNamingStrategy() throws IOException {
     Assume.assumeTrue(
         mapper.version().getMajorVersion() == 2 && mapper.version().getMinorVersion() >= 7);
-    mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     final String json = mapper.writeValueAsString(FOO);
     final JsonNode tree = mapper.readTree(json);
     assertThat(tree.has("a_camel_case_field"), is(true));
