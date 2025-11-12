@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>auto-matter-jackson</artifactId>
+  <name>auto-matter-jackson</name>
 
   <dependencyManagement>
     <dependencies>

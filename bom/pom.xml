@@ -10,6 +10,7 @@
   <artifactId>auto-matter-bom</artifactId>
   <version>0.26.3-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <name>auto-matter-bom</name>
 
   <dependencyManagement>
     <dependencies>

@@ -8,6 +8,7 @@
   </parent>
 
   <artifactId>auto-matter</artifactId>
+  <name>auto-matter</name>
   <packaging>jar</packaging>
 
   <properties>

@@ -11,6 +11,7 @@
   <artifactId>auto-matter-dependencies</artifactId>
   <packaging>pom</packaging>
   <version>0.26.3-SNAPSHOT</version>
+  <name>auto-matter-dependencies</name>
 
   <dependencyManagement>
     <dependencies>

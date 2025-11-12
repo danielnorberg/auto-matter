@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>auto-matter-annotation</artifactId>
+  <name>auto-matter-annotation</name>
 
   <build>
     <plugins>

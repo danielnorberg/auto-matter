@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>auto-matter-record-test</artifactId>
+  <name>auto-matter-record-test</name>
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>

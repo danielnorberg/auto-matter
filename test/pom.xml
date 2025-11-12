@@ -8,6 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>auto-matter-test</artifactId>
+  <name>auto-matter-test</name>
 
   <properties>
     <maven.javadoc.skip>true</maven.javadoc.skip>
