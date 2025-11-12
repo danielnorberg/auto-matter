@@ -49,6 +49,11 @@
       <groupId>com.squareup</groupId>
       <artifactId>javapoet</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
     <!--test deps-->
     <dependency>
