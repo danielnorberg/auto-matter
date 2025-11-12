@@ -42,7 +42,7 @@
                 <path>
                   <groupId>com.google.errorprone</groupId>
                   <artifactId>error_prone_core</artifactId>
-                  <version>2.44.0</version>
+                  <version>2.23.0</version>
                 </path>
                 <path>
                   <groupId>io.norberg</groupId>
@@ -90,7 +90,7 @@
                 <path>
                   <groupId>com.google.errorprone</groupId>
                   <artifactId>error_prone_core</artifactId>
-                  <version>2.44.0</version>
+                  <version>2.23.0</version>
                 </path>
                 <path>
                   <groupId>io.norberg</groupId>
