@@ -691,6 +691,18 @@ public class AutoMatterProcessorTest {
     assert_().about(javaSource()).that(source).processedWith(testProcessor).compilesWithoutError();
   }
 
+  @Test
+  public void testJSpecifyNestedType() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/JSpecifyNestedType.java");
+    assert_()
+        .about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/JSpecifyNestedTypeBuilder.java"));
+  }
+
   private boolean isJava8() {
     try {
       Class.forName("java.util.Optional");

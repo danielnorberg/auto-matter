@@ -893,12 +893,32 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   private MethodSpec setter(final Descriptor d, final ExecutableElement field) {
     String fieldName = fieldName(field);
 
-    ParameterSpec.Builder parameterSpecBuilder =
-        ParameterSpec.builder(fieldType(d, field), fieldName);
+    TypeName parameterType = fieldType(d, field);
+    ParameterSpec.Builder parameterSpecBuilder = ParameterSpec.builder(parameterType, fieldName);
+
     if (!isPrimitive(field)) {
       AnnotationMirror nullableAnnotation = nullableAnnotation(field);
       if (nullableAnnotation != null) {
-        parameterSpecBuilder.addAnnotation(AnnotationSpec.get(nullableAnnotation));
+        // Check if this is a TYPE_USE annotation (found on the return type)
+        final TypeMirror returnType = field.getReturnType();
+        boolean isTypeUseAnnotation =
+            returnType.getAnnotationMirrors().stream()
+                .anyMatch(
+                    a ->
+                        a.getAnnotationType()
+                            .asElement()
+                            .getSimpleName()
+                            .contentEquals("Nullable"));
+
+        if (isTypeUseAnnotation) {
+          // For TYPE_USE annotations, annotate the TypeName itself
+          // This ensures nested types get annotated correctly (Outer.@Nullable Inner)
+          parameterType = parameterType.annotated(AnnotationSpec.get(nullableAnnotation));
+          parameterSpecBuilder = ParameterSpec.builder(parameterType, fieldName);
+        } else {
+          // For METHOD-targeted annotations, add to the ParameterSpec
+          parameterSpecBuilder.addAnnotation(AnnotationSpec.get(nullableAnnotation));
+        }
       }
     }
     MethodSpec.Builder setter =
