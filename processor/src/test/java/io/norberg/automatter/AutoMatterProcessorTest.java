@@ -3,6 +3,7 @@ package io.norberg.automatter;
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
@@ -10,6 +11,16 @@ import com.google.testing.compile.JavaFileObjects;
 import io.norberg.automatter.processor.AutoMatterProcessor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Set;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 import org.junit.Assume;
 import org.junit.Before;
@@ -566,6 +577,118 @@ public class AutoMatterProcessorTest {
         .compilesWithoutError()
         .and()
         .generatesSources(expectedSource("expected/JSpecifyNullMarkedFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testJSpecifyCollectionFields() {
+    final JavaFileObject source = JavaFileObjects.forResource("good/JSpecifyCollectionFields.java");
+    assert_()
+        .about(javaSource())
+        .that(source)
+        .processedWith(new AutoMatterProcessor())
+        .compilesWithoutError()
+        .and()
+        .generatesSources(expectedSource("expected/JSpecifyCollectionFieldsBuilder.java"));
+  }
+
+  @Test
+  public void testGetCanonicalTypeName() {
+    final JavaFileObject source =
+        JavaFileObjects.forResource("good/CanonicalTypeNameTestTypes.java");
+
+    // Create a processor that captures type information and tests getCanonicalTypeName
+    final AbstractProcessor testProcessor =
+        new AbstractProcessor() {
+          @Override
+          public Set<String> getSupportedAnnotationTypes() {
+            return Collections.singleton("*");
+          }
+
+          @Override
+          public SourceVersion getSupportedSourceVersion() {
+            return SourceVersion.latestSupported();
+          }
+
+          @Override
+          public boolean process(
+              Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+            if (roundEnv.processingOver()) {
+              return false;
+            }
+
+            // Find the test interface
+            TypeElement testInterface = null;
+            for (Element element : roundEnv.getRootElements()) {
+              if (element.getKind() == ElementKind.INTERFACE
+                  && element.getSimpleName().toString().equals("CanonicalTypeNameTestTypes")) {
+                testInterface = (TypeElement) element;
+                break;
+              }
+            }
+
+            if (testInterface == null) {
+              return false;
+            }
+
+            // Test each method's return type
+            for (Element enclosedElement : testInterface.getEnclosedElements()) {
+              if (enclosedElement.getKind() == ElementKind.METHOD) {
+                ExecutableElement method = (ExecutableElement) enclosedElement;
+                String methodName = method.getSimpleName().toString();
+                TypeMirror returnType = method.getReturnType();
+                String canonicalName = AutoMatterProcessor.getCanonicalTypeName(returnType);
+
+                // Verify expected canonical names
+                switch (methodName) {
+                  case "simpleString":
+                    assertEquals("java.lang.String", canonicalName);
+                    break;
+                  case "simpleInteger":
+                    assertEquals("java.lang.Integer", canonicalName);
+                    break;
+                  case "listOfStrings":
+                    assertEquals("java.util.List<java.lang.String>", canonicalName);
+                    break;
+                  case "setOfIntegers":
+                    assertEquals("java.util.Set<java.lang.Integer>", canonicalName);
+                    break;
+                  case "mapOfStringToInteger":
+                    assertEquals(
+                        "java.util.Map<java.lang.String, java.lang.Integer>", canonicalName);
+                    break;
+                  case "nestedList":
+                    assertEquals("java.util.List<java.util.List<java.lang.String>>", canonicalName);
+                    break;
+                  case "mapWithListValue":
+                    assertEquals(
+                        "java.util.Map<java.lang.String, java.util.List<java.lang.Integer>>",
+                        canonicalName);
+                    break;
+                  case "nullableString":
+                    // TYPE_USE annotation should be stripped
+                    assertEquals("java.lang.String", canonicalName);
+                    break;
+                  case "nullableList":
+                    // TYPE_USE annotation should be stripped
+                    assertEquals("java.util.List<java.lang.String>", canonicalName);
+                    break;
+                  case "nullableMap":
+                    // TYPE_USE annotation should be stripped
+                    assertEquals(
+                        "java.util.Map<java.lang.String, java.lang.Integer>", canonicalName);
+                    break;
+                  case "listOfNullables":
+                    // TYPE_USE annotation on type argument should be stripped
+                    assertEquals("java.util.List<java.lang.String>", canonicalName);
+                    break;
+                }
+              }
+            }
+            return false;
+          }
+        };
+
+    assert_().about(javaSource()).that(source).processedWith(testProcessor).compilesWithoutError();
   }
 
   private boolean isJava8() {

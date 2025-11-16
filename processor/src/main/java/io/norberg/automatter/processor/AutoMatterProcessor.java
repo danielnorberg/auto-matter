@@ -1498,8 +1498,33 @@ public final class AutoMatterProcessor extends AbstractProcessor {
     return ClassName.get("java.util", type.asElement().getSimpleName().toString());
   }
 
+  /**
+   * Get the canonical string representation of a type, stripping any TYPE_USE annotations. This is
+   * necessary because TYPE_USE annotations (like JSpecify's @Nullable) are included in the
+   * toString() output, which breaks string-based type checks.
+   */
+  public static String getCanonicalTypeName(final TypeMirror type) {
+    // For DeclaredType (like List<String>), get the qualified name and type arguments
+    if (type.getKind() == DECLARED) {
+      final DeclaredType declaredType = (DeclaredType) type;
+      final String qualifiedName =
+          ((TypeElement) declaredType.asElement()).getQualifiedName().toString();
+      if (declaredType.getTypeArguments().isEmpty()) {
+        return qualifiedName;
+      }
+      return qualifiedName
+          + "<"
+          + declaredType.getTypeArguments().stream()
+              .map(AutoMatterProcessor::getCanonicalTypeName)
+              .collect(Collectors.joining(", "))
+          + ">";
+    }
+    // For other types, just use toString()
+    return type.toString();
+  }
+
   private static String optionalEmptyName(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     if (returnType.startsWith("com.google.common.base.Optional<")) {
       return "absent";
     }
@@ -1507,7 +1532,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private static String optionalMaybeName(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     if (returnType.startsWith("com.google.common.base.Optional<")) {
       return "fromNullable";
     }
@@ -1515,7 +1540,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private boolean isCollection(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     return returnType.startsWith("java.util.List<")
         || returnType.startsWith("java.util.Collection<")
         || returnType.startsWith("java.util.Set<")
@@ -1524,7 +1549,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private boolean isCollectionInterface(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     return returnType.startsWith("java.util.Collection<");
   }
 
@@ -1577,7 +1602,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String collectionType(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     if (returnType.startsWith("java.util.List<")) {
       return "List";
     } else if (returnType.startsWith("java.util.Set<")) {
@@ -1600,7 +1625,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private String optionalType(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     if (returnType.startsWith("java.util.Optional<")) {
       return "java.util.Optional";
     } else if (returnType.startsWith("com.google.common.base.Optional<")) {
@@ -1610,7 +1635,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private boolean isMap(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     return returnType.startsWith("java.util.Map<")
         || returnType.startsWith("java.util.SortedMap<")
         || returnType.startsWith("java.util.NavigableMap<");
@@ -1621,7 +1646,7 @@ public final class AutoMatterProcessor extends AbstractProcessor {
   }
 
   private boolean isOptional(final ExecutableElement field) {
-    final String returnType = field.getReturnType().toString();
+    final String returnType = getCanonicalTypeName(field.getReturnType());
     return returnType.startsWith("java.util.Optional<")
         || returnType.startsWith("com.google.common.base.Optional<");
   }
