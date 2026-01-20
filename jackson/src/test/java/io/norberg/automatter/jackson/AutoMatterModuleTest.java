@@ -17,8 +17,8 @@ import org.junit.Test;
 public class AutoMatterModuleTest {
 
   static final Foo FOO = new FooBuilder().a(17).b("foobar").aCamelCaseField(true).build();
-  static final GenericFoo GENERIC_FOO = new GenericFooBuilder<Foo>().a(FOO).build();
-  static final GenericFoo NESTED_GENERIC_FOO =
+  static final GenericFoo<Foo> GENERIC_FOO = new GenericFooBuilder<Foo>().a(FOO).build();
+  static final GenericFoo<GenericFoo<Foo>> NESTED_GENERIC_FOO =
       new GenericFooBuilder<GenericFoo<Foo>>().a(GENERIC_FOO).build();
 
   static final WithInner.Bar BAR = new BarBuilder().a(17).b("foobar").aCamelCaseField(true).build();
