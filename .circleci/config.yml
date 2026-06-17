@@ -48,17 +48,10 @@ jobs:
             ./mvnw -B -V -DdryRun=true release:perform -Darguments="-Dgpg.skip=true -DskipTests"
           fi
 
-  test-jdk:
-    parameters:
-      jdk:
-        type: string
+  test-jdk-template:
     docker:
-      - image: << parameters.jdk >>
-    environment:
-      # Neutralize the MAVEN_CONFIG env set in maven images
-      # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
-      MAVEN_CONFIG: ""
-    steps:
+      - image: dummy      
+    steps: &test-jdk-steps
       - attach_workspace:
           at: .
       - restore_cache:
@@ -75,6 +68,26 @@ jobs:
       - run: ./mvnw -B -V clean test -pl example -Dfmt.skip=true
       # 3. Compile and run tests
       - run: ./mvnw -B -V clean test -pl test,record-test -Dfmt.skip=true
+
+  # amd64 / x86-64
+  test-jdk:
+    parameters:
+      jdk:
+        type: string
+    docker:
+      - image: << parameters.jdk >>
+    environment:
+      # Neutralize the MAVEN_CONFIG env set in maven images
+      # https://github.com/carlossg/docker-maven/blob/master/amazoncorretto-17/Dockerfile#L20
+      MAVEN_CONFIG: ""
+    steps: *test-jdk-steps
+
+  # aarch64 / arm64
+  test-jdk-aarch64:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps: *test-jdk-steps
 
   jackson-it:
     parallelism: 4
@@ -105,21 +118,41 @@ workflows:
           requires: [build]
       - test-jdk:
           requires: [build]
-          name: 8 - AdoptOpenJDK
+          name: 8 - Adoptium
           jdk: "cimg/openjdk:8.0.302"
       - test-jdk:
           requires: [build]
-          name: 11 - AdoptOpenJDK
+          name: 11 - Adoptium
           jdk: "cimg/openjdk:11.0.12"
       - test-jdk:
           requires: [build]
-          name: 15 - AdoptOpenJDK
+          name: 15 - Adoptium
           jdk: "cimg/openjdk:15.0.2"
       - test-jdk:
           requires: [build]
-          name: 17 - AdoptOpenJDK
+          name: 17 - Adoptium
           jdk: "cimg/openjdk:17.0.0"
 
+      - test-jdk-aarch64:
+          requires: [build]
+          name: 11 - Adoptium - Aarch64
+          pre-steps:
+            - run: |
+                export DEBIAN_FRONTEND=noninteractive
+                sudo -E apt-get update
+                sudo -E apt-get install -qq openjdk-11-jdk-headless
+                sudo update-alternatives --auto java
+                sudo update-alternatives --auto javac
+      - test-jdk-aarch64:
+          requires: [build]
+          name: 17 - Adoptium - Aarch64
+          pre-steps:
+            - run: |
+                export DEBIAN_FRONTEND=noninteractive
+                sudo -E apt-get update
+                sudo -E apt-get install -qq openjdk-17-jdk-headless
+                sudo update-alternatives --auto java
+                sudo update-alternatives --auto javac
       - test-jdk:
           requires: [build]
           name: 8 - Amazon Corretto
